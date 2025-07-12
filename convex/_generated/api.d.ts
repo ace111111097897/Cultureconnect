@@ -13,14 +13,19 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as ai from "../ai.js";
 import type * as auth from "../auth.js";
 import type * as conversations from "../conversations.js";
+import type * as friends from "../friends.js";
 import type * as http from "../http.js";
+import type * as kandi from "../kandi.js";
+import type * as kandiQueries from "../kandiQueries.js";
 import type * as matches from "../matches.js";
 import type * as profiles from "../profiles.js";
 import type * as prompts from "../prompts.js";
 import type * as router from "../router.js";
 import type * as stories from "../stories.js";
+import type * as storyReactions from "../storyReactions.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -31,14 +36,19 @@ import type * as stories from "../stories.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  ai: typeof ai;
   auth: typeof auth;
   conversations: typeof conversations;
+  friends: typeof friends;
   http: typeof http;
+  kandi: typeof kandi;
+  kandiQueries: typeof kandiQueries;
   matches: typeof matches;
   profiles: typeof profiles;
   prompts: typeof prompts;
   router: typeof router;
   stories: typeof stories;
+  storyReactions: typeof storyReactions;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

@@ -4,30 +4,34 @@ import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
 
 export function DiscoverSection() {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentProfileIndex, setCurrentProfileIndex] = useState(0);
+  
   const profiles = useQuery(api.profiles.getDiscoverProfiles, { limit: 10 });
-  const createMatch = useMutation(api.matches.createMatch);
+  const sendFriendRequest = useMutation(api.friends.sendFriendRequest);
 
-  const handleInteraction = async (interactionType: "like" | "pass") => {
-    if (!profiles || profiles.length === 0) return;
+  const currentProfile = profiles?.[currentProfileIndex];
 
-    const currentProfile = profiles[currentIndex];
+  const handleNext = () => {
+    if (profiles && currentProfileIndex < profiles.length - 1) {
+      setCurrentProfileIndex(prev => prev + 1);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentProfileIndex > 0) {
+      setCurrentProfileIndex(prev => prev - 1);
+    }
+  };
+
+  const handleSendFriendRequest = async () => {
+    if (!currentProfile) return;
     
     try {
-      const result = await createMatch({
-        targetUserId: currentProfile.userId,
-        interactionType,
-      });
-
-      if (result.matched) {
-        toast.success("🎉 It's a match! You can now start chatting.");
-      }
-
-      // Move to next profile
-      setCurrentIndex(prev => prev + 1);
-    } catch (error) {
-      toast.error("Something went wrong");
-      console.error(error);
+      await sendFriendRequest({ toUserId: currentProfile.userId });
+      toast.success("Friend request sent!");
+      handleNext();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send friend request");
     }
   };
 
@@ -39,30 +43,37 @@ export function DiscoverSection() {
     );
   }
 
-  if (profiles.length === 0 || currentIndex >= profiles.length) {
+  if (profiles.length === 0) {
     return (
       <div className="text-center space-y-6">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
-          <div className="text-6xl mb-4">🌟</div>
-          <h2 className="text-2xl font-bold text-white mb-4">You've explored all available profiles!</h2>
-          <p className="text-white/70 mb-6">
-            Check back later for new cultural connections, or explore other sections of the app.
+          <div className="text-6xl mb-4">🔍</div>
+          <h2 className="text-2xl font-bold text-white mb-4">No more profiles</h2>
+          <p className="text-white/70">
+            Check back later for new cultural connections!
           </p>
-          <button
-            onClick={() => setCurrentIndex(0)}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
-          >
-            Start Over
-          </button>
         </div>
       </div>
     );
   }
 
-  const currentProfile = profiles[currentIndex];
+  if (!currentProfile) {
+    return (
+      <div className="text-center space-y-6">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
+          <div className="text-6xl mb-4">🎉</div>
+          <h2 className="text-2xl font-bold text-white mb-4">You've seen everyone!</h2>
+          <p className="text-white/70">
+            Check back later for new cultural connections!
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Profile Card */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20">
         {/* Profile Image */}
         <div className="h-96 bg-gradient-to-br from-purple-500 to-pink-500 relative">
@@ -74,7 +85,7 @@ export function DiscoverSection() {
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <div className="text-8xl text-white/50">👤</div>
+              <div className="text-6xl text-white/50">👤</div>
             </div>
           )}
           
@@ -84,28 +95,46 @@ export function DiscoverSection() {
               {currentProfile.compatibilityScore}% Match
             </span>
           </div>
+
+          {/* Navigation */}
+          <div className="absolute top-1/2 left-4 transform -translate-y-1/2">
+            <button
+              onClick={handlePrevious}
+              disabled={currentProfileIndex === 0}
+              className="w-12 h-12 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/70 transition-all"
+            >
+              ←
+            </button>
+          </div>
+          
+          <div className="absolute top-1/2 right-4 transform -translate-y-1/2">
+            <button
+              onClick={handleNext}
+              disabled={currentProfileIndex >= profiles.length - 1}
+              className="w-12 h-12 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/70 transition-all"
+            >
+              →
+            </button>
+          </div>
         </div>
 
         {/* Profile Info */}
         <div className="p-8 space-y-6">
           <div>
-            <h2 className="text-3xl font-bold text-white mb-2">
+            <h2 className="text-3xl font-bold text-white">
               {currentProfile.displayName}, {currentProfile.age}
             </h2>
-            <p className="text-white/70 mb-4">{currentProfile.location}</p>
-            <p className="text-white/80">{currentProfile.bio}</p>
+            <p className="text-white/70 text-lg">{currentProfile.location}</p>
+            <p className="text-white/80 mt-3">{currentProfile.bio}</p>
           </div>
 
-          {/* Cultural Details */}
+          {/* Cultural Information */}
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">🌍 Cultural Background</h3>
+              <h3 className="text-white/80 font-medium mb-3">🌍 Cultural Background</h3>
               <div className="flex flex-wrap gap-2">
-                {currentProfile.culturalBackground.map((bg, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-blue-500/20 text-blue-200 rounded-full text-sm"
-                  >
+                {currentProfile.culturalBackground.slice(0, 3).map((bg, index) => (
+                  <span key={index} className="px-3 py-1 bg-purple-500/20 text-purple-200 rounded-full text-sm">
                     {bg}
                   </span>
                 ))}
@@ -113,13 +142,10 @@ export function DiscoverSection() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">🗣️ Languages</h3>
+              <h3 className="text-white/80 font-medium mb-3">🗣️ Languages</h3>
               <div className="flex flex-wrap gap-2">
-                {currentProfile.languages.map((lang, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-green-500/20 text-green-200 rounded-full text-sm"
-                  >
+                {currentProfile.languages.slice(0, 3).map((lang, index) => (
+                  <span key={index} className="px-3 py-1 bg-blue-500/20 text-blue-200 rounded-full text-sm">
                     {lang}
                   </span>
                 ))}
@@ -127,42 +153,22 @@ export function DiscoverSection() {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">🎵 Music</h3>
+              <h3 className="text-white/80 font-medium mb-3">💫 Values</h3>
               <div className="flex flex-wrap gap-2">
-                {currentProfile.musicGenres.slice(0, 4).map((genre, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-purple-500/20 text-purple-200 rounded-full text-sm"
-                  >
-                    {genre}
+                {currentProfile.values.slice(0, 3).map((value, index) => (
+                  <span key={index} className="px-3 py-1 bg-cyan-500/20 text-cyan-200 rounded-full text-sm">
+                    {value}
                   </span>
                 ))}
               </div>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-white mb-3">🍽️ Food</h3>
+              <h3 className="text-white/80 font-medium mb-3">🍽️ Food Interests</h3>
               <div className="flex flex-wrap gap-2">
-                {currentProfile.foodPreferences.slice(0, 4).map((food, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-orange-500/20 text-orange-200 rounded-full text-sm"
-                  >
+                {currentProfile.foodPreferences.slice(0, 3).map((food, index) => (
+                  <span key={index} className="px-3 py-1 bg-orange-500/20 text-orange-200 rounded-full text-sm">
                     {food}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="md:col-span-2">
-              <h3 className="text-lg font-semibold text-white mb-3">💫 Values</h3>
-              <div className="flex flex-wrap gap-2">
-                {currentProfile.values.map((value, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-pink-500/20 text-pink-200 rounded-full text-sm"
-                  >
-                    {value}
                   </span>
                 ))}
               </div>
@@ -170,26 +176,33 @@ export function DiscoverSection() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-center space-x-6 pt-6">
+          <div className="flex space-x-4">
             <button
-              onClick={() => handleInteraction("pass")}
-              className="w-16 h-16 rounded-full bg-gray-500/20 text-gray-300 hover:bg-gray-500/30 transition-all flex items-center justify-center text-2xl"
+              onClick={handleNext}
+              className="flex-1 px-6 py-4 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all font-semibold"
             >
-              ✕
+              Pass
             </button>
-            
             <button
-              onClick={() => handleInteraction("like")}
-              className="w-16 h-16 rounded-full bg-gradient-to-r from-pink-500 to-red-500 text-white hover:from-pink-600 hover:to-red-600 transition-all flex items-center justify-center text-2xl shadow-lg"
+              onClick={handleSendFriendRequest}
+              className="flex-1 px-6 py-4 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
             >
-              ❤️
+              Add Friend
             </button>
           </div>
+        </div>
+      </div>
 
-          {/* Progress Indicator */}
-          <div className="text-center text-white/50 text-sm">
-            {currentIndex + 1} of {profiles.length} profiles
-          </div>
+      {/* Progress Indicator */}
+      <div className="text-center">
+        <p className="text-white/60">
+          {currentProfileIndex + 1} of {profiles.length} profiles
+        </p>
+        <div className="w-full bg-white/20 rounded-full h-2 mt-2">
+          <div 
+            className="bg-gradient-to-r from-orange-500 to-pink-500 h-2 rounded-full transition-all"
+            style={{ width: `${((currentProfileIndex + 1) / profiles.length) * 100}%` }}
+          ></div>
         </div>
       </div>
     </div>

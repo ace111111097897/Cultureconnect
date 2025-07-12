@@ -10,6 +10,8 @@ const STORY_CATEGORIES = [
   { id: "family", label: "Family", icon: "👨‍👩‍👧‍👦" },
 ];
 
+const REACTION_TYPES = ["❤️", "🔥", "👏", "😍", "🌟"];
+
 export function StoriesSection() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
@@ -27,6 +29,8 @@ export function StoriesSection() {
   
   const createStory = useMutation(api.stories.createCulturalStory);
   const likeStory = useMutation(api.stories.likeCulturalStory);
+  const addReaction = useMutation(api.storyReactions.addStoryReaction);
+  const removeReaction = useMutation(api.storyReactions.removeStoryReaction);
 
   const handleCreateStory = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +52,14 @@ export function StoriesSection() {
       await likeStory({ storyId: storyId as any });
     } catch (error) {
       console.error("Failed to like story:", error);
+    }
+  };
+
+  const handleReaction = async (storyId: string, reactionType: string) => {
+    try {
+      await addReaction({ storyId: storyId as any, reactionType });
+    } catch (error) {
+      console.error("Failed to add reaction:", error);
     }
   };
 
@@ -236,17 +248,32 @@ export function StoriesSection() {
 
               {/* Story Actions */}
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/20">
-                <button
-                  onClick={() => handleLikeStory(story._id)}
-                  className="flex items-center space-x-2 text-white/70 hover:text-pink-400 transition-all"
-                >
-                  <span>❤️</span>
-                  <span className="text-sm">{story.likes}</span>
-                </button>
+                <div className="flex items-center space-x-1">
+                  {REACTION_TYPES.map((reaction) => (
+                    <button
+                      key={reaction}
+                      onClick={() => handleReaction(story._id, reaction)}
+                      className="text-lg hover:scale-110 transition-transform"
+                      title={`React with ${reaction}`}
+                    >
+                      {reaction}
+                    </button>
+                  ))}
+                </div>
                 
-                <span className="px-3 py-1 bg-white/10 text-white/70 rounded-full text-xs">
-                  {STORY_CATEGORIES.find(cat => cat.id === story.category)?.label || story.category}
-                </span>
+                <div className="flex items-center space-x-4">
+                  <button
+                    onClick={() => handleLikeStory(story._id)}
+                    className="flex items-center space-x-1 text-white/70 hover:text-pink-400 transition-all"
+                  >
+                    <span>❤️</span>
+                    <span className="text-sm">{story.likes}</span>
+                  </button>
+                  
+                  <span className="px-3 py-1 bg-white/10 text-white/70 rounded-full text-xs">
+                    {STORY_CATEGORIES.find(cat => cat.id === story.category)?.label || story.category}
+                  </span>
+                </div>
               </div>
             </div>
           ))}

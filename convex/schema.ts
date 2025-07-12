@@ -67,9 +67,28 @@ const applicationTables = {
     .index("by_user2", ["user2Id"])
     .index("by_status", ["status"]),
 
+  // NEW: Friend system
+  friendRequests: defineTable({
+    fromUserId: v.id("users"),
+    toUserId: v.id("users"),
+    status: v.string(), // "pending", "accepted", "rejected"
+    timestamp: v.number(),
+  })
+    .index("by_from", ["fromUserId"])
+    .index("by_to", ["toUserId"])
+    .index("by_status", ["status"]),
+
+  friends: defineTable({
+    user1Id: v.id("users"),
+    user2Id: v.id("users"),
+    timestamp: v.number(),
+  })
+    .index("by_user1", ["user1Id"])
+    .index("by_user2", ["user2Id"]),
+
   conversations: defineTable({
     participants: v.array(v.id("users")),
-    type: v.string(), // "direct", "group"
+    type: v.string(), // "direct", "group", "kandi"
     title: v.optional(v.string()),
     culturalTheme: v.optional(v.string()),
     lastMessage: v.optional(v.string()),
@@ -83,12 +102,22 @@ const applicationTables = {
     conversationId: v.id("conversations"),
     senderId: v.id("users"),
     content: v.string(),
-    messageType: v.string(), // "text", "story", "cultural_moment"
+    messageType: v.string(), // "text", "story", "cultural_moment", "kandi"
     timestamp: v.number(),
     isRead: v.boolean(),
   })
     .index("by_conversation", ["conversationId"])
     .index("by_sender", ["senderId"])
+    .index("by_timestamp", ["timestamp"]),
+
+  // NEW: Kandi AI messages
+  kandiMessages: defineTable({
+    userId: v.id("users"),
+    userMessage: v.string(),
+    kandiResponse: v.string(),
+    timestamp: v.number(),
+  })
+    .index("by_user", ["userId"])
     .index("by_timestamp", ["timestamp"]),
 
   culturalStories: defineTable({
@@ -104,6 +133,16 @@ const applicationTables = {
     .index("by_user", ["userId"])
     .index("by_category", ["category"])
     .index("by_public", ["isPublic"]),
+
+  // NEW: Story reactions
+  storyReactions: defineTable({
+    storyId: v.id("culturalStories"),
+    userId: v.id("users"),
+    reactionType: v.string(), // "❤️", "🔥", "👏", "😍", "🌟"
+    timestamp: v.number(),
+  })
+    .index("by_story", ["storyId"])
+    .index("by_user", ["userId"]),
 
   culturalEvents: defineTable({
     title: v.string(),

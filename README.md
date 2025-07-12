@@ -3,7 +3,7 @@
 This is a project built with [Chef](https://chef.convex.dev) using [Convex](https://convex.dev) as its backend.
  You can find docs about Chef with useful information like how to deploy to production [here](https://docs.convex.dev/chef).
   
-This project is connected to the Convex deployment named [`polished-mockingbird-493`](https://dashboard.convex.dev/d/polished-mockingbird-493).
+This project is connected to the Convex deployment named [`glad-trout-827`](https://dashboard.convex.dev/d/glad-trout-827).
   
 ## Project structure
   
