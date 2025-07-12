@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { internal } from "./_generated/api";
 
 export const sendFriendRequest = mutation({
   args: {
@@ -42,12 +43,38 @@ export const sendFriendRequest = mutation({
       throw new Error("Already friends");
     }
 
-    return await ctx.db.insert("friendRequests", {
+    // Get user profiles for email notification
+    const senderProfile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
+
+    const recipientProfile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", args.toUserId))
+      .unique();
+
+    const requestId = await ctx.db.insert("friendRequests", {
       fromUserId: userId,
       toUserId: args.toUserId,
       status: "pending",
       timestamp: Date.now(),
     });
+
+    // Send email notification to recipient
+    if (senderProfile && recipientProfile) {
+      // Get recipient's email from auth system
+      const recipientUser = await ctx.db.get(args.toUserId);
+      if (recipientUser?.email) {
+        await ctx.scheduler.runAfter(0, internal.emailActions.sendFriendRequestNotificationEmail, {
+          email: recipientUser.email,
+          recipientName: recipientProfile.displayName,
+          senderName: senderProfile.displayName,
+        });
+      }
+    }
+
+    return requestId;
   },
 });
 

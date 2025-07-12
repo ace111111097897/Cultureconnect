@@ -7,7 +7,9 @@ export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     displayName: "",
+    age: 25,
     bio: "",
+    location: "",
     languages: [] as string[],
     culturalBackground: [] as string[],
     traditions: [] as string[],
@@ -17,16 +19,26 @@ export function ProfilePage() {
     lifeGoals: [] as string[],
     values: [] as string[],
     relationshipGoals: "",
+    ageRangeMin: 18,
+    ageRangeMax: 50,
+    maxDistance: 50,
   });
 
   const profile = useQuery(api.profiles.getCurrentUserProfile);
-  const updateProfile = useMutation(api.profiles.updateProfile);
+  const updateProfile = useMutation(api.profiles.upsertProfile);
+  const generateUploadUrl = useMutation(api.profiles.generateUploadUrl);
+  const updateProfileImage = useMutation(api.profiles.updateProfileImage);
+
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const handleEdit = () => {
     if (profile) {
       setEditData({
         displayName: profile.displayName,
+        age: profile.age,
         bio: profile.bio,
+        location: profile.location,
         languages: profile.languages,
         culturalBackground: profile.culturalBackground,
         traditions: profile.traditions,
@@ -36,6 +48,9 @@ export function ProfilePage() {
         lifeGoals: profile.lifeGoals,
         values: profile.values,
         relationshipGoals: profile.relationshipGoals,
+        ageRangeMin: profile.ageRangeMin,
+        ageRangeMax: profile.ageRangeMax,
+        maxDistance: profile.maxDistance,
       });
       setIsEditing(true);
     }
@@ -61,6 +76,29 @@ export function ProfilePage() {
     setEditData(prev => ({ ...prev, [field]: newArray }));
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsUploadingImage(true);
+      const uploadUrl = await generateUploadUrl();
+      const result = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+      const { storageId } = await result.json();
+      await updateProfileImage({ storageId });
+      toast.success("Profile picture updated!");
+    } catch (error) {
+      toast.error("Failed to upload image");
+      console.error(error);
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   if (!profile) {
     return (
       <div className="flex justify-center items-center h-96">
@@ -70,32 +108,50 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-4 md:space-y-8 px-2 sm:px-0">
       {/* Profile Header */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center space-x-6">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-              {profile.profileImageUrl ? (
-                <img
-                  src={profile.profileImageUrl}
-                  alt={profile.displayName}
-                  className="w-full h-full rounded-full object-cover"
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-8 border border-white/20">
+        <div className="flex flex-col sm:flex-row items-start justify-between mb-6 space-y-4 sm:space-y-0">
+          <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden">
+                {profile.profileImageUrl ? (
+                  <img
+                    src={profile.profileImageUrl}
+                    alt={profile.displayName}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <span className="text-white text-3xl">👤</span>
+                )}
+              </div>
+              
+              {/* Image Upload Button */}
+              <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center cursor-pointer hover:from-orange-600 hover:to-pink-600 transition-all border-2 border-white">
+                {isUploadingImage ? (
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                ) : (
+                  <span className="text-white text-sm">📷</span>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                  disabled={isUploadingImage}
                 />
-              ) : (
-                <span className="text-white text-3xl">👤</span>
-              )}
+              </label>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">{profile.displayName}</h1>
-              <p className="text-white/70 text-lg">{profile.age} • {profile.location}</p>
-              <p className="text-white/60 mt-2">{profile.bio}</p>
+            <div className="text-center sm:text-left">
+              <h1 className="text-2xl md:text-3xl font-bold text-white">{profile.displayName}</h1>
+              <p className="text-white/70 text-base md:text-lg">{profile.age} • {profile.location}</p>
+              <p className="text-white/60 mt-2 text-sm md:text-base">{profile.bio}</p>
             </div>
           </div>
           
           <button
             onClick={isEditing ? handleSave : handleEdit}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
+            className="px-4 md:px-6 py-2 md:py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all text-sm md:text-base w-full sm:w-auto"
           >
             {isEditing ? "Save Changes" : "Edit Profile"}
           </button>
@@ -137,9 +193,9 @@ export function ProfilePage() {
       </div>
 
       {/* Cultural Information */}
-      <div className="grid md:grid-cols-2 gap-8">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-          <h2 className="text-xl font-bold text-white mb-4">🌍 Cultural Identity</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20">
+          <h2 className="text-lg md:text-xl font-bold text-white mb-4">🌍 Cultural Identity</h2>
           
           <div className="space-y-4">
             <div>
@@ -177,8 +233,8 @@ export function ProfilePage() {
           </div>
         </div>
 
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-          <h2 className="text-xl font-bold text-white mb-4">💫 Interests & Values</h2>
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20">
+          <h2 className="text-lg md:text-xl font-bold text-white mb-4">💫 Interests & Values</h2>
           
           <div className="space-y-4">
             <div>
@@ -218,10 +274,10 @@ export function ProfilePage() {
       </div>
 
       {/* Life Goals */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-        <h2 className="text-xl font-bold text-white mb-4">🎯 Life Goals & Travel</h2>
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20">
+        <h2 className="text-lg md:text-xl font-bold text-white mb-4">🎯 Life Goals & Travel</h2>
         
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           <div>
             <h3 className="text-white/80 font-medium mb-2">Life Goals</h3>
             <div className="flex flex-wrap gap-2">

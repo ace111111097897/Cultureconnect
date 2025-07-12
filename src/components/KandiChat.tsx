@@ -29,7 +29,7 @@ export function KandiChat() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 px-2 sm:px-0">
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="w-20 h-20 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto border-4 border-white/20">
@@ -42,9 +42,9 @@ export function KandiChat() {
       </div>
 
       {/* Chat Container */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col h-[600px]">
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col h-[500px] md:h-[600px]">
         {/* Chat Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4">
           {/* Welcome message */}
           <div className="flex justify-start">
             <div className="max-w-xs lg:max-w-md">
@@ -112,8 +112,8 @@ export function KandiChat() {
         </div>
 
         {/* Message Input */}
-        <form onSubmit={handleSendMessage} className="p-4 border-t border-white/20">
-          <div className="flex space-x-2">
+        <form onSubmit={handleSendMessage} className="p-3 md:p-4 border-t border-white/20">
+          <div className="flex space-x-1 md:space-x-2">
             <input
               type="text"
               value={message}
@@ -125,7 +125,7 @@ export function KandiChat() {
             <button
               type="submit"
               disabled={!message.trim() || isLoading}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold hover:from-yellow-500 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center space-x-2"
+              className="px-3 md:px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold hover:from-yellow-500 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center space-x-1 md:space-x-2 text-sm md:text-base"
             >
               <span>🐕</span>
               <span>{isLoading ? "Sending..." : "Send"}</span>
@@ -135,9 +135,9 @@ export function KandiChat() {
       </div>
 
       {/* Quick Questions */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-        <h3 className="text-lg font-semibold text-white mb-4">💡 Quick Questions for Kandi</h3>
-        <div className="grid md:grid-cols-2 gap-3">
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20">
+        <h3 className="text-base md:text-lg font-semibold text-white mb-4">💡 Quick Questions for Kandi</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {[
             "How do I start a conversation about cultural traditions?",
             "What are good first date ideas for cultural connections?",

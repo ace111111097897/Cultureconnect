@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { internal } from "./_generated/api";
 
 export const getCurrentUserProfile = query({
   args: {},
@@ -15,7 +16,6 @@ export const getCurrentUserProfile = query({
 
     if (!profile) return null;
 
-    // Get profile image URL if exists
     const profileImageUrl = profile.profileImage 
       ? await ctx.storage.getUrl(profile.profileImage)
       : null;
@@ -27,7 +27,69 @@ export const getCurrentUserProfile = query({
   },
 });
 
-export const createProfile = mutation({
+export const getDiscoverProfiles = query({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+
+    const userProfile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
+
+    if (!userProfile) return [];
+
+    const profiles = await ctx.db
+      .query("profiles")
+      .withIndex("by_active", (q) => q.eq("isActive", true))
+      .filter((q) => q.neq(q.field("userId"), userId))
+      .take(args.limit || 10);
+
+    const profilesWithImages = await Promise.all(
+      profiles.map(async (profile) => {
+        const profileImageUrl = profile.profileImage 
+          ? await ctx.storage.getUrl(profile.profileImage)
+          : null;
+
+        // Calculate compatibility score based on shared interests
+        const sharedCulture = profile.culturalBackground.filter(bg => 
+          userProfile.culturalBackground.includes(bg)
+        ).length;
+        const sharedValues = profile.values.filter(value => 
+          userProfile.values.includes(value)
+        ).length;
+        const sharedInterests = [
+          ...profile.foodPreferences.filter(food => userProfile.foodPreferences.includes(food)),
+          ...profile.musicGenres.filter(music => userProfile.musicGenres.includes(music)),
+          ...profile.travelInterests.filter(travel => userProfile.travelInterests.includes(travel)),
+        ].length;
+
+        const totalPossibleMatches = Math.max(
+          userProfile.culturalBackground.length + userProfile.values.length + 
+          userProfile.foodPreferences.length + userProfile.musicGenres.length + 
+          userProfile.travelInterests.length, 1
+        );
+
+        const compatibilityScore = Math.round(
+          ((sharedCulture * 2 + sharedValues * 2 + sharedInterests) / totalPossibleMatches) * 100
+        );
+
+        return {
+          ...profile,
+          profileImageUrl,
+          compatibilityScore: Math.min(compatibilityScore, 95), // Cap at 95%
+        };
+      })
+    );
+
+    return profilesWithImages.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+  },
+});
+
+export const upsertProfile = mutation({
   args: {
     displayName: v.string(),
     age: v.number(),
@@ -45,43 +107,65 @@ export const createProfile = mutation({
     ageRangeMin: v.number(),
     ageRangeMax: v.number(),
     maxDistance: v.number(),
+    email: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
-    // Check if profile already exists
     const existingProfile = await ctx.db
       .query("profiles")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .unique();
 
-    if (existingProfile) {
-      throw new Error("Profile already exists");
-    }
-
-    return await ctx.db.insert("profiles", {
+    const profileData = {
       userId,
-      ...args,
+      displayName: args.displayName,
+      age: args.age,
+      bio: args.bio,
+      location: args.location,
+      languages: args.languages,
+      culturalBackground: args.culturalBackground,
+      traditions: args.traditions,
+      foodPreferences: args.foodPreferences,
+      musicGenres: args.musicGenres,
+      travelInterests: args.travelInterests,
+      lifeGoals: args.lifeGoals,
+      values: args.values,
+      relationshipGoals: args.relationshipGoals,
+      ageRangeMin: args.ageRangeMin,
+      ageRangeMax: args.ageRangeMax,
+      maxDistance: args.maxDistance,
       isActive: true,
       lastActive: Date.now(),
-    });
+    };
+
+    let profileId;
+    let isNewProfile = false;
+
+    if (existingProfile) {
+      await ctx.db.patch(existingProfile._id, profileData);
+      profileId = existingProfile._id;
+    } else {
+      profileId = await ctx.db.insert("profiles", profileData);
+      isNewProfile = true;
+    }
+
+    // Send welcome email for new profiles
+    if (isNewProfile && args.email) {
+      await ctx.scheduler.runAfter(0, internal.emailActions.sendWelcomeEmail, {
+        email: args.email,
+        displayName: args.displayName,
+      });
+    }
+
+    return profileId;
   },
 });
 
-export const updateProfile = mutation({
+export const updateProfileImage = mutation({
   args: {
-    displayName: v.optional(v.string()),
-    bio: v.optional(v.string()),
-    languages: v.optional(v.array(v.string())),
-    culturalBackground: v.optional(v.array(v.string())),
-    traditions: v.optional(v.array(v.string())),
-    foodPreferences: v.optional(v.array(v.string())),
-    musicGenres: v.optional(v.array(v.string())),
-    travelInterests: v.optional(v.array(v.string())),
-    lifeGoals: v.optional(v.array(v.string())),
-    values: v.optional(v.array(v.string())),
-    relationshipGoals: v.optional(v.string()),
+    storageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -94,106 +178,20 @@ export const updateProfile = mutation({
 
     if (!profile) throw new Error("Profile not found");
 
-    const updates = Object.fromEntries(
-      Object.entries(args).filter(([_, value]) => value !== undefined)
-    );
-
     await ctx.db.patch(profile._id, {
-      ...updates,
-      lastActive: Date.now(),
+      profileImage: args.storageId,
     });
+
+    return args.storageId;
   },
 });
 
-export const getDiscoverProfiles = query({
-  args: {
-    limit: v.optional(v.number()),
-  },
-  handler: async (ctx, args) => {
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) return [];
+    if (!userId) throw new Error("Not authenticated");
 
-    const currentProfile = await ctx.db
-      .query("profiles")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .unique();
-
-    if (!currentProfile) return [];
-
-    // Get profiles excluding current user and already interacted users
-    const profiles = await ctx.db
-      .query("profiles")
-      .withIndex("by_active", (q) => q.eq("isActive", true))
-      .filter((q) => q.neq(q.field("userId"), userId))
-      .take(args.limit || 10);
-
-    // Get profile images and calculate compatibility scores
-    const profilesWithDetails = await Promise.all(
-      profiles.map(async (profile) => {
-        const profileImageUrl = profile.profileImage 
-          ? await ctx.storage.getUrl(profile.profileImage)
-          : null;
-
-        // Calculate basic compatibility score
-        const compatibilityScore = calculateCompatibility(currentProfile, profile);
-
-        return {
-          ...profile,
-          profileImageUrl,
-          compatibilityScore,
-        };
-      })
-    );
-
-    // Sort by compatibility score
-    return profilesWithDetails.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
+    return await ctx.storage.generateUploadUrl();
   },
 });
-
-function calculateCompatibility(profile1: any, profile2: any): number {
-  let score = 0;
-  let totalFactors = 0;
-
-  // Cultural background match
-  const culturalMatch = profile1.culturalBackground.filter((bg: string) => 
-    profile2.culturalBackground.includes(bg)
-  ).length;
-  score += (culturalMatch / Math.max(profile1.culturalBackground.length, 1)) * 20;
-  totalFactors += 20;
-
-  // Language match
-  const languageMatch = profile1.languages.filter((lang: string) => 
-    profile2.languages.includes(lang)
-  ).length;
-  score += (languageMatch / Math.max(profile1.languages.length, 1)) * 15;
-  totalFactors += 15;
-
-  // Values match
-  const valuesMatch = profile1.values.filter((value: string) => 
-    profile2.values.includes(value)
-  ).length;
-  score += (valuesMatch / Math.max(profile1.values.length, 1)) * 25;
-  totalFactors += 25;
-
-  // Food preferences match
-  const foodMatch = profile1.foodPreferences.filter((food: string) => 
-    profile2.foodPreferences.includes(food)
-  ).length;
-  score += (foodMatch / Math.max(profile1.foodPreferences.length, 1)) * 10;
-  totalFactors += 10;
-
-  // Music match
-  const musicMatch = profile1.musicGenres.filter((genre: string) => 
-    profile2.musicGenres.includes(genre)
-  ).length;
-  score += (musicMatch / Math.max(profile1.musicGenres.length, 1)) * 10;
-  totalFactors += 10;
-
-  // Age compatibility
-  const ageDiff = Math.abs(profile1.age - profile2.age);
-  const ageScore = Math.max(0, 20 - ageDiff * 2);
-  score += ageScore;
-  totalFactors += 20;
-
-  return Math.round((score / totalFactors) * 100);
-}

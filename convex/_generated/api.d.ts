@@ -16,6 +16,7 @@ import type {
 import type * as ai from "../ai.js";
 import type * as auth from "../auth.js";
 import type * as conversations from "../conversations.js";
+import type * as emailActions from "../emailActions.js";
 import type * as friends from "../friends.js";
 import type * as http from "../http.js";
 import type * as kandi from "../kandi.js";
@@ -39,6 +40,7 @@ declare const fullApi: ApiFromModules<{
   ai: typeof ai;
   auth: typeof auth;
   conversations: typeof conversations;
+  emailActions: typeof emailActions;
   friends: typeof friends;
   http: typeof http;
   kandi: typeof kandi;

@@ -45,10 +45,10 @@ export function DiscoverSection() {
 
   if (profiles.length === 0) {
     return (
-      <div className="text-center space-y-6">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
-          <div className="text-6xl mb-4">🔍</div>
-          <h2 className="text-2xl font-bold text-white mb-4">No more profiles</h2>
+      <div className="text-center space-y-6 px-2 sm:px-0">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-12 border border-white/20">
+          <div className="text-4xl md:text-6xl mb-4">🔍</div>
+          <h2 className="text-xl md:text-2xl font-bold text-white mb-4">No more profiles</h2>
           <p className="text-white/70">
             Check back later for new cultural connections!
           </p>
@@ -59,10 +59,10 @@ export function DiscoverSection() {
 
   if (!currentProfile) {
     return (
-      <div className="text-center space-y-6">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
-          <div className="text-6xl mb-4">🎉</div>
-          <h2 className="text-2xl font-bold text-white mb-4">You've seen everyone!</h2>
+      <div className="text-center space-y-6 px-2 sm:px-0">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-12 border border-white/20">
+          <div className="text-4xl md:text-6xl mb-4">🎉</div>
+          <h2 className="text-xl md:text-2xl font-bold text-white mb-4">You've seen everyone!</h2>
           <p className="text-white/70">
             Check back later for new cultural connections!
           </p>
@@ -72,11 +72,11 @@ export function DiscoverSection() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-4 md:space-y-6 px-2 sm:px-0">
       {/* Profile Card */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20">
         {/* Profile Image */}
-        <div className="h-96 bg-gradient-to-br from-purple-500 to-pink-500 relative">
+        <div className="h-64 md:h-96 bg-gradient-to-br from-purple-500 to-pink-500 relative">
           {currentProfile.profileImageUrl ? (
             <img
               src={currentProfile.profileImageUrl}
@@ -97,21 +97,21 @@ export function DiscoverSection() {
           </div>
 
           {/* Navigation */}
-          <div className="absolute top-1/2 left-4 transform -translate-y-1/2">
+          <div className="absolute top-1/2 left-2 md:left-4 transform -translate-y-1/2">
             <button
               onClick={handlePrevious}
               disabled={currentProfileIndex === 0}
-              className="w-12 h-12 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/70 transition-all"
+              className="w-10 h-10 md:w-12 md:h-12 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/70 transition-all text-sm md:text-base"
             >
               ←
             </button>
           </div>
           
-          <div className="absolute top-1/2 right-4 transform -translate-y-1/2">
+          <div className="absolute top-1/2 right-2 md:right-4 transform -translate-y-1/2">
             <button
               onClick={handleNext}
               disabled={currentProfileIndex >= profiles.length - 1}
-              className="w-12 h-12 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/70 transition-all"
+              className="w-10 h-10 md:w-12 md:h-12 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-black/70 transition-all text-sm md:text-base"
             >
               →
             </button>
@@ -119,13 +119,13 @@ export function DiscoverSection() {
         </div>
 
         {/* Profile Info */}
-        <div className="p-8 space-y-6">
+        <div className="p-4 md:p-8 space-y-4 md:space-y-6">
           <div>
-            <h2 className="text-3xl font-bold text-white">
+            <h2 className="text-2xl md:text-3xl font-bold text-white">
               {currentProfile.displayName}, {currentProfile.age}
             </h2>
-            <p className="text-white/70 text-lg">{currentProfile.location}</p>
-            <p className="text-white/80 mt-3">{currentProfile.bio}</p>
+            <p className="text-white/70 text-base md:text-lg">{currentProfile.location}</p>
+            <p className="text-white/80 mt-3 text-sm md:text-base">{currentProfile.bio}</p>
           </div>
 
           {/* Cultural Information */}
@@ -176,16 +176,16 @@ export function DiscoverSection() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex space-x-4">
+          <div className="flex space-x-2 md:space-x-4">
             <button
               onClick={handleNext}
-              className="flex-1 px-6 py-4 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all font-semibold"
+              className="flex-1 px-4 md:px-6 py-3 md:py-4 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all font-semibold text-sm md:text-base"
             >
               Pass
             </button>
             <button
               onClick={handleSendFriendRequest}
-              className="flex-1 px-6 py-4 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
+              className="flex-1 px-4 md:px-6 py-3 md:py-4 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all text-sm md:text-base"
             >
               Add Friend
             </button>

@@ -42,23 +42,23 @@ export function Dashboard() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 md:space-y-8">
       {/* Navigation Tabs */}
-      <div className="flex justify-center">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/20">
-          <div className="flex space-x-2 overflow-x-auto">
+      <div className="w-full overflow-hidden">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/20 mx-auto max-w-full">
+          <div className="flex space-x-1 md:space-x-2 overflow-x-auto scrollbar-hide pb-1">
             {tabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-3 rounded-xl font-medium transition-all flex items-center space-x-2 whitespace-nowrap ${
+                className={`px-2 md:px-4 py-2 md:py-3 rounded-xl font-medium transition-all flex items-center space-x-1 md:space-x-2 whitespace-nowrap text-xs md:text-sm flex-shrink-0 ${
                   activeTab === tab.id
                     ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white'
                     : 'text-white/70 hover:text-white hover:bg-white/10'
                 }`}
               >
-                <span>{tab.icon}</span>
-                <span>{tab.label}</span>
+                <span className="text-sm md:text-base">{tab.icon}</span>
+                <span className="hidden sm:inline">{tab.label}</span>
               </button>
             ))}
           </div>
@@ -66,7 +66,7 @@ export function Dashboard() {
       </div>
 
       {/* Content */}
-      <div className="min-h-[600px]">
+      <div className="w-full overflow-hidden">
         {renderContent()}
       </div>
     </div>

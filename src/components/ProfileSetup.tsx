@@ -22,6 +22,7 @@ export function ProfileSetup() {
     age: 25,
     bio: "",
     location: "",
+    email: "",
     languages: [] as string[],
     culturalBackground: [] as string[],
     traditions: [] as string[],
@@ -36,7 +37,13 @@ export function ProfileSetup() {
     maxDistance: 50,
   });
 
-  const createProfile = useMutation(api.profiles.createProfile);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
+  const upsertProfile = useMutation(api.profiles.upsertProfile);
+  const generateUploadUrl = useMutation(api.profiles.generateUploadUrl);
+  const updateProfileImage = useMutation(api.profiles.updateProfileImage);
 
   const handleArrayChange = (field: keyof typeof formData, value: string) => {
     const currentArray = formData[field] as string[];
@@ -47,13 +54,40 @@ export function ProfileSetup() {
     setFormData(prev => ({ ...prev, [field]: newArray }));
   };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
-      await createProfile(formData);
-      toast.success("Profile created successfully!");
+      setIsUploading(true);
+      await upsertProfile(formData);
+      
+      if (selectedImage) {
+        const uploadUrl = await generateUploadUrl();
+        const result = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": selectedImage.type },
+          body: selectedImage,
+        });
+        const { storageId } = await result.json();
+        await updateProfileImage({ storageId });
+      }
+      
+      toast.success("Profile created successfully! 🎉");
     } catch (error) {
       toast.error("Failed to create profile");
       console.error(error);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -63,6 +97,24 @@ export function ProfileSetup() {
         return (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white mb-6">Basic Information</h2>
+            
+            {/* Profile Picture Upload */}
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center border-4 border-white/20 overflow-hidden">
+                {imagePreview ? (
+                  <img src={imagePreview} alt="Profile preview" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-white text-4xl">👤</span>
+                )}
+              </div>
+              <div className="text-center">
+                <label className="cursor-pointer px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium hover:from-orange-600 hover:to-pink-600 transition-all">
+                  {selectedImage ? "Change Photo" : "Add Profile Photo"}
+                  <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
+                </label>
+                <p className="text-white/60 text-sm mt-2">📸 Add a photo to help others connect with you</p>
+              </div>
+            </div>
             
             <div>
               <label className="block text-white/80 mb-2">Display Name</label>
@@ -96,6 +148,20 @@ export function ProfileSetup() {
                 className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
                 placeholder="City, State/Country"
               />
+            </div>
+
+            <div>
+              <label className="block text-white/80 mb-2">Email (for notifications)</label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                placeholder="your.email@example.com"
+              />
+              <p className="text-white/60 text-sm mt-1">
+                📧 Get notified about matches, friend requests, and cultural events
+              </p>
             </div>
 
             <div>
@@ -360,9 +426,10 @@ export function ProfileSetup() {
           ) : (
             <button
               onClick={handleSubmit}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
+              disabled={isUploading}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 disabled:opacity-50 transition-all"
             >
-              Complete Profile
+              {isUploading ? "Creating Profile..." : "Complete Profile"}
             </button>
           )}
         </div>
