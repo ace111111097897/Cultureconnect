@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { internal } from "./_generated/api";
 
 export const createMatch = mutation({
   args: {
@@ -50,13 +51,33 @@ export const createMatch = mutation({
             user2Id: args.targetUserId,
             compatibilityScore,
             sharedInterests,
+            matchType: "cultural",
             status: "mutual",
+            timestamp: Date.now(),
           });
 
           // Create conversation for the match
           await ctx.db.insert("conversations", {
             participants: [userId, args.targetUserId],
-            unreadCount: { user1: 0, user2: 0 },
+            type: "direct",
+            isActive: true,
+          });
+
+          // Create match notifications for both users
+          await ctx.runMutation(internal.notifications.createNotification, {
+            userId,
+            type: "match",
+            title: "New Match! 🎉",
+            message: `You matched with ${targetProfile.displayName}! Start a conversation to learn more about their cultural background.`,
+            relatedUserId: args.targetUserId,
+          });
+
+          await ctx.runMutation(internal.notifications.createNotification, {
+            userId: args.targetUserId,
+            type: "match",
+            title: "New Match! 🎉",
+            message: `You matched with ${userProfile.displayName}! Start a conversation to learn more about their cultural background.`,
+            relatedUserId: userId,
           });
 
           return { matched: true, matchId };
@@ -96,8 +117,12 @@ export const getUserMatches = query({
 
         if (!otherProfile) return null;
 
-        const profileImageUrl = otherProfile.profileImageId 
-          ? await ctx.storage.getUrl(otherProfile.profileImageId)
+        const profileImageUrl = otherProfile.profileImage 
+          ? await ctx.storage.getUrl(otherProfile.profileImage)
+          : null;
+
+        const profileVideoUrl = otherProfile.profileVideo
+          ? await ctx.storage.getUrl(otherProfile.profileVideo)
           : null;
 
         return {
@@ -105,12 +130,96 @@ export const getUserMatches = query({
           otherProfile: {
             ...otherProfile,
             profileImageUrl,
+            profileVideoUrl,
           },
         };
       })
     );
 
     return matchesWithProfiles.filter(Boolean);
+  },
+});
+
+// NEW: Get friends of friends for discovery
+export const getFriendsOfFriends = query({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
+
+    // Get user's friends
+    const friendships1 = await ctx.db
+      .query("friends")
+      .withIndex("by_user1", (q) => q.eq("user1Id", userId))
+      .collect();
+
+    const friendships2 = await ctx.db
+      .query("friends")
+      .withIndex("by_user2", (q) => q.eq("user2Id", userId))
+      .collect();
+
+    const friendIds = [
+      ...friendships1.map(f => f.user2Id),
+      ...friendships2.map(f => f.user1Id),
+    ];
+
+    // Get friends of friends
+    const friendsOfFriends = new Set<string>();
+    
+    for (const friendId of friendIds) {
+      const friendFriendships1 = await ctx.db
+        .query("friends")
+        .withIndex("by_user1", (q) => q.eq("user1Id", friendId))
+        .collect();
+
+      const friendFriendships2 = await ctx.db
+        .query("friends")
+        .withIndex("by_user2", (q) => q.eq("user2Id", friendId))
+        .collect();
+
+      const friendOfFriendIds = [
+        ...friendFriendships1.map(f => f.user2Id),
+        ...friendFriendships2.map(f => f.user1Id),
+      ];
+
+      // Add friends of friends, excluding the original user and their direct friends
+      for (const fofId of friendOfFriendIds) {
+        if (fofId !== userId && !friendIds.includes(fofId)) {
+          friendsOfFriends.add(fofId);
+        }
+      }
+    }
+
+    // Get profiles for friends of friends
+    const friendsOfFriendsProfiles = await Promise.all(
+      Array.from(friendsOfFriends).slice(0, args.limit || 10).map(async (fofId) => {
+        const profile = await ctx.db
+          .query("profiles")
+          .withIndex("by_user", (q) => q.eq("userId", fofId))
+          .unique();
+
+        if (!profile) return null;
+
+        const profileImageUrl = profile.profileImage 
+          ? await ctx.storage.getUrl(profile.profileImage)
+          : null;
+
+        const profileVideoUrl = profile.profileVideo
+          ? await ctx.storage.getUrl(profile.profileVideo)
+          : null;
+
+        return {
+          ...profile,
+          profileImageUrl,
+          profileVideoUrl,
+          isFriendOfFriend: true,
+        };
+      })
+    );
+
+    return friendsOfFriendsProfiles.filter(Boolean);
   },
 });
 

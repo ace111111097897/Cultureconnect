@@ -121,10 +121,7 @@ export const seedCulturalPrompts = mutation({
     ];
 
     for (const prompt of prompts) {
-      await ctx.db.insert("culturalPrompts", {
-        ...prompt,
-        createdAt: Date.now(),
-      });
+      await ctx.db.insert("culturalPrompts", prompt);
     }
   },
 });

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
-import React from "react";
 
 const STORY_CATEGORIES = [
   { id: "tradition", label: "Traditions", icon: "🎭" },
@@ -22,11 +21,9 @@ export function StoriesSection() {
     category: "tradition",
     isPublic: true,
   });
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [uploading, setUploading] = useState(false);
-  const generateUploadUrl = useMutation(api.profiles.generateUploadUrl); // Reuse profile upload
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [profileUserId, setProfileUserId] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [selectedVideos, setSelectedVideos] = useState<File[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   const stories = useQuery(api.stories.getCulturalStories, {
     category: selectedCategory,
@@ -37,47 +34,77 @@ export function StoriesSection() {
   const likeStory = useMutation(api.stories.likeCulturalStory);
   const addReaction = useMutation(api.storyReactions.addStoryReaction);
   const removeReaction = useMutation(api.storyReactions.removeStoryReaction);
-
-  const selectedProfile = useQuery(
-    profileUserId ? api.profiles.getUserProfileById : null,
-    profileUserId ? { userId: profileUserId } : "skip"
-  );
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setSelectedFiles(Array.from(e.target.files));
-    }
-  };
+  const generateUploadUrl = useMutation(api.stories.generateUploadUrl);
+  const generateVideoUploadUrl = useMutation(api.stories.generateVideoUploadUrl);
 
   const handleCreateStory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newStory.title.trim() || !newStory.content.trim()) return;
-    setUploading(true);
-    let imageIds: string[] = [];
+
     try {
-      if (selectedFiles.length > 0) {
-        for (const file of selectedFiles) {
-          const uploadUrl = await generateUploadUrl();
-          const result = await fetch(uploadUrl, {
-            method: "POST",
-            headers: { "Content-Type": file.type },
-            body: file,
-          });
-          const { storageId } = await result.json();
-          imageIds.push(storageId);
-        }
+      setIsUploading(true);
+
+      // Upload images
+      const imageStorageIds: string[] = [];
+      for (const image of selectedImages) {
+        const uploadUrl = await generateUploadUrl();
+        const result = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": image.type },
+          body: image,
+        });
+        const { storageId } = await result.json();
+        imageStorageIds.push(storageId);
       }
-      await createStory({ ...newStory, images: imageIds });
+
+      // Upload videos
+      const videoStorageIds: string[] = [];
+      for (const video of selectedVideos) {
+        const uploadUrl = await generateVideoUploadUrl();
+        const result = await fetch(uploadUrl, {
+          method: "POST",
+          headers: { "Content-Type": video.type },
+          body: video,
+        });
+        const { storageId } = await result.json();
+        videoStorageIds.push(storageId);
+      }
+
+      await createStory({
+        ...newStory,
+        images: imageStorageIds.length > 0 ? imageStorageIds : undefined,
+        videos: videoStorageIds.length > 0 ? videoStorageIds : undefined,
+      });
+      
       toast.success("Story shared successfully!");
       setNewStory({ title: "", content: "", category: "tradition", isPublic: true });
-      setSelectedFiles([]);
+      setSelectedImages([]);
+      setSelectedVideos([]);
       setShowCreateForm(false);
     } catch (error) {
       toast.error("Failed to share story");
       console.error(error);
     } finally {
-      setUploading(false);
+      setIsUploading(false);
     }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setSelectedImages(prev => [...prev, ...files]);
+  };
+
+  const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setSelectedVideos(prev => [...prev, ...files]);
+  };
+
+  const removeImage = (index: number) => {
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeVideo = (index: number) => {
+    setSelectedVideos(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleLikeStory = async (storyId: string) => {
@@ -194,28 +221,91 @@ export function StoriesSection() {
                 />
               </div>
 
-              <div>
-                <label className="block text-white/80 mb-2">Add Photos or Videos</label>
-                <input
-                  type="file"
-                  accept="image/*,video/*"
-                  multiple
-                  onChange={handleFileChange}
-                  className="w-full px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                />
-                {selectedFiles.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {selectedFiles.map((file, idx) => (
-                      <div key={idx} className="w-20 h-20 bg-white/10 rounded-lg flex items-center justify-center overflow-hidden border border-white/20">
-                        {file.type.startsWith("image/") ? (
-                          <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
-                        ) : (
-                          <video src={URL.createObjectURL(file)} className="w-full h-full object-cover" controls />
-                        )}
+              {/* Media Upload Section */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-white/80 mb-2">Add Photos</label>
+                  <label className="block w-full h-32 border-2 border-dashed border-white/30 rounded-xl flex items-center justify-center cursor-pointer hover:border-white/50 transition-all">
+                    <div className="text-center">
+                      <div className="text-2xl mb-2">📷</div>
+                      <p className="text-white/60 text-sm">Click to add photos</p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  
+                  {/* Selected Images Preview */}
+                  {selectedImages.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="text-white/70 text-sm mb-2">Selected Images:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedImages.map((image, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={URL.createObjectURL(image)}
+                              alt={`Preview ${index + 1}`}
+                              className="w-20 h-20 object-cover rounded-lg"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-                )}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-white/80 mb-2">Add Videos</label>
+                  <label className="block w-full h-32 border-2 border-dashed border-white/30 rounded-xl flex items-center justify-center cursor-pointer hover:border-white/50 transition-all">
+                    <div className="text-center">
+                      <div className="text-2xl mb-2">📹</div>
+                      <p className="text-white/60 text-sm">Click to add videos</p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      multiple
+                      onChange={handleVideoUpload}
+                      className="hidden"
+                    />
+                  </label>
+                  
+                  {/* Selected Videos Preview */}
+                  {selectedVideos.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="text-white/70 text-sm mb-2">Selected Videos:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedVideos.map((video, index) => (
+                          <div key={index} className="relative">
+                            <video
+                              src={URL.createObjectURL(video)}
+                              className="w-20 h-20 object-cover rounded-lg"
+                              muted
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeVideo(index)}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex items-center space-x-3">
@@ -236,16 +326,15 @@ export function StoriesSection() {
                   type="button"
                   onClick={() => setShowCreateForm(false)}
                   className="px-6 py-3 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all"
-                  disabled={uploading}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
-                  disabled={uploading}
+                  disabled={isUploading}
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
-                  {uploading ? "Sharing..." : "Share Story"}
+                  {isUploading ? "Sharing..." : "Share Story"}
                 </button>
               </div>
             </form>
@@ -270,22 +359,24 @@ export function StoriesSection() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {stories?.map((story) => (
+          {stories.map((story) => (
             <div
               key={story._id}
               className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all"
             >
               {/* Story Header */}
               <div className="flex items-start justify-between mb-4">
-                <div
-                  className="flex items-center space-x-3 cursor-pointer hover:opacity-80"
-                  onClick={() => {
-                    setProfileUserId(story.userId);
-                    setShowProfileModal(true);
-                  }}
-                >
+                <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                    <span className="text-white text-sm">👤</span>
+                    {story.author?.profileImageUrl ? (
+                      <img
+                        src={story.author.profileImageUrl}
+                        alt={story.author.displayName}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white text-sm">👤</span>
+                    )}
                   </div>
                   <div>
                     <p className="text-white font-medium">
@@ -303,21 +394,6 @@ export function StoriesSection() {
                 </div>
               </div>
 
-              {/* Media Gallery */}
-              {story.imageUrls && story.imageUrls.length > 0 && (
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {story.imageUrls.map((url: string, idx: number) => (
-                    <div key={idx} className="w-24 h-24 bg-white/10 rounded-lg flex items-center justify-center overflow-hidden border border-white/20">
-                      {url.match(/\.(mp4|webm|ogg)$/i) ? (
-                        <video src={url} className="w-full h-full object-cover" controls />
-                      ) : (
-                        <img src={url} alt="story media" className="w-full h-full object-cover" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-
               {/* Story Content */}
               <div className="space-y-3">
                 <h3 className="text-lg font-semibold text-white">{story.title}</h3>
@@ -325,6 +401,32 @@ export function StoriesSection() {
                   {story.content}
                 </p>
               </div>
+
+              {/* Story Media */}
+              {(story.imageUrls?.length > 0 || story.videoUrls?.length > 0) && (
+                <div className="mt-4 space-y-2">
+                  {/* Images */}
+                  {story.imageUrls?.map((imageUrl, index) => (
+                    <img
+                      key={index}
+                      src={imageUrl}
+                      alt={`Story image ${index + 1}`}
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                  ))}
+                  
+                  {/* Videos */}
+                  {story.videoUrls?.map((videoUrl, index) => (
+                    <video
+                      key={index}
+                      src={videoUrl}
+                      className="w-full h-48 object-cover rounded-lg"
+                      controls
+                      muted
+                    />
+                  ))}
+                </div>
+              )}
 
               {/* Story Actions */}
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/20">
@@ -357,97 +459,6 @@ export function StoriesSection() {
               </div>
             </div>
           ))}
-        </div>
-      )}
-      {/* Profile Modal */}
-      {showProfileModal && selectedProfile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-          <div className="bg-white/90 rounded-2xl p-8 max-w-lg w-full relative shadow-xl">
-            <button
-              className="absolute top-3 right-3 text-gray-700 hover:text-black text-2xl"
-              onClick={() => setShowProfileModal(false)}
-            >
-              ✕
-            </button>
-            <div className="flex flex-col items-center space-y-4">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden">
-                {selectedProfile.profileImageUrl ? (
-                  <img src={selectedProfile.profileImageUrl} alt={selectedProfile.displayName} className="w-full h-full object-cover" />
-                ) : (
-                  <span className="text-white text-3xl">👤</span>
-                )}
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900">{selectedProfile.displayName}</h2>
-              <p className="text-gray-700">{selectedProfile.age} • {selectedProfile.location}</p>
-              <p className="text-gray-800 text-center">{selectedProfile.bio}</p>
-              <div className="w-full grid grid-cols-2 gap-4 mt-4">
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-1">Languages</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedProfile.languages?.map((lang: string, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-blue-500/20 text-blue-800 rounded text-xs">{lang}</span>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-1">Cultural Background</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedProfile.culturalBackground?.map((bg: string, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-purple-500/20 text-purple-800 rounded text-xs">{bg}</span>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-1">Values</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedProfile.values?.map((v: string, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-cyan-500/20 text-cyan-800 rounded text-xs">{v}</span>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-1">Food Preferences</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedProfile.foodPreferences?.map((f: string, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-orange-500/20 text-orange-800 rounded text-xs">{f}</span>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-1">Life Goals</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedProfile.lifeGoals?.map((g: string, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-green-500/20 text-green-800 rounded text-xs">{g}</span>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-1">Music Genres</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedProfile.musicGenres?.map((m: string, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-pink-500/20 text-pink-800 rounded text-xs">{m}</span>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-1">Travel Interests</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedProfile.travelInterests?.map((t: string, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-indigo-500/20 text-indigo-800 rounded text-xs">{t}</span>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-800 mb-1">Traditions</h3>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedProfile.traditions?.map((tr: string, i: number) => (
-                      <span key={i} className="px-2 py-1 bg-yellow-500/20 text-yellow-800 rounded text-xs">{tr}</span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       )}
     </div>

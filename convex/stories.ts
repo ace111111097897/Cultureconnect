@@ -9,6 +9,7 @@ export const createCulturalStory = mutation({
     category: v.string(),
     isPublic: v.boolean(),
     images: v.optional(v.array(v.id("_storage"))),
+    videos: v.optional(v.array(v.id("_storage"))),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -20,10 +21,10 @@ export const createCulturalStory = mutation({
       content: args.content,
       category: args.category,
       isPublic: args.isPublic,
+      images: args.images || [],
+      videos: args.videos || [],
       likes: 0,
       timestamp: Date.now(),
-      tags: [],
-      images: args.images || [],
     });
   },
 });
@@ -51,7 +52,7 @@ export const getCulturalStories = query({
       .order("desc")
       .take(args.limit || 20);
 
-    // Get author profiles and image URLs
+    // Get author profiles and media URLs
     const storiesWithDetails = await Promise.all(
       stories.map(async (story) => {
         const authorProfile = await ctx.db
@@ -63,10 +64,15 @@ export const getCulturalStories = query({
           ? await Promise.all(story.images.map(id => ctx.storage.getUrl(id)))
           : [];
 
+        const videoUrls = story.videos
+          ? await Promise.all(story.videos.map(id => ctx.storage.getUrl(id)))
+          : [];
+
         return {
           ...story,
           author: authorProfile,
           imageUrls: imageUrls.filter(Boolean),
+          videoUrls: videoUrls.filter(Boolean),
         };
       })
     );
@@ -89,5 +95,25 @@ export const likeCulturalStory = mutation({
     await ctx.db.patch(args.storyId, {
       likes: story.likes + 1,
     });
+  },
+});
+
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    return await ctx.storage.generateUploadUrl();
+  },
+});
+
+export const generateVideoUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    return await ctx.storage.generateUploadUrl();
   },
 });

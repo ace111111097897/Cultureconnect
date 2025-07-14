@@ -6,55 +6,30 @@ import { Toaster } from "sonner";
 import { useState } from "react";
 import { ProfileSetup } from "./components/ProfileSetup";
 import { Dashboard } from "./components/Dashboard";
-import { useNavigate } from "react-router-dom";
 
 export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-800 to-orange-600">
       <div className="min-h-screen bg-black/20 backdrop-blur-sm">
         <header className="sticky top-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/20">
-          <div className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-            <Authenticated>
-              <ProfileButton />
-            </Authenticated>
-            <Unauthenticated>
-              <button
-                className="flex items-center space-x-2"
-                onClick={() => window.location.href = "/"}
-                aria-label="Go to home page"
-              >
-                <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full"></div>
-                <h1 className="text-2xl font-bold text-white">Culture</h1>
-              </button>
-            </Unauthenticated>
+          <div className="max-w-7xl mx-auto px-2 sm:px-4 h-16 flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full"></div>
+              <h1 className="text-2xl font-bold text-white">Culture</h1>
+            </div>
             <Authenticated>
               <SignOutButton />
             </Authenticated>
           </div>
         </header>
 
-        <main className="max-w-7xl mx-auto px-4 py-8">
+        <main className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
           <Content />
         </main>
         
         <Toaster />
       </div>
     </div>
-  );
-}
-
-function ProfileButton() {
-  const loggedInUser = useQuery(api.auth.loggedInUser);
-  const navigate = useNavigate();
-  return (
-    <button
-      className="flex items-center space-x-2 hover:bg-white/10 rounded-lg px-3 py-2 transition-all"
-      onClick={() => navigate("/")}
-      aria-label="Go to home page"
-    >
-      <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full"></div>
-      <h1 className="text-2xl font-bold text-white">Culture</h1>
-    </button>
   );
 }
 

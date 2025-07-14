@@ -8,138 +8,50 @@ const applicationTables = {
     displayName: v.string(),
     age: v.number(),
     bio: v.string(),
+    profileImage: v.optional(v.id("_storage")),
+    profileVideo: v.optional(v.id("_storage")),
     location: v.string(),
-    email: v.optional(v.string()),
-    profileImageId: v.optional(v.id("_storage")),
-    profileImageUrl: v.optional(v.string()),
+    
+    // Social Media Links
+    socialLinks: v.optional(v.object({
+      instagram: v.optional(v.string()),
+      twitter: v.optional(v.string()),
+      facebook: v.optional(v.string()),
+      linkedin: v.optional(v.string()),
+      tiktok: v.optional(v.string()),
+      youtube: v.optional(v.string()),
+    })),
+    
+    // Cultural Information
     languages: v.array(v.string()),
     culturalBackground: v.array(v.string()),
     traditions: v.array(v.string()),
     foodPreferences: v.array(v.string()),
     musicGenres: v.array(v.string()),
     travelInterests: v.array(v.string()),
+    
+    // Values & Goals
     lifeGoals: v.array(v.string()),
     values: v.array(v.string()),
     relationshipGoals: v.string(),
+    
+    // Preferences
     ageRangeMin: v.number(),
     ageRangeMax: v.number(),
     maxDistance: v.number(),
+    
+    isActive: v.boolean(),
+    lastActive: v.number(),
   })
     .index("by_user", ["userId"])
-    .index("by_age", ["age"])
+    .index("by_active", ["isActive"])
     .index("by_location", ["location"]),
 
-  matches: defineTable({
-    user1Id: v.id("users"),
-    user2Id: v.id("users"),
-    compatibilityScore: v.number(),
-    sharedInterests: v.array(v.string()),
-    status: v.string(), // "pending", "matched", "rejected"
-  })
-    .index("by_user1", ["user1Id"])
-    .index("by_user2", ["user2Id"])
-    .index("by_status", ["status"]),
-
-  friendRequests: defineTable({
-    fromUserId: v.id("users"),
-    toUserId: v.id("users"),
-    status: v.string(), // "pending", "accepted", "rejected"
-    timestamp: v.number(),
-  })
-    .index("by_from_user", ["fromUserId"])
-    .index("by_to_user", ["toUserId"])
-    .index("by_status", ["status"]),
-
-  friends: defineTable({
-    user1Id: v.id("users"),
-    user2Id: v.id("users"),
-    timestamp: v.number(),
-  })
-    .index("by_user1", ["user1Id"])
-    .index("by_user2", ["user2Id"]),
-
-  conversations: defineTable({
-    participants: v.array(v.id("users")),
-    lastMessage: v.optional(v.string()),
-    lastMessageTime: v.optional(v.number()),
-    unreadCount: v.object({
-      user1: v.number(),
-      user2: v.number(),
-    }),
-  })
-    .index("by_participants", ["participants"]),
-
-  messages: defineTable({
-    conversationId: v.id("conversations"),
-    senderId: v.id("users"),
-    content: v.string(),
-    timestamp: v.number(),
-    messageType: v.string(), // "text", "image", "video"
-    mediaId: v.optional(v.id("_storage")),
-    isRead: v.boolean(),
-  })
-    .index("by_conversation", ["conversationId"])
-    .index("by_timestamp", ["timestamp"]),
-
-  stories: defineTable({
-    userId: v.id("users"),
-    title: v.string(),
-    content: v.string(),
-    category: v.string(),
-    tags: v.array(v.string()),
-    likes: v.number(),
-    timestamp: v.number(),
-    mediaId: v.optional(v.id("_storage")),
-    mediaType: v.optional(v.string()),
-  })
-    .index("by_user", ["userId"])
-    .index("by_category", ["category"])
-    .index("by_timestamp", ["timestamp"]),
-
-  storyReactions: defineTable({
-    storyId: v.id("culturalStories"),
-    userId: v.id("users"),
-    reactionType: v.string(), // "like", "love", "celebrate"
-    timestamp: v.number(),
-  })
-    .index("by_story", ["storyId"])
-    .index("by_user", ["userId"]),
-
-  kandiConversations: defineTable({
-    userId: v.id("users"),
-    userMessage: v.string(),
-    kandiResponse: v.string(),
-    timestamp: v.number(),
-  })
-    .index("by_user", ["userId"])
-    .index("by_timestamp", ["timestamp"]),
-
-  gameScores: defineTable({
-    userId: v.id("users"),
-    gameType: v.string(), // "uno", "quiz", etc.
-    score: v.number(),
-    playerName: v.string(),
-    timestamp: v.number(),
-  })
-    .index("by_user", ["userId"])
-    .index("by_game_type", ["gameType"])
-    .index("by_score", ["score"])
-    .index("by_timestamp", ["timestamp"]),
-
-  userInteractions: defineTable({
-    userId: v.id("users"),
-    targetUserId: v.id("users"),
-    interactionType: v.string(), // "like", "pass", "super_like"
-    timestamp: v.number(),
-  })
-    .index("by_user", ["userId"])
-    .index("by_target", ["targetUserId"]),
-
   culturalPrompts: defineTable({
-    category: v.string(),
     question: v.string(),
+    category: v.string(), // "traditions", "food", "travel", "values", etc.
+    options: v.array(v.string()),
     isActive: v.boolean(),
-    createdAt: v.number(),
   })
     .index("by_category", ["category"])
     .index("by_active", ["isActive"]),
@@ -153,22 +65,63 @@ const applicationTables = {
     .index("by_user", ["userId"])
     .index("by_prompt", ["promptId"]),
 
-  culturalStories: defineTable({
-    userId: v.id("users"),
-    title: v.string(),
-    content: v.string(),
-    category: v.string(),
-    tags: v.array(v.string()),
-    likes: v.number(),
+  matches: defineTable({
+    user1Id: v.id("users"),
+    user2Id: v.id("users"),
+    compatibilityScore: v.number(),
+    sharedInterests: v.array(v.string()),
+    matchType: v.string(), // "cultural", "values", "interests"
+    status: v.string(), // "pending", "mutual", "declined"
     timestamp: v.number(),
-    isPublic: v.boolean(),
-    images: v.optional(v.array(v.id("_storage"))),
   })
-    .index("by_user", ["userId"])
-    .index("by_category", ["category"])
-    .index("by_public", ["isPublic"])
+    .index("by_user1", ["user1Id"])
+    .index("by_user2", ["user2Id"])
+    .index("by_status", ["status"]),
+
+  // NEW: Friend system
+  friendRequests: defineTable({
+    fromUserId: v.id("users"),
+    toUserId: v.id("users"),
+    status: v.string(), // "pending", "accepted", "rejected"
+    timestamp: v.number(),
+  })
+    .index("by_from", ["fromUserId"])
+    .index("by_to", ["toUserId"])
+    .index("by_status", ["status"]),
+
+  friends: defineTable({
+    user1Id: v.id("users"),
+    user2Id: v.id("users"),
+    timestamp: v.number(),
+  })
+    .index("by_user1", ["user1Id"])
+    .index("by_user2", ["user2Id"]),
+
+  conversations: defineTable({
+    participants: v.array(v.id("users")),
+    type: v.string(), // "direct", "group", "kandi"
+    title: v.optional(v.string()),
+    culturalTheme: v.optional(v.string()),
+    lastMessage: v.optional(v.string()),
+    lastMessageTime: v.optional(v.number()),
+    isActive: v.boolean(),
+  })
+    .index("by_participants", ["participants"])
+    .index("by_type", ["type"]),
+
+  messages: defineTable({
+    conversationId: v.id("conversations"),
+    senderId: v.id("users"),
+    content: v.string(),
+    messageType: v.string(), // "text", "story", "cultural_moment", "kandi"
+    timestamp: v.number(),
+    isRead: v.boolean(),
+  })
+    .index("by_conversation", ["conversationId"])
+    .index("by_sender", ["senderId"])
     .index("by_timestamp", ["timestamp"]),
 
+  // NEW: Kandi AI messages
   kandiMessages: defineTable({
     userId: v.id("users"),
     userMessage: v.string(),
@@ -178,33 +131,73 @@ const applicationTables = {
     .index("by_user", ["userId"])
     .index("by_timestamp", ["timestamp"]),
 
-  unoQueue: defineTable({
+  culturalStories: defineTable({
     userId: v.id("users"),
-    joinedAt: v.number(),
+    title: v.string(),
+    content: v.string(),
+    category: v.string(), // "tradition", "food", "travel", "family"
+    images: v.optional(v.array(v.id("_storage"))),
+    videos: v.optional(v.array(v.id("_storage"))),
+    likes: v.number(),
+    timestamp: v.number(),
+    isPublic: v.boolean(),
   })
     .index("by_user", ["userId"])
-    .index("by_joinedAt", ["joinedAt"]),
+    .index("by_category", ["category"])
+    .index("by_public", ["isPublic"]),
 
-  unoGames: defineTable({
-    playerIds: v.array(v.id("users")), // All players in the game
-    state: v.string(), // JSON stringified game state
-    currentTurn: v.number(), // Index in playerIds
-    startedAt: v.number(),
-    finishedAt: v.optional(v.number()),
-    winnerId: v.optional(v.id("users")),
+  // NEW: Story reactions
+  storyReactions: defineTable({
+    storyId: v.id("culturalStories"),
+    userId: v.id("users"),
+    reactionType: v.string(), // "❤️", "🔥", "👏", "😍", "🌟"
+    timestamp: v.number(),
   })
-    .index("by_player", ["playerIds"])
-    .index("by_startedAt", ["startedAt"]),
+    .index("by_story", ["storyId"])
+    .index("by_user", ["userId"]),
 
-  unoLobbies: defineTable({
-    creatorId: v.id("users"),
-    playerIds: v.array(v.id("users")),
-    status: v.string(), // "open", "started", "finished"
-    createdAt: v.number(),
-    gameId: v.optional(v.id("unoGames")),
+  culturalEvents: defineTable({
+    title: v.string(),
+    description: v.string(),
+    category: v.string(), // "food", "music", "language", "travel"
+    location: v.string(),
+    dateTime: v.number(),
+    maxParticipants: v.number(),
+    currentParticipants: v.number(),
+    hostId: v.id("users"),
+    participants: v.array(v.id("users")),
+    isActive: v.boolean(),
   })
-    .index("by_status", ["status"])
-    .index("by_creator", ["creatorId"]),
+    .index("by_category", ["category"])
+    .index("by_host", ["hostId"])
+    .index("by_date", ["dateTime"]),
+
+  userInteractions: defineTable({
+    userId: v.id("users"),
+    targetUserId: v.id("users"),
+    interactionType: v.string(), // "view", "like", "pass", "message"
+    timestamp: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_target", ["targetUserId"])
+    .index("by_type", ["interactionType"]),
+
+  // NEW: Notifications system
+  notifications: defineTable({
+    userId: v.id("users"),
+    type: v.string(), // "match", "message", "friend_request", "story_reaction"
+    title: v.string(),
+    message: v.string(),
+    relatedUserId: v.optional(v.id("users")),
+    relatedStoryId: v.optional(v.id("culturalStories")),
+    relatedConversationId: v.optional(v.id("conversations")),
+    isRead: v.boolean(),
+    timestamp: v.number(),
+  })
+    .index("by_user", ["userId"])
+    .index("by_type", ["type"])
+    .index("by_read", ["isRead"])
+    .index("by_timestamp", ["timestamp"]),
 };
 
 export default defineSchema({

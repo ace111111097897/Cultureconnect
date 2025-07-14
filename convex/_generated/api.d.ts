@@ -18,7 +18,6 @@ import type * as auth from "../auth.js";
 import type * as conversations from "../conversations.js";
 import type * as emailActions from "../emailActions.js";
 import type * as friends from "../friends.js";
-import type * as games from "../games.js";
 import type * as http from "../http.js";
 import type * as kandi from "../kandi.js";
 import type * as kandiQueries from "../kandiQueries.js";
@@ -43,7 +42,6 @@ declare const fullApi: ApiFromModules<{
   conversations: typeof conversations;
   emailActions: typeof emailActions;
   friends: typeof friends;
-  games: typeof games;
   http: typeof http;
   kandi: typeof kandi;
   kandiQueries: typeof kandiQueries;

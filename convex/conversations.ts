@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
+import { internal } from "./_generated/api";
 
 export const getUserConversations = query({
   args: {},
@@ -10,6 +11,7 @@ export const getUserConversations = query({
 
     const allConversations = await ctx.db
       .query("conversations")
+      .filter((q) => q.eq(q.field("isActive"), true))
       .collect();
 
     const conversations = allConversations.filter(conv => 
@@ -21,14 +23,14 @@ export const getUserConversations = query({
       conversations.map(async (conversation) => {
         const otherParticipants = conversation.participants.filter(id => id !== userId);
         
-        if (otherParticipants.length === 1) {
+        if (conversation.type === "direct" && otherParticipants.length === 1) {
           const otherProfile = await ctx.db
             .query("profiles")
             .withIndex("by_user", (q) => q.eq("userId", otherParticipants[0]))
             .unique();
 
-          const profileImageUrl = otherProfile?.profileImageId 
-            ? await ctx.storage.getUrl(otherProfile.profileImageId)
+          const profileImageUrl = otherProfile?.profileImage 
+            ? await ctx.storage.getUrl(otherProfile.profileImage)
             : null;
 
           return {
@@ -53,40 +55,23 @@ export const getUserConversations = query({
 export const getConversationMessages = query({
   args: {
     conversationId: v.id("conversations"),
-    limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
 
-    // Verify user is participant in conversation
     const conversation = await ctx.db.get(args.conversationId);
     if (!conversation || !conversation.participants.includes(userId)) {
-      throw new Error("Not authorized to view this conversation");
+      return [];
     }
 
     const messages = await ctx.db
       .query("messages")
       .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
-      .order("desc")
-      .take(args.limit || 50);
+      .order("asc")
+      .collect();
 
-    // Get sender profiles
-    const messagesWithSenders = await Promise.all(
-      messages.map(async (message) => {
-        const senderProfile = await ctx.db
-          .query("profiles")
-          .withIndex("by_user", (q) => q.eq("userId", message.senderId))
-          .unique();
-
-        return {
-          ...message,
-          sender: senderProfile,
-        };
-      })
-    );
-
-    return messagesWithSenders.reverse();
+    return messages;
   },
 });
 
@@ -94,23 +79,21 @@ export const sendMessage = mutation({
   args: {
     conversationId: v.id("conversations"),
     content: v.string(),
-    messageType: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
-    // Verify user is participant in conversation
     const conversation = await ctx.db.get(args.conversationId);
     if (!conversation || !conversation.participants.includes(userId)) {
-      throw new Error("Not authorized to send messages to this conversation");
+      throw new Error("Conversation not found or not authorized");
     }
 
     const messageId = await ctx.db.insert("messages", {
       conversationId: args.conversationId,
       senderId: userId,
       content: args.content,
-      messageType: args.messageType || "text",
+      messageType: "text",
       timestamp: Date.now(),
       isRead: false,
     });
@@ -120,6 +103,28 @@ export const sendMessage = mutation({
       lastMessage: args.content,
       lastMessageTime: Date.now(),
     });
+
+    // Send notification to other participants
+    const otherParticipants = conversation.participants.filter(id => id !== userId);
+    
+    for (const participantId of otherParticipants) {
+      // Get sender's profile for notification
+      const senderProfile = await ctx.db
+        .query("profiles")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .unique();
+
+      if (senderProfile) {
+        await ctx.runMutation(internal.notifications.createNotification, {
+          userId: participantId,
+          type: "message",
+          title: `New message from ${senderProfile.displayName}`,
+          message: args.content.length > 50 ? `${args.content.substring(0, 50)}...` : args.content,
+          relatedUserId: userId,
+          relatedConversationId: args.conversationId,
+        });
+      }
+    }
 
     return messageId;
   },
@@ -133,15 +138,55 @@ export const markMessagesAsRead = mutation({
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
 
-    const messages = await ctx.db
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation || !conversation.participants.includes(userId)) {
+      throw new Error("Conversation not found or not authorized");
+    }
+
+    // Mark all unread messages in this conversation as read
+    const unreadMessages = await ctx.db
       .query("messages")
       .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
       .filter((q) => q.neq(q.field("senderId"), userId))
       .filter((q) => q.eq(q.field("isRead"), false))
       .collect();
 
-    for (const message of messages) {
-      await ctx.db.patch(message._id, { isRead: true });
+    for (const message of unreadMessages) {
+      await ctx.db.patch(message._id, {
+        isRead: true,
+      });
     }
+  },
+});
+
+export const getUnreadMessageCount = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return 0;
+
+    const allConversations = await ctx.db
+      .query("conversations")
+      .filter((q) => q.eq(q.field("isActive"), true))
+      .collect();
+
+    const userConversations = allConversations.filter(conv => 
+      conv.participants.includes(userId)
+    );
+
+    let totalUnread = 0;
+
+    for (const conversation of userConversations) {
+      const unreadMessages = await ctx.db
+        .query("messages")
+        .withIndex("by_conversation", (q) => q.eq("conversationId", conversation._id))
+        .filter((q) => q.neq(q.field("senderId"), userId))
+        .filter((q) => q.eq(q.field("isRead"), false))
+        .collect();
+
+      totalUnread += unreadMessages.length;
+    }
+
+    return totalUnread;
   },
 });
