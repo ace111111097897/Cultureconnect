@@ -17,7 +17,6 @@ export function GamesSection() {
     answered: false,
   });
 
-  const leaderboard = useQuery(api.games.getLeaderboard);
   const submitScore = useMutation(api.games.submitScore);
   const userProfile = useQuery(api.profiles.getCurrentUserProfile);
   const unoQueue = useQuery(api.games.getUnoQueue);
@@ -363,47 +362,6 @@ export function GamesSection() {
             >
               Start Quiz
             </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Leaderboard */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">🏆 Leaderboard</h2>
-        
-        <div className="grid md:grid-cols-2 gap-6">
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-4">🎴 UNO Champions</h3>
-            <div className="space-y-3">
-              {leaderboard?.filter(entry => entry.gameType === "uno").slice(0, 5).map((entry, index) => (
-                <div key={entry._id} className="flex items-center justify-between bg-white/5 rounded-lg p-3">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-orange-400 font-bold">#{index + 1}</span>
-                    <span className="text-white">{entry.playerName}</span>
-                  </div>
-                  <span className="text-orange-400 font-semibold">{entry.score} pts</span>
-                </div>
-              )) || (
-                <p className="text-white/50 text-center py-4">No scores yet. Be the first!</p>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-4">🧠 Quiz Masters</h3>
-            <div className="space-y-3">
-              {leaderboard?.filter(entry => entry.gameType === "quiz").slice(0, 5).map((entry, index) => (
-                <div key={entry._id} className="flex items-center justify-between bg-white/5 rounded-lg p-3">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-purple-400 font-bold">#{index + 1}</span>
-                    <span className="text-white">{entry.playerName}</span>
-                  </div>
-                  <span className="text-purple-400 font-semibold">{entry.score} pts</span>
-                </div>
-              )) || (
-                <p className="text-white/50 text-center py-4">No scores yet. Be the first!</p>
-              )}
-            </div>
           </div>
         </div>
       </div>
