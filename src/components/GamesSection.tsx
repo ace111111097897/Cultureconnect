@@ -19,8 +19,6 @@ export function GamesSection() {
 
   const submitScore = useMutation(api.games.submitScore);
   const userProfile = useQuery(api.profiles.getCurrentUserProfile);
-  const unoQueue = useQuery(api.games.getUnoQueue);
-  const isQueued = unoQueue?.some(q => q.userId === userProfile?.userId);
   const unoGame = useQuery(api.games.getUnoGameForUser);
   const joinUnoQueue = useMutation(api.games.joinUnoQueue);
   const leaveUnoQueue = useMutation(api.games.leaveUnoQueue);
