@@ -195,6 +195,16 @@ const applicationTables = {
   })
     .index("by_player", ["playerIds"])
     .index("by_startedAt", ["startedAt"]),
+
+  unoLobbies: defineTable({
+    creatorId: v.id("users"),
+    playerIds: v.array(v.id("users")),
+    status: v.string(), // "open", "started", "finished"
+    createdAt: v.number(),
+    gameId: v.optional(v.id("unoGames")),
+  })
+    .index("by_status", ["status"])
+    .index("by_creator", ["creatorId"]),
 };
 
 export default defineSchema({

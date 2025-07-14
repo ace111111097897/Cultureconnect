@@ -8,6 +8,7 @@ import * as conversations from "./conversations";
 import * as kandi from "./kandi";
 import * as kandiQueries from "./kandiQueries";
 import * as prompts from "./prompts";
+import * as unoLobbies from "./unoLobbies";
 
 export default {
   games,
@@ -20,4 +21,5 @@ export default {
   kandi,
   kandiQueries,
   prompts,
+  unoLobbies,
 }; 

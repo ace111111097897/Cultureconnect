@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
@@ -20,13 +20,27 @@ export function GamesSection() {
   const submitScore = useMutation(api.games.submitScore);
   const userProfile = useQuery(api.profiles.getCurrentUserProfile);
   const unoQueue = useQuery(api.games.getUnoQueue);
+  const isQueued = unoQueue?.some(q => q.userId === userProfile?.userId);
   const unoGame = useQuery(api.games.getUnoGameForUser);
   const joinUnoQueue = useMutation(api.games.joinUnoQueue);
   const leaveUnoQueue = useMutation(api.games.leaveUnoQueue);
   const matchPlayersToGame = useMutation(api.games.matchPlayersToGame);
   const playUnoCardMutation = useMutation(api.games.playUnoCard);
+  const unoLobbies = useQuery(api.unoLobbies.listUnoLobbies) || [];
+  const createUnoLobby = useMutation(api.unoLobbies.createUnoLobby);
+  const joinUnoLobby = useMutation(api.unoLobbies.joinUnoLobby);
+  const leaveUnoLobby = useMutation(api.unoLobbies.leaveUnoLobby);
+  const startUnoLobbyGame = useMutation(api.unoLobbies.startUnoLobbyGame);
+  const [selectedLobby, setSelectedLobby] = useState<string | null>(null);
+  const [myLobby, setMyLobby] = useState<any>(null);
 
-  const isQueued = unoQueue?.some(q => q.userId === userProfile?.userId);
+  // Helper: Find the lobby the user is in
+  useEffect(() => {
+    if (!userProfile) return;
+    const lobby = unoLobbies.find(l => l.playerIds.includes(userProfile.userId));
+    setMyLobby(lobby || null);
+  }, [unoLobbies, userProfile]);
+
   const inGame = !!unoGame;
 
   const handleJoinQueue = async () => {
@@ -306,44 +320,47 @@ export function GamesSection() {
 
       {/* Games Grid */}
       <div className="grid md:grid-cols-2 gap-6">
-        {/* UNO Game */}
+        {/* UNO Game Section (Lobby-based) */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
           <div className="text-center space-y-4">
             <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto">
               <span className="text-2xl">🎴</span>
             </div>
             <h3 className="text-xl font-bold text-white">Cultural UNO</h3>
-            <p className="text-white/70">Play UNO with a cultural twist! Queue up and play with others online.</p>
+            <p className="text-white/70">Play UNO with a cultural twist! Join or create a lobby to play with others.</p>
             {!userProfile ? (
               <p className="text-white/60">Sign in to play UNO with others!</p>
-            ) : inGame ? (
-              <MultiplayerUnoGame unoGame={unoGame} userProfile={userProfile} />
-            ) : isQueued ? (
+            ) : myLobby ? (
               <div>
-                <p className="text-white/80 mb-2">Waiting for other players... ({unoQueue.length} in queue)</p>
-                <button
-                  onClick={handleLeaveQueue}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
-                >
-                  Leave Queue
-                </button>
-                {/* For demo: allow manual match start if enough players */}
-                {unoQueue.length >= 2 && (
-                  <button
-                    onClick={handleStartMatch}
-                    className="ml-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold hover:from-blue-600 hover:to-purple-600 transition-all"
-                  >
-                    Start Match
-                  </button>
+                <h4 className="text-white font-semibold mb-2">Lobby: {myLobby._id}</h4>
+                <p className="text-white/70 mb-2">Players: {myLobby.playerIds.length}</p>
+                <div className="flex gap-2 mb-2">
+                  {myLobby.playerIds.map((id: string, idx: number) => (
+                    <span key={id} className="px-2 py-1 bg-white/20 rounded text-white text-xs">Player {idx + 1}{id === myLobby.creatorId ? ' (Host)' : ''}</span>
+                  ))}
+                </div>
+                {myLobby.status === "open" && myLobby.creatorId === userProfile.userId && myLobby.playerIds.length >= 2 && (
+                  <button onClick={async () => { await startUnoLobbyGame({ lobbyId: myLobby._id }); }} className="px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-all">Start Game</button>
+                )}
+                <button onClick={async () => { await leaveUnoLobby({ lobbyId: myLobby._id }); }} className="ml-2 px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-all">Leave Lobby</button>
+                {myLobby.status === "started" && (
+                  <MultiplayerUnoGame unoGame={unoGame} userProfile={userProfile} />
                 )}
               </div>
             ) : (
-              <button
-                onClick={handleJoinQueue}
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-orange-500 text-white font-semibold hover:from-red-600 hover:to-orange-600 transition-all"
-              >
-                Queue for UNO
-              </button>
+              <div>
+                <button onClick={async () => { await createUnoLobby(); }} className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-all mb-4">Create Lobby</button>
+                <h4 className="text-white font-semibold mb-2">Open Lobbies</h4>
+                {unoLobbies.length === 0 && <p className="text-white/60">No open lobbies. Create one above!</p>}
+                <ul className="space-y-2">
+                  {unoLobbies.map(lobby => (
+                    <li key={lobby._id} className="flex items-center justify-between bg-white/10 rounded p-2">
+                      <span className="text-white">Lobby {lobby._id} ({lobby.playerIds.length} players)</span>
+                      <button onClick={async () => { await joinUnoLobby({ lobbyId: lobby._id }); }} className="px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600">Join</button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         </div>
