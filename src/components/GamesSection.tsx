@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 export function GamesSection() {
   const [activeGame, setActiveGame] = useState<string | null>(null);
-  const [unoGame, setUnoGame] = useState({
+  const [localUnoGame, setLocalUnoGame] = useState({
     playerCards: [] as string[],
     currentCard: "Red 5",
     gameStarted: false,
@@ -77,7 +77,7 @@ export function GamesSection() {
 
   const startUnoGame = () => {
     const cards = ["Red 1", "Red 2", "Blue 3", "Yellow 4", "Green 5", "Red Skip", "Blue Draw 2"];
-    setUnoGame({
+    setLocalUnoGame({
       playerCards: cards.slice(0, 7),
       currentCard: "Red 5",
       gameStarted: true,
@@ -86,8 +86,8 @@ export function GamesSection() {
   };
 
   const playUnoCard = (card: string) => {
-    const newCards = unoGame.playerCards.filter(c => c !== card);
-    setUnoGame(prev => ({
+    const newCards = localUnoGame.playerCards.filter(c => c !== card);
+    setLocalUnoGame(prev => ({
       ...prev,
       playerCards: newCards,
       currentCard: card,
