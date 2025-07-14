@@ -3,9 +3,15 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { MessagingPrompts } from "./MessagingPrompts";
+import React from "react";
 
-export function ConversationsSection() {
-  const [selectedConversation, setSelectedConversation] = useState<Id<"conversations"> | null>(null);
+interface ConversationsSectionProps {
+  selectedConversationId?: string | null;
+  setSelectedConversationId?: (id: string | null) => void;
+}
+
+export function ConversationsSection({ selectedConversationId, setSelectedConversationId }: ConversationsSectionProps = {}) {
+  const [selectedConversation, setSelectedConversation] = useState<string | null>(selectedConversationId || null);
   const [newMessage, setNewMessage] = useState("");
   const [showPrompts, setShowPrompts] = useState(false);
   
@@ -18,6 +24,13 @@ export function ConversationsSection() {
   
   const sendMessage = useMutation(api.conversations.sendMessage);
   const markAsRead = useMutation(api.conversations.markMessagesAsRead);
+
+  // Sync with prop if it changes
+  React.useEffect(() => {
+    if (selectedConversationId && selectedConversationId !== selectedConversation) {
+      setSelectedConversation(selectedConversationId);
+    }
+  }, [selectedConversationId]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,9 +47,10 @@ export function ConversationsSection() {
     }
   };
 
-  const handleSelectConversation = async (conversationId: Id<"conversations">) => {
+  const handleSelectConversation = async (conversationId: string) => {
     setSelectedConversation(conversationId);
     setShowPrompts(false);
+    if (setSelectedConversationId) setSelectedConversationId(conversationId);
     try {
       await markAsRead({ conversationId });
     } catch (error) {

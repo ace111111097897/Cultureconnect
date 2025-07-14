@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
+import { CULTURAL_OPTIONS } from "./ProfileSetup";
 
 export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
@@ -196,108 +197,242 @@ export function ProfilePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20">
           <h2 className="text-lg md:text-xl font-bold text-white mb-4">🌍 Cultural Identity</h2>
-          
           <div className="space-y-4">
             <div>
               <h3 className="text-white/80 font-medium mb-2">Languages</h3>
-              <div className="flex flex-wrap gap-2">
-                {profile.languages.map((lang, index) => (
-                  <span key={index} className="px-3 py-1 bg-blue-500/20 text-blue-200 rounded-full text-sm">
-                    {lang}
-                  </span>
-                ))}
-              </div>
+              {isEditing ? (
+                <div className="flex flex-wrap gap-2">
+                  {CULTURAL_OPTIONS.languages.map(lang => (
+                    <button
+                      key={lang}
+                      onClick={() => handleArrayChange('languages', lang)}
+                      className={`px-3 py-1 rounded-full text-sm transition-all ${
+                        editData.languages.includes(lang)
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-white/10 text-white/80 hover:bg-white/20'
+                      }`}
+                    >
+                      {lang}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {profile.languages.map((lang, index) => (
+                    <span key={index} className="px-3 py-1 bg-blue-500/20 text-blue-200 rounded-full text-sm">
+                      {lang}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-
             <div>
               <h3 className="text-white/80 font-medium mb-2">Cultural Background</h3>
-              <div className="flex flex-wrap gap-2">
-                {profile.culturalBackground.map((bg, index) => (
-                  <span key={index} className="px-3 py-1 bg-purple-500/20 text-purple-200 rounded-full text-sm">
-                    {bg}
-                  </span>
-                ))}
-              </div>
+              {isEditing ? (
+                <div className="flex flex-wrap gap-2">
+                  {CULTURAL_OPTIONS.culturalBackground.map(bg => (
+                    <button
+                      key={bg}
+                      onClick={() => handleArrayChange('culturalBackground', bg)}
+                      className={`px-3 py-1 rounded-full text-sm transition-all ${
+                        editData.culturalBackground.includes(bg)
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-white/10 text-white/80 hover:bg-white/20'
+                      }`}
+                    >
+                      {bg}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {profile.culturalBackground.map((bg, index) => (
+                    <span key={index} className="px-3 py-1 bg-purple-500/20 text-purple-200 rounded-full text-sm">
+                      {bg}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-
             <div>
               <h3 className="text-white/80 font-medium mb-2">Traditions</h3>
-              <div className="flex flex-wrap gap-2">
-                {profile.traditions.map((tradition, index) => (
-                  <span key={index} className="px-3 py-1 bg-green-500/20 text-green-200 rounded-full text-sm">
-                    {tradition}
-                  </span>
-                ))}
-              </div>
+              {isEditing ? (
+                <div className="flex flex-wrap gap-2">
+                  {CULTURAL_OPTIONS.traditions.map(tradition => (
+                    <button
+                      key={tradition}
+                      onClick={() => handleArrayChange('traditions', tradition)}
+                      className={`px-3 py-1 rounded-full text-sm transition-all ${
+                        editData.traditions.includes(tradition)
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-white/10 text-white/80 hover:bg-white/20'
+                      }`}
+                    >
+                      {tradition}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {profile.traditions.map((tradition, index) => (
+                    <span key={index} className="px-3 py-1 bg-green-500/20 text-green-200 rounded-full text-sm">
+                      {tradition}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
-
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20">
           <h2 className="text-lg md:text-xl font-bold text-white mb-4">💫 Interests & Values</h2>
-          
           <div className="space-y-4">
             <div>
               <h3 className="text-white/80 font-medium mb-2">Food Preferences</h3>
-              <div className="flex flex-wrap gap-2">
-                {profile.foodPreferences.map((food, index) => (
-                  <span key={index} className="px-3 py-1 bg-orange-500/20 text-orange-200 rounded-full text-sm">
-                    {food}
-                  </span>
-                ))}
-              </div>
+              {isEditing ? (
+                <div className="flex flex-wrap gap-2">
+                  {CULTURAL_OPTIONS.foodPreferences.map(food => (
+                    <button
+                      key={food}
+                      onClick={() => handleArrayChange('foodPreferences', food)}
+                      className={`px-3 py-1 rounded-full text-sm transition-all ${
+                        editData.foodPreferences.includes(food)
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-white/10 text-white/80 hover:bg-white/20'
+                      }`}
+                    >
+                      {food}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {profile.foodPreferences.map((food, index) => (
+                    <span key={index} className="px-3 py-1 bg-orange-500/20 text-orange-200 rounded-full text-sm">
+                      {food}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-
             <div>
               <h3 className="text-white/80 font-medium mb-2">Music Genres</h3>
-              <div className="flex flex-wrap gap-2">
-                {profile.musicGenres.map((genre, index) => (
-                  <span key={index} className="px-3 py-1 bg-pink-500/20 text-pink-200 rounded-full text-sm">
-                    {genre}
-                  </span>
-                ))}
-              </div>
+              {isEditing ? (
+                <div className="flex flex-wrap gap-2">
+                  {CULTURAL_OPTIONS.musicGenres.map(genre => (
+                    <button
+                      key={genre}
+                      onClick={() => handleArrayChange('musicGenres', genre)}
+                      className={`px-3 py-1 rounded-full text-sm transition-all ${
+                        editData.musicGenres.includes(genre)
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-white/10 text-white/80 hover:bg-white/20'
+                      }`}
+                    >
+                      {genre}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {profile.musicGenres.map((genre, index) => (
+                    <span key={index} className="px-3 py-1 bg-pink-500/20 text-pink-200 rounded-full text-sm">
+                      {genre}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
-
             <div>
               <h3 className="text-white/80 font-medium mb-2">Core Values</h3>
-              <div className="flex flex-wrap gap-2">
-                {profile.values.map((value, index) => (
-                  <span key={index} className="px-3 py-1 bg-cyan-500/20 text-cyan-200 rounded-full text-sm">
-                    {value}
-                  </span>
-                ))}
-              </div>
+              {isEditing ? (
+                <div className="flex flex-wrap gap-2">
+                  {CULTURAL_OPTIONS.values.map(value => (
+                    <button
+                      key={value}
+                      onClick={() => handleArrayChange('values', value)}
+                      className={`px-3 py-1 rounded-full text-sm transition-all ${
+                        editData.values.includes(value)
+                          ? 'bg-orange-500 text-white'
+                          : 'bg-white/10 text-white/80 hover:bg-white/20'
+                      }`}
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {profile.values.map((value, index) => (
+                    <span key={index} className="px-3 py-1 bg-cyan-500/20 text-cyan-200 rounded-full text-sm">
+                      {value}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
-
       {/* Life Goals */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20">
         <h2 className="text-lg md:text-xl font-bold text-white mb-4">🎯 Life Goals & Travel</h2>
-        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           <div>
             <h3 className="text-white/80 font-medium mb-2">Life Goals</h3>
-            <div className="flex flex-wrap gap-2">
-              {profile.lifeGoals.map((goal, index) => (
-                <span key={index} className="px-3 py-1 bg-yellow-500/20 text-yellow-200 rounded-full text-sm">
-                  {goal}
-                </span>
-              ))}
-            </div>
+            {isEditing ? (
+              <div className="flex flex-wrap gap-2">
+                {CULTURAL_OPTIONS.lifeGoals.map(goal => (
+                  <button
+                    key={goal}
+                    onClick={() => handleArrayChange('lifeGoals', goal)}
+                    className={`px-3 py-1 rounded-full text-sm transition-all ${
+                      editData.lifeGoals.includes(goal)
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-white/10 text-white/80 hover:bg-white/20'
+                    }`}
+                  >
+                    {goal}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {profile.lifeGoals.map((goal, index) => (
+                  <span key={index} className="px-3 py-1 bg-yellow-500/20 text-yellow-200 rounded-full text-sm">
+                    {goal}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-
           <div>
             <h3 className="text-white/80 font-medium mb-2">Travel Interests</h3>
-            <div className="flex flex-wrap gap-2">
-              {profile.travelInterests.map((interest, index) => (
-                <span key={index} className="px-3 py-1 bg-indigo-500/20 text-indigo-200 rounded-full text-sm">
-                  {interest}
-                </span>
-              ))}
-            </div>
+            {isEditing ? (
+              <div className="flex flex-wrap gap-2">
+                {CULTURAL_OPTIONS.travelInterests.map(interest => (
+                  <button
+                    key={interest}
+                    onClick={() => handleArrayChange('travelInterests', interest)}
+                    className={`px-3 py-1 rounded-full text-sm transition-all ${
+                      editData.travelInterests.includes(interest)
+                        ? 'bg-orange-500 text-white'
+                        : 'bg-white/10 text-white/80 hover:bg-white/20'
+                    }`}
+                  >
+                    {interest}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {profile.travelInterests.map((interest, index) => (
+                  <span key={index} className="px-3 py-1 bg-indigo-500/20 text-indigo-200 rounded-full text-sm">
+                    {interest}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -3,11 +3,11 @@ import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
 
-const CULTURAL_OPTIONS = {
+export const CULTURAL_OPTIONS = {
   languages: ["English", "Spanish", "French", "German", "Italian", "Portuguese", "Arabic", "Chinese", "Japanese", "Korean", "Hindi", "Russian", "Other"],
-  culturalBackground: ["African", "Asian", "European", "Latin American", "Middle Eastern", "Native American", "Pacific Islander", "Caribbean", "Mixed Heritage"],
+  culturalBackground: ["African", "Asian", "European", "Latin American", "Middle Eastern", "Native American", "Pacific Islander", "Caribbean", "American", "Mixed Heritage"],
   traditions: ["Religious ceremonies", "Family gatherings", "Cultural festivals", "Food traditions", "Music and dance", "Storytelling", "Art and crafts"],
-  foodPreferences: ["Mediterranean", "Asian", "Latin American", "African", "Middle Eastern", "European", "Fusion", "Vegetarian", "Vegan"],
+  foodPreferences: ["Mediterranean", "Asian", "Latin American", "African", "Middle Eastern", "European", "American", "Fusion", "Vegetarian", "Vegan"],
   musicGenres: ["Pop", "Rock", "Hip Hop", "R&B", "Jazz", "Classical", "Folk", "Electronic", "Reggae", "Country", "World Music"],
   travelInterests: ["Cultural immersion", "Food tours", "Historical sites", "Music festivals", "Art galleries", "Nature exploration", "Adventure travel"],
   lifeGoals: ["Career advancement", "Family building", "Travel the world", "Learn new languages", "Start a business", "Give back to community", "Personal growth"],

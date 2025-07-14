@@ -1,7 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 
 export const sendFriendRequest = mutation({
   args: {
@@ -18,7 +18,7 @@ export const sendFriendRequest = mutation({
     // Check if request already exists
     const existingRequest = await ctx.db
       .query("friendRequests")
-      .withIndex("by_from", (q) => q.eq("fromUserId", userId))
+      .withIndex("by_from_user", (q) => q.eq("fromUserId", userId))
       .filter((q) => q.eq(q.field("toUserId"), args.toUserId))
       .unique();
 
@@ -78,6 +78,39 @@ export const sendFriendRequest = mutation({
   },
 });
 
+export const acceptFriendRequest = mutation({
+  args: { requestId: v.id("friendRequests") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    const request = await ctx.db.get(args.requestId);
+    if (!request || request.toUserId !== userId || request.status !== "pending") {
+      throw new Error("Invalid request");
+    }
+    await ctx.db.patch(args.requestId, { status: "accepted" });
+    await ctx.db.insert("friends", {
+      user1Id: request.fromUserId,
+      user2Id: request.toUserId,
+      timestamp: Date.now(),
+    });
+    return "accepted";
+  },
+});
+
+export const rejectFriendRequest = mutation({
+  args: { requestId: v.id("friendRequests") },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    const request = await ctx.db.get(args.requestId);
+    if (!request || request.toUserId !== userId || request.status !== "pending") {
+      throw new Error("Invalid request");
+    }
+    await ctx.db.patch(args.requestId, { status: "rejected" });
+    return "rejected";
+  },
+});
+
 export const respondToFriendRequest = mutation({
   args: {
     requestId: v.id("friendRequests"),
@@ -114,8 +147,7 @@ export const respondToFriendRequest = mutation({
       // Create a conversation for the new friends
       await ctx.db.insert("conversations", {
         participants: [request.fromUserId, request.toUserId],
-        type: "direct",
-        isActive: true,
+        unreadCount: { user1: 0, user2: 0 },
       });
     }
 
@@ -131,7 +163,7 @@ export const getFriendRequests = query({
 
     const requests = await ctx.db
       .query("friendRequests")
-      .withIndex("by_to", (q) => q.eq("toUserId", userId))
+      .withIndex("by_to_user", (q) => q.eq("toUserId", userId))
       .filter((q) => q.eq(q.field("status"), "pending"))
       .collect();
 
@@ -143,13 +175,13 @@ export const getFriendRequests = query({
           .withIndex("by_user", (q) => q.eq("userId", request.fromUserId))
           .unique();
 
-        const profileImageUrl = senderProfile?.profileImage 
-          ? await ctx.storage.getUrl(senderProfile.profileImage)
+        const profileImageUrl = senderProfile?.profileImageId 
+          ? await ctx.storage.getUrl(senderProfile.profileImageId)
           : null;
 
         return {
           ...request,
-          senderProfile: senderProfile ? {
+          fromUser: senderProfile ? {
             ...senderProfile,
             profileImageUrl,
           } : null,
@@ -192,8 +224,8 @@ export const getFriends = query({
 
         if (!profile) return null;
 
-        const profileImageUrl = profile.profileImage 
-          ? await ctx.storage.getUrl(profile.profileImage)
+        const profileImageUrl = profile.profileImageId 
+          ? await ctx.storage.getUrl(profile.profileImageId)
           : null;
 
         return {

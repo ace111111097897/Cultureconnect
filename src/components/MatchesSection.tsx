@@ -1,7 +1,8 @@
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { useState } from "react";
 
-export function MatchesSection() {
+export function MatchesSection({ onMessage }: { onMessage?: (conversationId: string) => void } = {}) {
   const matches = useQuery(api.matches.getUserMatches);
 
   if (!matches) {
@@ -89,8 +90,24 @@ export function MatchesSection() {
 
               {/* Match Date */}
               <p className="text-white/50 text-xs">
-                Matched {new Date(match!.timestamp).toLocaleDateString()}
+                Matched {new Date(match!._creationTime).toLocaleDateString()}
               </p>
+              <button
+                className="w-full mt-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 transition-all"
+                onClick={async () => {
+                  // Find the conversation with this user
+                  const conversations = await window.getUserConversations?.();
+                  const conversation = conversations?.find((c: any) => c.otherProfile?.userId === match.otherProfile.userId);
+                  if (conversation && onMessage) {
+                    onMessage(conversation._id);
+                  } else {
+                    // fallback: switch to conversations tab
+                    window.switchToConversationsTab?.();
+                  }
+                }}
+              >
+                Message
+              </button>
             </div>
           </div>
         ))}

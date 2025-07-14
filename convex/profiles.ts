@@ -16,76 +16,16 @@ export const getCurrentUserProfile = query({
 
     if (!profile) return null;
 
-    const profileImageUrl = profile.profileImage 
-      ? await ctx.storage.getUrl(profile.profileImage)
-      : null;
+    // Get profile image URL if exists
+    let profileImageUrl = null;
+    if (profile.profileImageId) {
+      profileImageUrl = await ctx.storage.getUrl(profile.profileImageId);
+    }
 
     return {
       ...profile,
       profileImageUrl,
     };
-  },
-});
-
-export const getDiscoverProfiles = query({
-  args: {
-    limit: v.optional(v.number()),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return [];
-
-    const userProfile = await ctx.db
-      .query("profiles")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .unique();
-
-    if (!userProfile) return [];
-
-    const profiles = await ctx.db
-      .query("profiles")
-      .withIndex("by_active", (q) => q.eq("isActive", true))
-      .filter((q) => q.neq(q.field("userId"), userId))
-      .take(args.limit || 10);
-
-    const profilesWithImages = await Promise.all(
-      profiles.map(async (profile) => {
-        const profileImageUrl = profile.profileImage 
-          ? await ctx.storage.getUrl(profile.profileImage)
-          : null;
-
-        // Calculate compatibility score based on shared interests
-        const sharedCulture = profile.culturalBackground.filter(bg => 
-          userProfile.culturalBackground.includes(bg)
-        ).length;
-        const sharedValues = profile.values.filter(value => 
-          userProfile.values.includes(value)
-        ).length;
-        const sharedInterests = [
-          ...profile.foodPreferences.filter(food => userProfile.foodPreferences.includes(food)),
-          ...profile.musicGenres.filter(music => userProfile.musicGenres.includes(music)),
-          ...profile.travelInterests.filter(travel => userProfile.travelInterests.includes(travel)),
-        ].length;
-
-        const totalPossibleMatches = Math.max(
-          userProfile.culturalBackground.length + userProfile.values.length + 
-          userProfile.foodPreferences.length + userProfile.musicGenres.length + 
-          userProfile.travelInterests.length, 1
-        );
-
-        const compatibilityScore = Math.round(
-          ((sharedCulture * 2 + sharedValues * 2 + sharedInterests) / totalPossibleMatches) * 100
-        );
-
-        return {
-          ...profile,
-          profileImageUrl,
-          compatibilityScore: Math.min(compatibilityScore, 95), // Cap at 95%
-        };
-      })
-    );
-
-    return profilesWithImages.sort((a, b) => b.compatibilityScore - a.compatibilityScore);
   },
 });
 
@@ -95,6 +35,7 @@ export const upsertProfile = mutation({
     age: v.number(),
     bio: v.string(),
     location: v.string(),
+    email: v.optional(v.string()),
     languages: v.array(v.string()),
     culturalBackground: v.array(v.string()),
     traditions: v.array(v.string()),
@@ -107,7 +48,6 @@ export const upsertProfile = mutation({
     ageRangeMin: v.number(),
     ageRangeMax: v.number(),
     maxDistance: v.number(),
-    email: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -120,46 +60,33 @@ export const upsertProfile = mutation({
 
     const profileData = {
       userId,
-      displayName: args.displayName,
-      age: args.age,
-      bio: args.bio,
-      location: args.location,
-      languages: args.languages,
-      culturalBackground: args.culturalBackground,
-      traditions: args.traditions,
-      foodPreferences: args.foodPreferences,
-      musicGenres: args.musicGenres,
-      travelInterests: args.travelInterests,
-      lifeGoals: args.lifeGoals,
-      values: args.values,
-      relationshipGoals: args.relationshipGoals,
-      ageRangeMin: args.ageRangeMin,
-      ageRangeMax: args.ageRangeMax,
-      maxDistance: args.maxDistance,
-      isActive: true,
-      lastActive: Date.now(),
+      ...args,
     };
 
     let profileId;
-    let isNewProfile = false;
-
     if (existingProfile) {
       await ctx.db.patch(existingProfile._id, profileData);
       profileId = existingProfile._id;
     } else {
       profileId = await ctx.db.insert("profiles", profileData);
-      isNewProfile = true;
-    }
-
-    // Send welcome email for new profiles
-    if (isNewProfile && args.email) {
-      await ctx.scheduler.runAfter(0, internal.emailActions.sendWelcomeEmail, {
-        email: args.email,
-        displayName: args.displayName,
-      });
+      
+      // Send welcome email for new profiles
+      if (args.email) {
+        await ctx.scheduler.runAfter(0, internal.emailActions.sendWelcomeEmail, {
+          email: args.email,
+          displayName: args.displayName,
+        });
+      }
     }
 
     return profileId;
+  },
+});
+
+export const generateUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.storage.generateUploadUrl();
   },
 });
 
@@ -179,19 +106,121 @@ export const updateProfileImage = mutation({
     if (!profile) throw new Error("Profile not found");
 
     await ctx.db.patch(profile._id, {
-      profileImage: args.storageId,
+      profileImageId: args.storageId,
     });
 
-    return args.storageId;
+    return { success: true };
   },
 });
 
-export const generateUploadUrl = mutation({
-  args: {},
-  handler: async (ctx) => {
+export const getDiscoverProfiles = query({
+  args: {
+    limit: v.number(),
+  },
+  handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    if (!userId) return [];
 
-    return await ctx.storage.generateUploadUrl();
+    const currentUserProfile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .unique();
+
+    if (!currentUserProfile) return [];
+
+    // Get all profiles except current user
+    const allProfiles = await ctx.db
+      .query("profiles")
+      .filter((q) => q.neq(q.field("userId"), userId))
+      .take(args.limit * 2); // Get more to filter and calculate compatibility
+
+    // Calculate compatibility scores and add profile images
+    const profilesWithCompatibility = await Promise.all(
+      allProfiles.map(async (profile) => {
+        const compatibilityScore = calculateCompatibility(currentUserProfile, profile);
+        
+        let profileImageUrl = null;
+        if (profile.profileImageId) {
+          profileImageUrl = await ctx.storage.getUrl(profile.profileImageId);
+        }
+
+        return {
+          ...profile,
+          compatibilityScore,
+          profileImageUrl,
+        };
+      })
+    );
+
+    // Sort by compatibility score and return top matches
+    return profilesWithCompatibility
+      .sort((a, b) => b.compatibilityScore - a.compatibilityScore)
+      .slice(0, args.limit);
   },
 });
+
+export const getUserProfileById = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .unique();
+    if (!profile) return null;
+    let profileImageUrl = null;
+    if (profile.profileImageId) {
+      profileImageUrl = await ctx.storage.getUrl(profile.profileImageId);
+    }
+    return { ...profile, profileImageUrl };
+  },
+});
+
+function calculateCompatibility(user1: any, user2: any): number {
+  let score = 0;
+  let totalFactors = 0;
+
+  // Age compatibility (within 10 years = 20 points)
+  const ageDiff = Math.abs(user1.age - user2.age);
+  if (ageDiff <= 5) score += 20;
+  else if (ageDiff <= 10) score += 15;
+  else if (ageDiff <= 15) score += 10;
+  totalFactors += 20;
+
+  // Cultural background overlap
+  const culturalOverlap = user1.culturalBackground.filter((bg: string) =>
+    user2.culturalBackground.includes(bg)
+  ).length;
+  score += Math.min(culturalOverlap * 10, 20);
+  totalFactors += 20;
+
+  // Language overlap
+  const languageOverlap = user1.languages.filter((lang: string) =>
+    user2.languages.includes(lang)
+  ).length;
+  score += Math.min(languageOverlap * 8, 16);
+  totalFactors += 16;
+
+  // Values overlap
+  const valuesOverlap = user1.values.filter((value: string) =>
+    user2.values.includes(value)
+  ).length;
+  score += Math.min(valuesOverlap * 6, 18);
+  totalFactors += 18;
+
+  // Food preferences overlap
+  const foodOverlap = user1.foodPreferences.filter((food: string) =>
+    user2.foodPreferences.includes(food)
+  ).length;
+  score += Math.min(foodOverlap * 4, 12);
+  totalFactors += 12;
+
+  // Life goals overlap
+  const goalsOverlap = user1.lifeGoals.filter((goal: string) =>
+    user2.lifeGoals.includes(goal)
+  ).length;
+  score += Math.min(goalsOverlap * 3, 12);
+  totalFactors += 12;
+
+  // Normalize to percentage
+  return Math.round((score / totalFactors) * 100);
+}

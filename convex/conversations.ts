@@ -10,7 +10,6 @@ export const getUserConversations = query({
 
     const allConversations = await ctx.db
       .query("conversations")
-      .filter((q) => q.eq(q.field("isActive"), true))
       .collect();
 
     const conversations = allConversations.filter(conv => 
@@ -22,14 +21,14 @@ export const getUserConversations = query({
       conversations.map(async (conversation) => {
         const otherParticipants = conversation.participants.filter(id => id !== userId);
         
-        if (conversation.type === "direct" && otherParticipants.length === 1) {
+        if (otherParticipants.length === 1) {
           const otherProfile = await ctx.db
             .query("profiles")
             .withIndex("by_user", (q) => q.eq("userId", otherParticipants[0]))
             .unique();
 
-          const profileImageUrl = otherProfile?.profileImage 
-            ? await ctx.storage.getUrl(otherProfile.profileImage)
+          const profileImageUrl = otherProfile?.profileImageId 
+            ? await ctx.storage.getUrl(otherProfile.profileImageId)
             : null;
 
           return {

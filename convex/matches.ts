@@ -50,16 +50,13 @@ export const createMatch = mutation({
             user2Id: args.targetUserId,
             compatibilityScore,
             sharedInterests,
-            matchType: "cultural",
             status: "mutual",
-            timestamp: Date.now(),
           });
 
           // Create conversation for the match
           await ctx.db.insert("conversations", {
             participants: [userId, args.targetUserId],
-            type: "direct",
-            isActive: true,
+            unreadCount: { user1: 0, user2: 0 },
           });
 
           return { matched: true, matchId };
@@ -99,8 +96,8 @@ export const getUserMatches = query({
 
         if (!otherProfile) return null;
 
-        const profileImageUrl = otherProfile.profileImage 
-          ? await ctx.storage.getUrl(otherProfile.profileImage)
+        const profileImageUrl = otherProfile.profileImageId 
+          ? await ctx.storage.getUrl(otherProfile.profileImageId)
           : null;
 
         return {

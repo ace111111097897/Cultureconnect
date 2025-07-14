@@ -8,6 +8,7 @@ export function DiscoverSection() {
   
   const profiles = useQuery(api.profiles.getDiscoverProfiles, { limit: 10 });
   const sendFriendRequest = useMutation(api.friends.sendFriendRequest);
+  const createMatch = useMutation(api.matches.createMatch);
 
   const currentProfile = profiles?.[currentProfileIndex];
 
@@ -32,6 +33,31 @@ export function DiscoverSection() {
       handleNext();
     } catch (error: any) {
       toast.error(error.message || "Failed to send friend request");
+    }
+  };
+
+  const handlePass = async () => {
+    if (!currentProfile) return;
+    try {
+      await createMatch({ targetUserId: currentProfile.userId, interactionType: "pass" });
+      handleNext();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to pass on profile");
+    }
+  };
+
+  const handleMatch = async () => {
+    if (!currentProfile) return;
+    try {
+      const result = await createMatch({ targetUserId: currentProfile.userId, interactionType: "like" });
+      if (result.matched) {
+        toast.success("It's a match! You can now message each other.");
+      } else {
+        toast.success("Liked! If they like you back, you'll match.");
+      }
+      handleNext();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to match");
     }
   };
 
@@ -178,7 +204,7 @@ export function DiscoverSection() {
           {/* Action Buttons */}
           <div className="flex space-x-2 md:space-x-4">
             <button
-              onClick={handleNext}
+              onClick={handlePass}
               className="flex-1 px-4 md:px-6 py-3 md:py-4 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all font-semibold text-sm md:text-base"
             >
               Pass
@@ -188,6 +214,12 @@ export function DiscoverSection() {
               className="flex-1 px-4 md:px-6 py-3 md:py-4 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all text-sm md:text-base"
             >
               Add Friend
+            </button>
+            <button
+              onClick={handleMatch}
+              className="flex-1 px-4 md:px-6 py-3 md:py-4 rounded-xl bg-gradient-to-r from-green-500 to-blue-500 text-white font-semibold hover:from-green-600 hover:to-blue-600 transition-all text-sm md:text-base"
+            >
+              Match
             </button>
           </div>
         </div>

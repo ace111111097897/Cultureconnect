@@ -11,7 +11,7 @@ export const getKandiHistory = query({
     if (!userId) return [];
 
     return await ctx.db
-      .query("kandiMessages")
+      .query("kandiConversations")
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .order("desc")
       .take(args.limit || 20);
@@ -25,7 +25,7 @@ export const saveKandiConversation = internalMutation({
     kandiResponse: v.string(),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("kandiMessages", {
+    return await ctx.db.insert("kandiConversations", {
       userId: args.userId,
       userMessage: args.userMessage,
       kandiResponse: args.kandiResponse,

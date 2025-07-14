@@ -8,6 +8,7 @@ export const createCulturalStory = mutation({
     content: v.string(),
     category: v.string(),
     isPublic: v.boolean(),
+    images: v.optional(v.array(v.id("_storage"))),
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -21,6 +22,8 @@ export const createCulturalStory = mutation({
       isPublic: args.isPublic,
       likes: 0,
       timestamp: Date.now(),
+      tags: [],
+      images: args.images || [],
     });
   },
 });
