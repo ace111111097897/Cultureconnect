@@ -270,7 +270,7 @@ export function StoriesSection() {
         </div>
       ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {stories.map((story) => (
+          {stories?.map((story) => (
             <div
               key={story._id}
               className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all"

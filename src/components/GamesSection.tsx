@@ -31,6 +31,8 @@ export function GamesSection() {
   const startUnoLobbyGame = useMutation(api.unoLobbies.startUnoLobbyGame);
   const [selectedLobby, setSelectedLobby] = useState<string | null>(null);
   const [myLobby, setMyLobby] = useState<any>(null);
+  const friends = useQuery(api.friends.getFriends) || [];
+  const createUnoGameWithFriend = useMutation(api.games.createUnoGameWithFriend);
 
   // Helper: Find the lobby the user is in
   useEffect(() => {
@@ -327,34 +329,26 @@ export function GamesSection() {
             <h3 className="text-xl font-bold text-white">Cultural UNO</h3>
             <p className="text-white/70">Play UNO with a cultural twist! Join or create a lobby to play with others.</p>
             {!userProfile ? (
-              <p className="text-white/60">Sign in to play UNO with others!</p>
-            ) : myLobby ? (
-              <div>
-                <h4 className="text-white font-semibold mb-2">Lobby: {myLobby._id}</h4>
-                <p className="text-white/70 mb-2">Players: {myLobby.playerIds.length}</p>
-                <div className="flex gap-2 mb-2">
-                  {myLobby.playerIds.map((id: string, idx: number) => (
-                    <span key={id} className="px-2 py-1 bg-white/20 rounded text-white text-xs">Player {idx + 1}{id === myLobby.creatorId ? ' (Host)' : ''}</span>
-                  ))}
-                </div>
-                {myLobby.status === "open" && myLobby.creatorId === userProfile.userId && myLobby.playerIds.length >= 2 && (
-                  <button onClick={async () => { await startUnoLobbyGame({ lobbyId: myLobby._id }); }} className="px-4 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 transition-all">Start Game</button>
-                )}
-                <button onClick={async () => { await leaveUnoLobby({ lobbyId: myLobby._id }); }} className="ml-2 px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-all">Leave Lobby</button>
-                {myLobby.status === "started" && (
-                  <MultiplayerUnoGame unoGame={unoGame} userProfile={userProfile} />
-                )}
-              </div>
+              <p className="text-white/60">Sign in to play UNO with friends!</p>
+            ) : unoGame ? (
+              <MultiplayerUnoGame unoGame={unoGame} userProfile={userProfile} />
             ) : (
               <div>
-                <button onClick={async () => { await createUnoLobby(); }} className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition-all mb-4">Create Lobby</button>
-                <h4 className="text-white font-semibold mb-2">Open Lobbies</h4>
-                {unoLobbies.length === 0 && <p className="text-white/60">No open lobbies. Create one above!</p>}
+                <h4 className="text-white font-semibold mb-2">Invite a Friend to Play UNO</h4>
+                {friends.length === 0 && <p className="text-white/60">You have no friends to invite.</p>}
                 <ul className="space-y-2">
-                  {unoLobbies.map(lobby => (
-                    <li key={lobby._id} className="flex items-center justify-between bg-white/10 rounded p-2">
-                      <span className="text-white">Lobby {lobby._id} ({lobby.playerIds.length} players)</span>
-                      <button onClick={async () => { await joinUnoLobby({ lobbyId: lobby._id }); }} className="px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600">Join</button>
+                  {friends.map(friend => (
+                    <li key={friend._id} className="flex items-center justify-between bg-white/10 rounded p-2">
+                      <span className="text-white">{friend.displayName}</span>
+                      <button onClick={async () => {
+                        const res = await createUnoGameWithFriend({ friendUserId: friend.userId });
+                        if (res?.alreadyExists) {
+                          toast("Game already exists! Redirecting...");
+                        } else {
+                          toast.success("Game created! Redirecting...");
+                        }
+                        // Optionally, trigger a refetch or UI update
+                      }} className="px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600">Invite</button>
                     </li>
                   ))}
                 </ul>
