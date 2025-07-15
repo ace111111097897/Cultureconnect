@@ -9,16 +9,14 @@ export function DiscoverSection() {
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
   const [showMessagePrompt, setShowMessagePrompt] = useState(false);
   const [messagePrompt, setMessagePrompt] = useState("");
-  const [discoveryMode, setDiscoveryMode] = useState<"regular" | "friendsOfFriends">("regular");
-  
   const profiles = useQuery(api.profiles.getDiscoverProfiles, { limit: 10 });
-  const friendsOfFriends = useQuery(api.matches.getFriendsOfFriends, { limit: 10 });
+
   const sendFriendRequest = useMutation(api.friends.sendFriendRequest);
   const createMatch = useMutation(api.matches.createMatch);
   const sendMessage = useMutation(api.conversations.sendMessage);
   const getUserConversations = useQuery(api.conversations.getUserConversations);
 
-  const currentProfiles = discoveryMode === "regular" ? profiles : friendsOfFriends;
+  const currentProfiles = profiles;
   const currentProfile = currentProfiles?.[currentProfileIndex];
 
   const handleNext = () => {
@@ -141,39 +139,7 @@ export function DiscoverSection() {
 
   return (
     <div className="space-y-6">
-      {/* Discovery Mode Toggle */}
-      <div className="flex justify-center">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/20">
-          <div className="flex space-x-2">
-            <button
-              onClick={() => {
-                setDiscoveryMode("regular");
-                setCurrentProfileIndex(0);
-              }}
-              className={`px-4 py-2 rounded-xl font-medium transition-all ${
-                discoveryMode === "regular"
-                  ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white'
-                  : 'text-white/70 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              Discover
-            </button>
-            <button
-              onClick={() => {
-                setDiscoveryMode("friendsOfFriends");
-                setCurrentProfileIndex(0);
-              }}
-              className={`px-4 py-2 rounded-xl font-medium transition-all ${
-                discoveryMode === "friendsOfFriends"
-                  ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white'
-                  : 'text-white/70 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              Friends of Friends
-            </button>
-          </div>
-        </div>
-      </div>
+
 
       {/* Profile Card */}
       <div className="max-w-md mx-auto">
@@ -206,14 +172,7 @@ export function DiscoverSection() {
               </span>
             </div>
 
-            {/* Friend of Friend Badge */}
-            {currentProfile?.isFriendOfFriend && (
-              <div className="absolute top-3 left-3 bg-green-500/80 backdrop-blur-sm rounded-full px-3 py-1">
-                <span className="text-white text-sm font-semibold">
-                  👥 Friend of Friend
-                </span>
-              </div>
-            )}
+
           </div>
 
           {/* Profile Info */}
