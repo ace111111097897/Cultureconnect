@@ -8,7 +8,6 @@ import { FriendsSection } from "./FriendsSection";
 import { KandiChat } from "./KandiChat";
 import { GamesSection } from "./GamesSection";
 import { CultureFeed } from "./CultureFeed";
-import { FeedbackPage } from "./FeedbackPage";
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("discover");
@@ -23,7 +22,6 @@ export function Dashboard() {
     { id: "kandi", label: "Kandi", icon: "🐕" },
     { id: "stories", label: "Stories", icon: "📖" },
     { id: "community", label: "Community", icon: "🌐" },
-    { id: "feedback", label: "Feedback", icon: "💡" },
     { id: "profile", label: "Profile", icon: "👤" },
   ];
 
@@ -45,8 +43,6 @@ export function Dashboard() {
         return <KandiChat />;
       case "stories":
         return <StoriesSection />;
-      case "feedback":
-        return <FeedbackPage />;
       case "profile":
         return <ProfilePage />;
       default:
@@ -55,7 +51,7 @@ export function Dashboard() {
   };
 
   return (
-    <div className="fixed inset-0 w-full h-full flex flex-col bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800 backdrop-blur-2xl">
+    <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800 backdrop-blur-2xl">
       {/* Top Nav Bar */}
       <header className="hidden md:flex fixed top-0 left-0 right-0 h-16 bg-white/10 backdrop-blur-md items-center px-4 z-40 shadow-lg">
         <div className="text-2xl font-bold text-white tracking-wide mr-8 cursor-pointer" onClick={() => setActiveTab('profile')}>
@@ -92,7 +88,7 @@ export function Dashboard() {
           </button>
         ))}
       </div>
-      <div className="flex flex-1 pt-16 md:pt-16" style={{ paddingTop: '4rem' }}>
+      <div className="flex flex-1 pt-16 md:pt-16 min-h-[calc(100vh-4rem)]" style={{ paddingTop: '4rem' }}>
         {/* Left Sidebar */}
         <aside className="hidden md:flex flex-col w-56 bg-white/10 backdrop-blur-md border-r border-white/10 py-6 px-2 space-y-2 min-h-screen">
           {tabs.map((tab) => (
@@ -111,7 +107,7 @@ export function Dashboard() {
           ))}
         </aside>
         {/* Main Content Area */}
-        <main className="flex-1 p-2 sm:p-4 md:p-8 max-w-4xl mx-auto w-full">
+        <main className="flex-1 p-2 sm:p-4 md:p-8 max-w-4xl mx-auto w-full min-h-[calc(100vh-4rem)]">
           {renderContent()}
         </main>
       </div>
