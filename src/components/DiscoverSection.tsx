@@ -97,11 +97,11 @@ export function DiscoverSection() {
           ))}
         </div>
       )}
-      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 overflow-y-auto max-h-[80vh] p-2 rounded-2xl">
+      <div className="w-full max-w-5xl mx-auto flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 p-2 rounded-2xl min-h-[calc(100vh-5rem)]">
         {visibleProfiles.map(profile => (
           <div
             key={profile.userId}
-            className="relative bg-gradient-to-br from-white/10 via-blue-900/30 to-purple-800/30 border-4 border-white/30 rounded-3xl p-8 shadow-2xl flex flex-col items-center min-h-[280px] sm:min-h-[340px] mb-6 sm:mb-0 cursor-pointer hover:scale-105 transition-transform max-w-full backdrop-blur-xl"
+            className="relative bg-gradient-to-br from-white/10 via-blue-900/30 to-purple-800/30 border-4 border-white/30 rounded-3xl p-8 shadow-2xl flex flex-col items-center justify-between min-h-[340px] h-full mb-6 sm:mb-0 cursor-pointer hover:scale-105 transition-transform max-w-full backdrop-blur-xl"
             tabIndex={0}
             role="region"
             aria-label={`Profile for ${profile.displayName}`}
