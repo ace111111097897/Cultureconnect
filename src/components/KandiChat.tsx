@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { useQuery, useAction } from "convex/react";
+import { useAction } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
 
 export function KandiChat() {
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
-  const chatHistory = useQuery(api.kandiQueries.getKandiHistory, { limit: 10 });
+  const [kandiResponse, setKandiResponse] = useState<string | null>(null);
+  const [lastUserMessage, setLastUserMessage] = useState<string | null>(null);
+
   const chatWithKandi = useAction(api.kandi.chatWithKandi);
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -17,9 +18,11 @@ export function KandiChat() {
     const userMessage = message.trim();
     setMessage("");
     setIsLoading(true);
+    setLastUserMessage(userMessage);
 
     try {
-      await chatWithKandi({ message: userMessage });
+      const response = await chatWithKandi({ message: userMessage });
+      setKandiResponse(response);
     } catch (error) {
       toast.error("Failed to send message to Kandi");
       console.error(error);
@@ -45,7 +48,17 @@ export function KandiChat() {
       <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col h-[500px] md:h-[600px]">
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-3 md:p-6 space-y-4">
-          {/* Welcome message */}
+          {/* Show user message and Kandi response, or greeting if no response yet */}
+          {lastUserMessage && (
+            <div className="flex justify-end">
+              <div className="max-w-xs lg:max-w-md">
+                <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-4 py-3 rounded-2xl rounded-br-md">
+                  <p>{lastUserMessage}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="flex justify-start">
             <div className="max-w-xs lg:max-w-md">
               <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 text-white px-4 py-3 rounded-2xl rounded-bl-md">
@@ -53,43 +66,14 @@ export function KandiChat() {
                   <span className="text-lg">🐕</span>
                   <span className="font-medium text-sm">Kandi</span>
                 </div>
-                <p>Woof! Hi there! I'm Kandi, your friendly cultural dating assistant. I'm here to help you connect with amazing people through shared traditions and values. What would you like to chat about? 🌟</p>
+                <p>
+                  {kandiResponse
+                    ? kandiResponse
+                    : "Woof! Hi there! I'm Kandi, your friendly cultural dating assistant. I'm here to help you connect with amazing people through shared traditions and values. What would you like to chat about? 🌟"}
+                </p>
               </div>
             </div>
           </div>
-
-          {/* Chat History */}
-          {chatHistory?.slice().reverse().map((chat) => (
-            <div key={chat._id} className="space-y-3">
-              {/* User Message */}
-              <div className="flex justify-end">
-                <div className="max-w-xs lg:max-w-md">
-                  <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-4 py-3 rounded-2xl rounded-br-md">
-                    <p>{chat.userMessage}</p>
-                    <p className="text-xs opacity-70 mt-1">
-                      {new Date(chat.timestamp).toLocaleTimeString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Kandi Response */}
-              <div className="flex justify-start">
-                <div className="max-w-xs lg:max-w-md">
-                  <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 border border-yellow-400/30 text-white px-4 py-3 rounded-2xl rounded-bl-md">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-lg">🐕</span>
-                      <span className="font-medium text-sm">Kandi</span>
-                    </div>
-                    <p>{chat.kandiResponse}</p>
-                    <p className="text-xs opacity-70 mt-1">
-                      {new Date(chat.timestamp).toLocaleTimeString()}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
 
           {/* Loading indicator */}
           {isLoading && (
