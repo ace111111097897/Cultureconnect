@@ -11,29 +11,53 @@ export function GamesSection() {
     maxPlayers: 4,
   });
 
-  // Temporarily disabled while deploying backend functions
-  const unoLobbies = null;
-  const userHistory = null;
+  const unoLobbies = useQuery(api.games.getUnoLobbies);
+  const userHistory = useQuery(api.games.getUserGameHistory);
 
-  const createUnoLobby = null;
-  const joinUnoLobby = null;
-  const leaveUnoLobby = null;
-  const startUnoGame = null;
+  const createUnoLobby = useMutation(api.games.createUnoLobby);
+  const joinUnoLobby = useMutation(api.games.joinUnoLobby);
+  const leaveUnoLobby = useMutation(api.games.leaveUnoLobby);
+  const startUnoGame = useMutation(api.games.startUnoGame);
 
   const handleCreateLobby = async () => {
-    toast.info("Games feature coming soon! Backend deployment in progress.");
+    try {
+      await createUnoLobby(newLobbyData);
+      toast.success("UNO lobby created successfully!");
+      setShowCreateLobby(false);
+      setNewLobbyData({
+        name: "",
+        maxPlayers: 4,
+      });
+    } catch (error) {
+      toast.error("Failed to create UNO lobby");
+    }
   };
 
   const handleJoinLobby = async (lobbyId: string) => {
-    toast.info("Games feature coming soon! Backend deployment in progress.");
+    try {
+      await joinUnoLobby({ lobbyId: lobbyId as any });
+      toast.success("Joined UNO lobby!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to join lobby");
+    }
   };
 
   const handleLeaveLobby = async (lobbyId: string) => {
-    toast.info("Games feature coming soon! Backend deployment in progress.");
+    try {
+      await leaveUnoLobby({ lobbyId: lobbyId as any });
+      toast.success("Left UNO lobby");
+    } catch (error: any) {
+      toast.error("Failed to leave lobby");
+    }
   };
 
   const handleStartGame = async (lobbyId: string) => {
-    toast.info("Games feature coming soon! Backend deployment in progress.");
+    try {
+      await startUnoGame({ lobbyId: lobbyId as any });
+      toast.success("UNO game started!");
+    } catch (error: any) {
+      toast.error("Failed to start game");
+    }
   };
 
   return (
