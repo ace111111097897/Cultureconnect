@@ -1,7 +1,36 @@
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useState } from "react";
-import { ProfileModal } from "./ProfileModal";
+
+// Inline ProfileModal component (restore if needed)
+function ProfileModal({ profile, onClose }: { profile: any; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative mx-2 animate-fadeIn">
+        <button
+          className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl"
+          onClick={onClose}
+          aria-label="Close"
+        >
+          &times;
+        </button>
+        <div className="flex flex-col items-center">
+          <div className="w-28 h-28 rounded-full bg-gray-200 mb-4 overflow-hidden flex items-center justify-center">
+            {profile.profileImageUrl ? (
+              <img src={profile.profileImageUrl} alt={profile.displayName} className="w-full h-full object-cover" />
+            ) : (
+              <span className="material-symbols-outlined text-7xl text-gray-400">person</span>
+            )}
+          </div>
+          <div className="font-bold text-2xl mb-1 text-gray-900">{profile.displayName}</div>
+          <div className="text-gray-700 mb-2 text-center">{profile.bio || "No bio yet."}</div>
+        </div>
+      </div>
+      {/* Click outside to close */}
+      <div className="fixed inset-0 z-40" onClick={onClose} />
+    </div>
+  );
+}
 
 export function DiscoverSection() {
   const profiles = useQuery(api.profiles.getDiscoverProfiles, { limit: 20 });
