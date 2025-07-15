@@ -60,23 +60,41 @@ export function DiscoverSection() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800 flex flex-col items-center justify-center py-4">
-      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 overflow-y-auto max-h-[80vh] p-2 rounded-2xl">
+      <div className="w-full max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 overflow-y-auto max-h-[80vh] p-2 rounded-2xl">
         {profiles.map(profile => (
           <div
             key={profile.userId}
-            className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-lg flex flex-col items-center min-h-[180px] sm:min-h-[220px] mb-4 sm:mb-0 cursor-pointer hover:scale-105 transition-transform"
+            className="bg-white/80 backdrop-blur-md rounded-2xl p-8 shadow-xl flex flex-col items-center min-h-[260px] sm:min-h-[320px] mb-6 sm:mb-0 cursor-pointer hover:scale-105 transition-transform max-w-full"
             onClick={() => setSelectedProfile(profile)}
             tabIndex={0}
             role="button"
             aria-label={`View profile for ${profile.displayName}`}
           >
             {profile.profileImageUrl ? (
-              <img src={profile.profileImageUrl} alt={profile.displayName} className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-white/30 mb-3" />
+              <img src={profile.profileImageUrl} alt={profile.displayName} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-2 border-white/30 mb-4" />
             ) : (
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/10 flex items-center justify-center text-4xl text-white/50 mb-3">👤</div>
+              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-white/10 flex items-center justify-center text-6xl text-white/50 mb-4">👤</div>
             )}
-            <div className="text-base sm:text-lg font-semibold text-gray-900 mb-1">{profile.displayName}</div>
-            <div className="text-gray-600 text-sm mb-2 text-center">{profile.bio || "No bio yet."}</div>
+            <div className="text-lg sm:text-2xl font-bold text-gray-900 mb-1">{profile.displayName}</div>
+            <div className="text-gray-700 text-base mb-2 text-center">{profile.bio || "No bio yet."}</div>
+            {/* Extra info: culture, food, etc. */}
+            <div className="flex flex-wrap justify-center gap-2 mt-2">
+              {profile.culturalBackground && profile.culturalBackground.length > 0 && (
+                <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold">Culture: {profile.culturalBackground.join(", ")}</span>
+              )}
+              {profile.foodPreferences && profile.foodPreferences.length > 0 && (
+                <span className="bg-pink-100 text-pink-800 px-3 py-1 rounded-full text-xs font-semibold">Food: {profile.foodPreferences.join(", ")}</span>
+              )}
+              {profile.languages && profile.languages.length > 0 && (
+                <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">Languages: {profile.languages.join(", ")}</span>
+              )}
+              {profile.musicGenres && profile.musicGenres.length > 0 && (
+                <span className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs font-semibold">Music: {profile.musicGenres.join(", ")}</span>
+              )}
+              {profile.travelInterests && profile.travelInterests.length > 0 && (
+                <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">Travel: {profile.travelInterests.join(", ")}</span>
+              )}
+            </div>
           </div>
         ))}
       </div>

@@ -70,7 +70,9 @@ export function Dashboard() {
         </div>
         <div className="flex items-center space-x-4 ml-8">
           <button className="text-white/80 hover:text-white text-xl">🔔</button>
-          <button className="text-white/80 hover:text-white text-xl">👤</button>
+          <button className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition" onClick={() => setActiveTab('profile')} title="Go to Profile">
+            <span className="text-2xl">👤</span>
+          </button>
         </div>
       </header>
       {/* Mobile Top Toolbar and Sidebar */}
