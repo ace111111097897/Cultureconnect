@@ -97,7 +97,7 @@ export function DiscoverSection() {
           ))}
         </div>
       )}
-      <div className="w-full max-w-5xl mx-auto flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 p-2 rounded-2xl min-h-[calc(100vh-5rem)]">
+      <div className="w-full flex-1 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 p-2 rounded-2xl min-h-[calc(100vh-5rem)]">
         {visibleProfiles.map(profile => (
           <div
             key={profile.userId}
