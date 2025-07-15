@@ -12,7 +12,6 @@ export function FriendsSection() {
   const friends = useQuery(api.friends.getFriends);
   const friendRequests = useQuery(api.friends.getFriendRequests);
   const respondToRequest = useMutation(api.friends.respondToFriendRequest);
-  const getUserConversations = useQuery(api.conversations.getUserConversations);
   const sendMessage = useMutation(api.conversations.sendMessage);
 
   const handleRespondToRequest = async (requestId: string, response: "accepted" | "rejected") => {
@@ -27,19 +26,19 @@ export function FriendsSection() {
 
   const handleMessage = async (friend: any) => {
     // Check if there's already a conversation
-    const existingConversation = getUserConversations?.find(conv => 
-      conv.participants.includes(friend.userId)
-    );
+    // const existingConversation = getUserConversations?.find(conv => 
+    //   conv.participants.includes(friend.userId)
+    // );
 
-    if (existingConversation) {
-      // Navigate to existing conversation
-      toast.info("Opening existing conversation...");
-      // You could add navigation logic here to switch to conversations tab
-    } else {
+    // if (existingConversation) {
+    //   // Navigate to existing conversation
+    //   toast.info("Opening existing conversation...");
+    //   // You could add navigation logic here to switch to conversations tab
+    // } else {
       // Show message prompt
       setSelectedFriend(friend);
       setShowMessagePrompt(true);
-    }
+    // }
   };
 
   const handleSendMessage = async () => {
