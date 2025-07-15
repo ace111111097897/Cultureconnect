@@ -32,7 +32,7 @@ export function KandiChat() {
   };
 
   return (
-    <div className="space-y-4 md:space-y-6 px-2 sm:px-0">
+    <div className="w-full max-w-3xl mx-auto p-2 sm:p-6 overflow-y-auto max-h-screen">
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="w-20 h-20 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto border-4 border-white/20">
