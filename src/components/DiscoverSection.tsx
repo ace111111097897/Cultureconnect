@@ -119,75 +119,88 @@ export function DiscoverSection() {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="relative w-full max-w-2xl mx-auto bg-gradient-to-br from-white/10 via-blue-900/30 to-purple-800/30 border-2 border-transparent rounded-3xl p-8 shadow-2xl flex flex-col items-center justify-between min-h-[400px] h-full mb-6 cursor-pointer hover:scale-105 transition-transform max-w-full backdrop-blur-xl group"
-          style={{ boxShadow: '0 4px 32px 0 rgba(0,0,0,0.25), 0 0 0 4px rgba(80,120,255,0.15)' }}
-        >
-          <div className="relative mb-4">
-            <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 blur-md opacity-60 group-hover:opacity-90 transition-all group-hover:blur-lg z-0" style={{ filter: 'blur(8px)' }} />
-            {profile.profileImageUrl ? (
-              <img src={profile.profileImageUrl} alt={profile.displayName} className="w-32 h-32 rounded-full object-cover border-4 border-blue-400/40 shadow-xl relative z-10" />
-            ) : (
-              <div className="w-32 h-32 rounded-full bg-white/10 flex items-center justify-center text-6xl text-white/50 border-4 border-blue-400/40 shadow-xl relative z-10">👤</div>
-            )}
-            <div className="absolute inset-0 rounded-full border-4 border-gradient-to-tr from-blue-400 via-purple-400 to-pink-400 animate-pulse z-0" style={{ pointerEvents: 'none', opacity: 0.7 }} />
+        <div className="relative w-full max-w-md mx-auto rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#a18cd1] via-[#fbc2eb] to-[#fcb69f]" style={{ boxShadow: '0 4px 32px 0 rgba(80,120,255,0.15), 0 0 16px 4px rgba(160,80,255,0.10)' }}>
+          {/* Top Gradient Section */}
+          <div className="relative bg-gradient-to-br from-[#a18cd1] via-[#fbc2eb] to-[#fcb69f] h-48 flex flex-col items-center justify-center">
+            {/* Match % */}
+            <div className="absolute top-4 right-4 bg-black/40 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg z-10">0% Match</div>
+            {/* Left/Right Arrows */}
+            <button className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-purple-400/60 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-md transition z-10" onClick={handlePass} aria-label="Pass">&#8592;</button>
+            <button className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-pink-400/60 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-md transition z-10" onClick={handleMatch} aria-label="Match">&#8594;</button>
+            {/* Avatar */}
+            <div className="relative z-10">
+              {profile.profileImageUrl ? (
+                <img src={profile.profileImageUrl} alt={profile.displayName} className="w-24 h-24 rounded-full object-cover border-4 border-white/60 shadow-xl" />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center text-6xl text-white/60 border-4 border-white/60 shadow-xl">👤</div>
+              )}
+            </div>
           </div>
-          <div className="text-lg sm:text-2xl font-bold text-gray-900 mb-1 text-center drop-shadow-lg">{profile.displayName}</div>
-          <div className="text-gray-700 text-base mb-2 text-center">{profile.bio || "No bio yet."}</div>
-          {/* Extra info: culture, food, etc. */}
-          <div className="flex flex-wrap justify-center gap-2 mt-2 mb-4">
+          {/* Info Section */}
+          <div className="bg-gradient-to-br from-[#4e54c8]/80 via-[#8f94fb]/80 to-[#fbc2eb]/80 p-8 flex flex-col gap-4 backdrop-blur-xl">
+            <div className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+              {profile.displayName && <span>{profile.displayName}</span>}
+              {profile.age && <span className="text-white/70 text-lg font-normal">, {profile.age}</span>}
+            </div>
+            {/* Cultural Background */}
             {profile.culturalBackground && profile.culturalBackground.length > 0 && (
-              <span className="bg-blue-100/60 text-blue-900 px-3 py-1 rounded-full text-xs font-semibold">Culture: {profile.culturalBackground.join(", ")}</span>
+              <div>
+                <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="globe">🌍</span> Cultural Background</div>
+                <div className="flex flex-wrap gap-2">
+                  {profile.culturalBackground.map((c: string) => (
+                    <span key={c} className="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/30">{c}</span>
+                  ))}
+                </div>
+              </div>
             )}
-            {profile.foodPreferences && profile.foodPreferences.length > 0 && (
-              <span className="bg-pink-100/60 text-pink-900 px-3 py-1 rounded-full text-xs font-semibold">Food: {profile.foodPreferences.join(", ")}</span>
-            )}
+            {/* Languages */}
             {profile.languages && profile.languages.length > 0 && (
-              <span className="bg-green-100/60 text-green-900 px-3 py-1 rounded-full text-xs font-semibold">Languages: {profile.languages.join(", ")}</span>
+              <div>
+                <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="languages">🗣️</span> Languages</div>
+                <div className="flex flex-wrap gap-2">
+                  {profile.languages.map((l: string) => (
+                    <span key={l} className="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/30">{l}</span>
+                  ))}
+                </div>
+              </div>
             )}
-            {profile.musicGenres && profile.musicGenres.length > 0 && (
-              <span className="bg-purple-100/60 text-purple-900 px-3 py-1 rounded-full text-xs font-semibold">Music: {profile.musicGenres.join(", ")}</span>
+            {/* Values */}
+            {profile.values && profile.values.length > 0 && (
+              <div>
+                <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="values">💡</span> Values</div>
+                <div className="flex flex-wrap gap-2">
+                  {profile.values.map((v: string) => (
+                    <span key={v} className="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/30">{v}</span>
+                  ))}
+                </div>
+              </div>
             )}
-            {profile.travelInterests && profile.travelInterests.length > 0 && (
-              <span className="bg-yellow-100/60 text-yellow-900 px-3 py-1 rounded-full text-xs font-semibold">Travel: {profile.travelInterests.join(", ")}</span>
+            {/* Food Preferences */}
+            {profile.foodPreferences && profile.foodPreferences.length > 0 && (
+              <div>
+                <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="food">🍽️</span> Food Interests</div>
+                <div className="flex flex-wrap gap-2">
+                  {profile.foodPreferences.map((f: string) => (
+                    <span key={f} className="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/30">{f}</span>
+                  ))}
+                </div>
+              </div>
             )}
-          </div>
-          {/* Action Buttons */}
-          <div className="flex gap-3 mt-auto w-full justify-center">
-            <button
-              className="flex-1 bg-red-500/80 text-white rounded-lg px-4 py-2 font-semibold hover:bg-red-600/90 transition shadow-md"
-              onClick={handlePass}
-            >
-              Pass
-            </button>
-            <button
-              className="flex-1 bg-green-500/80 text-white rounded-lg px-4 py-2 font-semibold hover:bg-green-600/90 transition shadow-md"
-              onClick={() => handleAddFriend(profile)}
-            >
-              Add Friend
-            </button>
-            <button
-              className="flex-1 bg-blue-500/80 text-white rounded-lg px-4 py-2 font-semibold hover:bg-blue-600/90 transition shadow-md"
-              onClick={handleMatch}
-            >
-              Match
-            </button>
-          </div>
-          {/* Swipe buttons for desktop */}
-          <div className="flex justify-between w-full mt-8">
-            <button
-              className="bg-white/10 hover:bg-red-500/80 text-red-700 hover:text-white rounded-full w-14 h-14 flex items-center justify-center text-3xl shadow-md transition"
-              onClick={handlePass}
-              aria-label="Pass"
-            >
-              &#8592;
-            </button>
-            <button
-              className="bg-white/10 hover:bg-blue-500/80 text-blue-700 hover:text-white rounded-full w-14 h-14 flex items-center justify-center text-3xl shadow-md transition"
-              onClick={handleMatch}
-              aria-label="Match"
-            >
-              &#8594;
-            </button>
+            {/* Action Buttons */}
+            <div className="flex gap-4 mt-6 w-full">
+              <button
+                className="flex-1 bg-white/10 text-white rounded-xl px-6 py-3 font-semibold hover:bg-purple-500/80 hover:text-white transition shadow-md border border-white/30 text-lg"
+                onClick={handlePass}
+              >
+                Pass
+              </button>
+              <button
+                className="flex-1 bg-gradient-to-r from-orange-400 to-pink-500 text-white rounded-xl px-6 py-3 font-semibold hover:from-orange-500 hover:to-pink-600 transition shadow-md border border-white/30 text-lg"
+                onClick={() => handleAddFriend(profile)}
+              >
+                Add Friend
+              </button>
+            </div>
           </div>
         </div>
       </div>
