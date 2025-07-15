@@ -296,15 +296,15 @@ export function FriendsSection() {
               <button
                 onClick={() => setShowMessagePrompt(false)}
                 className="flex-1 px-4 py-2 rounded-lg bg-white/10 text-white border border-white/20 hover:bg-white/20"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSendMessage}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSendMessage}
                 className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold"
-              >
+                >
                 Send
-              </button>
+                </button>
             </div>
           </div>
         </div>

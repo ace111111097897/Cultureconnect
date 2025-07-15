@@ -3,8 +3,8 @@ import { useState } from "react";
 export function GamesSection() {
   // Remove all state and logic related to lobbies and history
 
-  return (
-    <div className="space-y-6">
+    return (
+      <div className="space-y-6">
       <div className="flex justify-center">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/20">
           <div className="flex space-x-2">

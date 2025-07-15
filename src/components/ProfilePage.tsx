@@ -243,10 +243,10 @@ export function ProfilePage() {
           </div>
           
           <div className="flex space-x-3 w-full sm:w-auto">
-            <button
-              onClick={isEditing ? handleSave : handleEdit}
+          <button
+            onClick={isEditing ? handleSave : handleEdit}
               className="flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all text-sm md:text-base"
-            >
+          >
               {isEditing ? "💾 Save Changes" : "✏️ Edit Profile"}
             </button>
             {isEditing && (
@@ -255,25 +255,25 @@ export function ProfilePage() {
                 className="px-4 py-2 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all"
               >
                 ✕ Cancel
-              </button>
+          </button>
             )}
           </div>
-        </div>
+          </div>
 
         {/* Basic Info Section */}
         {isEditing ? (
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-white/80 mb-2">Display Name</label>
-              <input
-                type="text"
-                value={editData.displayName}
-                onChange={(e) => setEditData(prev => ({ ...prev, displayName: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-white/80 mb-2">Display Name</label>
+                <input
+                  type="text"
+                  value={editData.displayName}
+                  onChange={(e) => setEditData(prev => ({ ...prev, displayName: e.target.value }))}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
                 placeholder="Your display name"
-              />
-            </div>
-            <div>
+                />
+              </div>
+              <div>
               <label className="block text-white/80 mb-2">Age</label>
               <input
                 type="number"
@@ -286,13 +286,13 @@ export function ProfilePage() {
             </div>
             <div className="md:col-span-2">
               <label className="block text-white/80 mb-2">Location</label>
-              <input
-                type="text"
+                <input
+                  type="text"
                 value={editData.location}
                 onChange={(e) => setEditData(prev => ({ ...prev, location: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
                 placeholder="City, Country"
-              />
+                />
             </div>
             <div className="md:col-span-2">
               <label className="block text-white/80 mb-2">Bio</label>
@@ -322,7 +322,7 @@ export function ProfilePage() {
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                 {culturalOptions.map((option) => (
                   <label key={option} className="flex items-center space-x-2 cursor-pointer">
-                    <input
+                  <input
                       type="checkbox"
                       checked={editData.culturalBackground.includes(option)}
                       onChange={() => handleArrayChange('culturalBackground', option)}
@@ -331,21 +331,21 @@ export function ProfilePage() {
                     <span className="text-white/80 text-sm">{option}</span>
                   </label>
                 ))}
-              </div>
-            </div>
+                </div>
+                </div>
 
             {/* Languages */}
-            <div>
+                <div>
               <label className="block text-white/80 mb-3">Languages</label>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                 {languageOptions.map((option) => (
                   <label key={option} className="flex items-center space-x-2 cursor-pointer">
-                    <input
+                  <input
                       type="checkbox"
                       checked={editData.languages.includes(option)}
                       onChange={() => handleArrayChange('languages', option)}
                       className="rounded border-white/20 bg-white/10 text-orange-500 focus:ring-orange-400"
-                    />
+                  />
                     <span className="text-white/80 text-sm">{option}</span>
                   </label>
                 ))}
@@ -466,8 +466,8 @@ export function ProfilePage() {
                     <span className="text-white/80 text-sm">{option}</span>
                   </label>
                 ))}
-              </div>
-            </div>
+          </div>
+        </div>
 
             {/* Life Goals */}
             <div>
@@ -633,9 +633,9 @@ export function ProfilePage() {
             <div>
               <h3 className="text-white font-semibold mb-2">Relationship Goals</h3>
               <p className="text-white/70">{profile.relationshipGoals || "Not specified"}</p>
-            </div>
           </div>
-        )}
+        </div>
+      )}
       </div>
     </div>
   );

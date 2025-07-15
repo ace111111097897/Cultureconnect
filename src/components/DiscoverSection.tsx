@@ -155,7 +155,7 @@ export function DiscoverSection() {
         </div>
         <div className="absolute -bottom-6 -left-6 w-12 h-12 bg-gradient-to-r from-green-400 to-teal-500 rounded-full flex items-center justify-center shadow-lg animate-pulse delay-500">
           <span className="text-white text-lg">🎭</span>
-        </div>
+          </div>
         <div className="absolute -bottom-6 -right-6 w-12 h-12 bg-gradient-to-r from-red-400 to-pink-500 rounded-full flex items-center justify-center shadow-lg animate-pulse delay-1500">
           <span className="text-white text-lg">🎨</span>
         </div>
@@ -170,7 +170,7 @@ export function DiscoverSection() {
               <div className="absolute top-12 right-8 w-6 h-6 border-2 border-white/30 rounded-full"></div>
               <div className="absolute bottom-8 left-8 w-10 h-10 border-2 border-white/30 rounded-full"></div>
               <div className="absolute bottom-16 right-4 w-4 h-4 border-2 border-white/30 rounded-full"></div>
-            </div>
+      </div>
 
             {currentProfile?.profileVideoUrl ? (
               <video
@@ -339,7 +339,7 @@ export function DiscoverSection() {
                 ✕
               </button>
             </div>
-            
+
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <h3 className="text-lg font-semibold text-white mb-2">About</h3>
@@ -347,37 +347,37 @@ export function DiscoverSection() {
                 
                 <h3 className="text-lg font-semibold text-white mb-2">Cultural Background</h3>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {selectedProfile.culturalBackground?.map((bg: string, index: number) => (
+                    {selectedProfile.culturalBackground?.map((bg: string, index: number) => (
                     <span key={index} className="px-2 py-1 bg-purple-500/20 text-purple-200 rounded text-sm">
-                      {bg}
-                    </span>
-                  ))}
+                        {bg}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              
-              <div>
+
+                <div>
                 <h3 className="text-lg font-semibold text-white mb-2">Interests</h3>
                 <div className="space-y-2">
                   <div>
                     <span className="text-white/60 text-sm">Languages:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {selectedProfile.languages?.map((lang: string, index: number) => (
+                    {selectedProfile.languages?.map((lang: string, index: number) => (
                         <span key={index} className="px-2 py-1 bg-blue-500/20 text-blue-200 rounded text-xs">
-                          {lang}
-                        </span>
-                      ))}
-                    </div>
+                        {lang}
+                      </span>
+                    ))}
                   </div>
-                  
-                  <div>
+                </div>
+
+                <div>
                     <span className="text-white/60 text-sm">Values:</span>
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {selectedProfile.values?.map((value: string, index: number) => (
+                    {selectedProfile.values?.map((value: string, index: number) => (
                         <span key={index} className="px-2 py-1 bg-green-500/20 text-green-200 rounded text-xs">
-                          {value}
-                        </span>
-                      ))}
-                    </div>
+                        {value}
+                      </span>
+                    ))}
+                  </div>
                   </div>
                 </div>
               </div>

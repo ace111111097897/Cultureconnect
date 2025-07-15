@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
 import { DiscoverSection } from "./DiscoverSection";
 import { MatchesSection } from "./MatchesSection";
 import { ConversationsSection } from "./ConversationsSection";
@@ -52,29 +50,65 @@ export function Dashboard() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Top Toolbar */}
-      <div className="flex overflow-x-auto whitespace-nowrap scrollbar-hide py-2 px-1 md:px-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-pink-900 to-yellow-900 flex flex-col">
+      {/* Top Nav Bar */}
+      <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-orange-500 to-pink-500 flex items-center px-4 z-40 shadow-lg">
+        <div className="text-2xl font-bold text-white tracking-wide mr-8">CultureConnect</div>
+        <div className="flex-1 flex items-center">
+          <input
+            type="text"
+            placeholder="Search CultureConnect..."
+            className="w-full max-w-md px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+          />
+        </div>
+        <div className="flex items-center space-x-4 ml-8">
+          <button className="text-white/80 hover:text-white text-xl">🔔</button>
+          <button className="text-white/80 hover:text-white text-xl">👤</button>
+        </div>
+      </header>
+
+      <div className="flex flex-1 pt-16">
+        {/* Left Sidebar */}
+        <aside className="hidden md:flex flex-col w-56 bg-white/10 backdrop-blur-md border-r border-white/20 py-6 px-2 space-y-2 min-h-screen">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all text-lg w-full text-left ${
+                activeTab === tab.id
+                  ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <span>{tab.icon}</span>
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="flex-1 p-4 md:p-8 max-w-4xl mx-auto w-full">
+          {renderContent()}
+        </main>
+      </div>
+
+      {/* Mobile Bottom Nav */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-r from-orange-500 to-pink-500 flex md:hidden justify-around items-center h-16 border-t border-white/20">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`relative px-4 py-3 rounded-xl font-medium transition-all flex items-center space-x-2 ${
+            className={`flex flex-col items-center justify-center px-2 py-1 rounded-lg font-medium transition-all text-sm ${
               activeTab === tab.id
-                ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg'
-                : 'text-white/70 hover:text-white hover:bg-white/10'
+                ? 'text-white'
+                : 'text-white/70 hover:text-white'
             }`}
           >
-            <span className="text-lg">{tab.icon}</span>
+            <span className="text-xl">{tab.icon}</span>
             <span>{tab.label}</span>
           </button>
         ))}
-      </div>
-
-      {/* Content Area */}
-      <div className="min-h-[600px]">
-        {renderContent()}
-      </div>
+      </nav>
     </div>
   );
 }
