@@ -182,47 +182,18 @@ const applicationTables = {
     .index("by_target", ["targetUserId"])
     .index("by_type", ["interactionType"]),
 
-  // NEW: Games system
-  triviaGames: defineTable({
-    title: v.string(),
-    category: v.string(), // "cultural", "general", "history", "geography"
-    questions: v.array(v.object({
-      question: v.string(),
-      options: v.array(v.string()),
-      correctAnswer: v.number(),
-      explanation: v.optional(v.string()),
-    })),
-    timeLimit: v.number(), // in seconds
-    isActive: v.boolean(),
-    createdBy: v.id("users"),
-    timestamp: v.number(),
-  })
-    .index("by_category", ["category"])
-    .index("by_active", ["isActive"])
-    .index("by_creator", ["createdBy"]),
-
-  triviaSessions: defineTable({
-    gameId: v.id("triviaGames"),
-    players: v.array(v.object({
-      userId: v.id("users"),
-      score: v.number(),
-      answers: v.array(v.object({
-        questionIndex: v.number(),
-        selectedAnswer: v.number(),
-        isCorrect: v.boolean(),
-        timeSpent: v.number(),
-      })),
-      completedAt: v.optional(v.number()),
-    })),
-    status: v.string(), // "waiting", "active", "completed"
-    startedAt: v.optional(v.number()),
-    endedAt: v.optional(v.number()),
+  // NEW: UNO Games system
+  unoLobbies: defineTable({
+    name: v.string(),
+    hostId: v.id("users"),
+    players: v.array(v.id("users")),
     maxPlayers: v.number(),
-    isPublic: v.boolean(),
+    isActive: v.boolean(),
+    status: v.string(), // "waiting", "playing", "finished"
   })
-    .index("by_game", ["gameId"])
-    .index("by_status", ["status"])
-    .index("by_public", ["isPublic"]),
+    .index("by_host", ["hostId"])
+    .index("by_active", ["isActive"])
+    .index("by_status", ["status"]),
 
   // NEW: News Feed system
   newsArticles: defineTable({
