@@ -58,12 +58,7 @@ export function DiscoverSection() {
     // TODO: Call backend to add friend
   };
   const handleMatch = () => {
-    setNotifications(n => [
-      `You matched with ${visibleProfiles[currentIndex]?.displayName}!`,
-      ...n
-    ]);
     setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1));
-    // TODO: Call backend to match
   };
 
   // Swipe gesture handlers
@@ -74,7 +69,7 @@ export function DiscoverSection() {
     if (touchStartX.current === null) return;
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
     if (deltaX < -50) handlePass(); // swipe left
-    else if (deltaX > 50) handleMatch(); // swipe right
+    else if (deltaX > 50) setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1)); // swipe right to next profile
     touchStartX.current = null;
   };
 
@@ -126,7 +121,7 @@ export function DiscoverSection() {
             <div className="absolute top-4 right-4 bg-black/40 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg z-10">0% Match</div>
             {/* Left/Right Arrows */}
             <button className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-purple-400/60 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-md transition z-10" onClick={handlePass} aria-label="Pass">&#8592;</button>
-            <button className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-pink-400/60 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-md transition z-10" onClick={handleMatch} aria-label="Match">&#8594;</button>
+            <button className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-pink-400/60 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-md transition z-10" onClick={() => setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1))} aria-label="Next Profile">&#8594;</button>
             {/* Avatar */}
             <div className="relative z-10">
               {profile.profileImageUrl ? (
