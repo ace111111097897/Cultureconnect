@@ -101,16 +101,21 @@ export function DiscoverSection() {
         {visibleProfiles.map(profile => (
           <div
             key={profile.userId}
-            className="relative bg-gradient-to-br from-white/10 via-blue-900/30 to-purple-800/30 border-4 border-white/30 rounded-3xl p-8 shadow-2xl flex flex-col items-center justify-between min-h-[340px] h-full mb-6 sm:mb-0 cursor-pointer hover:scale-105 transition-transform max-w-full backdrop-blur-xl"
+            className="relative bg-gradient-to-br from-white/10 via-blue-900/30 to-purple-800/30 border-2 border-transparent rounded-3xl p-8 shadow-2xl flex flex-col items-center justify-between min-h-[340px] h-full mb-6 sm:mb-0 cursor-pointer hover:scale-105 transition-transform max-w-full backdrop-blur-xl group"
+            style={{ boxShadow: '0 4px 32px 0 rgba(0,0,0,0.25), 0 0 0 4px rgba(80,120,255,0.15)' }}
             tabIndex={0}
             role="region"
             aria-label={`Profile for ${profile.displayName}`}
           >
-            {profile.profileImageUrl ? (
-              <img src={profile.profileImageUrl} alt={profile.displayName} className="w-28 h-28 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-white/40 mb-4 shadow-lg" />
-            ) : (
-              <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-full bg-white/10 flex items-center justify-center text-6xl text-white/50 mb-4 border-4 border-white/40 shadow-lg">👤</div>
-            )}
+            <div className="relative mb-4">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500 via-purple-500 to-pink-500 blur-md opacity-60 group-hover:opacity-90 transition-all group-hover:blur-lg z-0" style={{ filter: 'blur(8px)' }} />
+              {profile.profileImageUrl ? (
+                <img src={profile.profileImageUrl} alt={profile.displayName} className="w-32 h-32 rounded-full object-cover border-4 border-blue-400/40 shadow-xl relative z-10" />
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-white/10 flex items-center justify-center text-6xl text-white/50 border-4 border-blue-400/40 shadow-xl relative z-10">👤</div>
+              )}
+              <div className="absolute inset-0 rounded-full border-4 border-gradient-to-tr from-blue-400 via-purple-400 to-pink-400 animate-pulse z-0" style={{ pointerEvents: 'none', opacity: 0.7 }} />
+            </div>
             <div className="text-lg sm:text-2xl font-bold text-gray-900 mb-1 text-center drop-shadow-lg">{profile.displayName}</div>
             <div className="text-gray-700 text-base mb-2 text-center">{profile.bio || "No bio yet."}</div>
             {/* Extra info: culture, food, etc. */}

@@ -107,7 +107,7 @@ export function Dashboard() {
           ))}
         </aside>
         {/* Main Content Area */}
-        <main className="flex-1 p-2 sm:p-4 md:p-8 max-w-4xl mx-auto w-full min-h-[calc(100vh-4rem)]">
+        <main className="flex-1 p-2 sm:p-4 md:p-8 w-full min-h-[calc(100vh-4rem)]">
           {renderContent()}
         </main>
       </div>
