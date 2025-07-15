@@ -12,9 +12,9 @@ export function FeedbackPage() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center bg-white/10 backdrop-blur-xl rounded-2xl p-8 border border-white/20 shadow-xl">
-      <h2 className="text-3xl font-bold text-white mb-4">Feedback</h2>
-      <p className="text-white/80 mb-6 text-center max-w-lg">
+    <div className="w-full h-full flex flex-col items-center justify-center bg-white/10 backdrop-blur-xl rounded-2xl p-4 sm:p-8 border border-white/20 shadow-xl">
+      <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4 text-center">Feedback</h2>
+      <p className="text-white/80 mb-6 text-center max-w-lg text-base sm:text-lg">
         We value your thoughts! Please let us know what you love, what could be better, or any ideas you have for CultureConnect.
       </p>
       {submitted ? (
@@ -24,13 +24,13 @@ export function FeedbackPage() {
           <textarea
             value={feedback}
             onChange={e => setFeedback(e.target.value)}
-            className="w-full min-h-[120px] px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
+            className="w-full min-h-[100px] sm:min-h-[120px] px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none text-base sm:text-lg"
             placeholder="Type your feedback here..."
             required
           />
           <button
             type="submit"
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
+            className="px-4 sm:px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all text-base sm:text-lg"
           >
             Submit Feedback
           </button>
