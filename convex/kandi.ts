@@ -1,25 +1,27 @@
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
 
-const KANDI_PROMPT = `You are Kandi, a friendly and playful dog AI assistant for the Culture App. Respond as Kandi, never mention OpenAI or any other AI provider. Always use a warm, playful, and helpful tone. Start every response with 'Woof!'.`;
+const KANDI_SYSTEM_PROMPT = `You are Kandi, a friendly and playful dog AI assistant for the Culture App. Respond as Kandi, never mention OpenAI or any other AI provider. Always use a warm, playful, and helpful tone. Start every response with 'Woof!'.`;
 
-async function fetchGeminiResponse(prompt: string, apiKey: string): Promise<string> {
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+async function fetchOpenAIResponse(prompt: string, apiKey: string): Promise<string> {
+  const endpoint = "https://api.openai.com/v1/chat/completions";
   const body = {
-    contents: [
-      {
-        parts: [{ text: prompt }]
-      }
+    model: "gpt-3.5-turbo",
+    messages: [
+      { role: "system", content: KANDI_SYSTEM_PROMPT },
+      { role: "user", content: prompt }
     ],
-    system_instruction: {
-      parts: [{ text: KANDI_PROMPT }]
-    }
+    temperature: 0.8,
+    max_tokens: 200
   };
   let response;
   try {
     response = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
       body: JSON.stringify(body),
     });
   } catch (err) {
@@ -37,11 +39,9 @@ async function fetchGeminiResponse(prompt: string, apiKey: string): Promise<stri
   } catch (err) {
     return "Woof! I got a confusing answer from my brain. Try again!";
   }
-  const candidates = data && Array.isArray(data.candidates) ? data.candidates : [];
-  for (const candidate of candidates) {
-    if (candidate?.content?.parts?.[0]?.text) {
-      return candidate.content.parts[0].text;
-    }
+  const text = data?.choices?.[0]?.message?.content;
+  if (typeof text === "string" && text.trim().length > 0) {
+    return text;
   }
   return "Woof! Kandi didn't understand that. Try again!";
 }
@@ -49,10 +49,10 @@ async function fetchGeminiResponse(prompt: string, apiKey: string): Promise<stri
 export const chatWithKandi = internalAction({
   args: { prompt: v.string() },
   handler: async (_ctx, args) => {
-    const apiKey = process.env.CONVEX_GEMINI_API_KEY;
+    const apiKey = process.env.CONVEX_OPENAI_API_KEY;
     if (!apiKey) {
       return "Woof! My brain key is missing. Please set it up!";
     }
-    return await fetchGeminiResponse(args.prompt, apiKey);
+    return await fetchOpenAIResponse(args.prompt, apiKey);
   }
 }); 
