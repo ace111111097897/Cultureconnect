@@ -164,7 +164,7 @@ export function GamesSection() {
                 <h4 className="text-lg font-semibold text-white mb-2">No active lobbies</h4>
                 <p className="text-white/70">Create a new UNO lobby to get started!</p>
               </div>
-            ) :
+            ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {unoLobbies.map((lobby) => (
                   <div key={lobby._id} className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
@@ -178,7 +178,6 @@ export function GamesSection() {
                       </div>
                       <div className="text-2xl">🎴</div>
                     </div>
-                    
                     <div className="space-y-2">
                       {lobby.status === "waiting" && (
                         <>
