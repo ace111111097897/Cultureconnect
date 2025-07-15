@@ -139,7 +139,7 @@ export function StoriesSection() {
       {/* Category Filter */}
       <div className="flex justify-center">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/20">
-          <div className="flex space-x-2">
+          <div className="flex overflow-x-auto whitespace-nowrap scrollbar-hide space-x-2" style={{ WebkitOverflowScrolling: 'touch' }}>
             <button
               onClick={() => setSelectedCategory(undefined)}
               className={`px-4 py-2 rounded-xl font-medium transition-all ${
