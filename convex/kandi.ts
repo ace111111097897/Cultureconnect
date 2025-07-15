@@ -1,53 +1,36 @@
 "use node";
 
-import { action } from "./_generated/server";
+import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
-import { internal } from "./_generated/api";
-// @ts-ignore
-import type { ActionCtx } from "./_generated/server";
 
-const KANDI_SYSTEM_PROMPT = `You are Kandi, a friendly and playful dog AI assistant for the Culture App. Respond as Kandi, never mention OpenAI or any other AI provider. Always use a warm, playful, and helpful tone.`;
-
-export const chatWithKandi = action({
+export const chatWithKandi = internalAction({
   args: {
-    message: v.string(),
+    prompt: v.string(),
   },
-  handler: async (ctx: ActionCtx, args: { message: string }) => {
-    // Hardcoded Gemini API key (for development/testing only)
-    const GEMINI_API_KEY = "AIzaSyCXAfg6XBvh0dp9c80ISpWthzFLgrXSrRU";
-    if (!GEMINI_API_KEY) return { reply: "Kandi is not configured. Please try again later." };
-
-    try {
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-pro:generateContent?key=${GEMINI_API_KEY}`;
-      const body = {
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: args.message }],
-          },
-        ],
-        system_instruction: {
-          parts: [{ text: KANDI_SYSTEM_PROMPT }],
-        },
-        generationConfig: {
-          maxOutputTokens: 150,
-          temperature: 0.8,
-        },
-      };
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      });
-      if (!response.ok) throw new Error("Kandi is having trouble responding right now.");
-      const result = await response.json();
-      const reply = result.candidates?.[0]?.content?.parts?.[0]?.text || "Woof! Kandi didn't understand that. Try again!";
-      return { reply };
-    } catch (error) {
-      console.error("Kandi Gemini API error:", error);
-      return { reply: "Kandi is having technical difficulties. Please try again later!" };
+  handler: async (ctx, args) => {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("Gemini API key not set");
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
+    const body = {
+      contents: [
+        {
+          parts: [
+            { text: args.prompt }
+          ]
+        }
+      ]
+    };
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
     }
-  },
+    const data = await response.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
+    return text;
+  }
 });
