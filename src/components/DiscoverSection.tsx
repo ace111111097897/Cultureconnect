@@ -47,7 +47,6 @@ export function DiscoverSection() {
   }, [profiles]);
 
   const handlePass = () => {
-    setNotifications(n => ["You passed on a profile.", ...n]);
     setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1));
   };
   const handleAddFriend = (profile: any) => {
@@ -68,7 +67,7 @@ export function DiscoverSection() {
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (touchStartX.current === null) return;
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
-    if (deltaX < -50) handlePass(); // swipe left
+    if (deltaX < -50) setCurrentIndex(idx => Math.max(idx - 1, 0)); // swipe left to previous profile
     else if (deltaX > 50) setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1)); // swipe right to next profile
     touchStartX.current = null;
   };
@@ -114,13 +113,13 @@ export function DiscoverSection() {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="relative w-full max-w-md mx-auto rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e]" style={{ boxShadow: '0 4px 32px 0 rgba(80,120,255,0.15), 0 0 16px 4px rgba(160,80,255,0.10)' }}>
+        <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] min-h-[calc(100vh-8rem)]" style={{ boxShadow: '0 4px 32px 0 rgba(80,120,255,0.15), 0 0 16px 4px rgba(160,80,255,0.10)' }}>
           {/* Top Gradient Section */}
           <div className="relative bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] h-48 flex flex-col items-center justify-center">
             {/* Match % */}
             <div className="absolute top-4 right-4 bg-black/40 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg z-10">0% Match</div>
             {/* Left/Right Arrows */}
-            <button className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-purple-400/60 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-md transition z-10" onClick={handlePass} aria-label="Pass">&#8592;</button>
+            <button className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-purple-400/60 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-md transition z-10" onClick={() => setCurrentIndex(idx => Math.max(idx - 1, 0))} aria-label="Previous Profile">&#8592;</button>
             <button className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-pink-400/60 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-md transition z-10" onClick={() => setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1))} aria-label="Next Profile">&#8594;</button>
             {/* Avatar */}
             <div className="relative z-10">
