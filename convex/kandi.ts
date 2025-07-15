@@ -3,37 +3,37 @@ import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { internal } from "./_generated/api";
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+const OPENAI_API_KEY = process.env.CONVEX_OPENAI_API_KEY;
+const OPENAI_BASE_URL = process.env.CONVEX_OPENAI_BASE_URL;
 
-const KANDI_SYSTEM_PROMPT = "You are Kandi, a friendly and playful dog AI assistant for the Culture App. Respond as Kandi, never mention Gemini or Google. Always use a warm, playful, and helpful tone.";
+const KANDI_SYSTEM_PROMPT = "You are Kandi, a friendly and playful dog AI assistant for the Culture App. Respond as Kandi, never mention OpenAI or any other AI provider. Always use a warm, playful, and helpful tone.";
 
-export const kandiChat = action({
+export const chatWithKandi = action({
   args: { message: v.string() },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
-    if (!GEMINI_API_KEY) return { reply: "Kandi is not configured. Please try again later." };
+    if (!OPENAI_API_KEY || !OPENAI_BASE_URL) return { reply: "Kandi is not configured. Please try again later." };
     try {
-      const requestBody = {
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { text: KANDI_SYSTEM_PROMPT },
-              { text: args.message }
-            ]
-          }
-        ]
-      };
-      const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      const response = await fetch(`${OPENAI_BASE_URL}/v1/chat/completions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody)
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            { role: "system", content: KANDI_SYSTEM_PROMPT },
+            { role: "user", content: args.message }
+          ],
+          max_tokens: 256,
+          temperature: 0.8
+        })
       });
       if (!response.ok) throw new Error("Kandi is having trouble responding right now.");
       const result = await response.json();
-      const reply = result.candidates?.[0]?.content?.parts?.[0]?.text || "Woof! Kandi didn't understand that. Try again!";
+      const reply = result.choices?.[0]?.message?.content || "Woof! Kandi didn't understand that. Try again!";
       return { reply };
     } catch (error) {
       return { reply: "Kandi is having technical difficulties. Please try again later!" };
