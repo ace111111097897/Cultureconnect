@@ -8,6 +8,7 @@ import { FriendsSection } from "./FriendsSection";
 import { KandiChat } from "./KandiChat";
 import { GamesSection } from "./GamesSection";
 import { CultureFeed } from "./CultureFeed";
+import { FeedbackPage } from "./FeedbackPage";
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("discover");
@@ -21,6 +22,7 @@ export function Dashboard() {
     { id: "news", label: "News", icon: "📰" },
     { id: "kandi", label: "Kandi", icon: "🐕" },
     { id: "stories", label: "Stories", icon: "📖" },
+    { id: "feedback", label: "Feedback", icon: "💡" },
     { id: "profile", label: "Profile", icon: "👤" },
   ];
 
@@ -42,6 +44,8 @@ export function Dashboard() {
         return <KandiChat />;
       case "stories":
         return <StoriesSection />;
+      case "feedback":
+        return <FeedbackPage />;
       case "profile":
         return <ProfilePage />;
       default:
@@ -50,10 +54,15 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-pink-900 to-yellow-900 flex flex-col">
+    <div className="fixed inset-0 w-full h-full flex flex-col bg-gradient-to-br from-orange-900/60 via-pink-900/60 to-yellow-900/60 backdrop-blur-2xl">
       {/* Top Nav Bar */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-orange-500 to-pink-500 flex items-center px-4 z-40 shadow-lg">
-        <div className="text-2xl font-bold text-white tracking-wide mr-8">CultureConnect</div>
+      <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-orange-500/80 to-pink-500/80 backdrop-blur-lg flex items-center px-4 z-40 shadow-lg">
+        <div
+          className="text-2xl font-bold text-white tracking-wide mr-8 cursor-pointer"
+          onClick={() => setActiveTab('profile')}
+        >
+          CultureConnect
+        </div>
         <div className="flex-1 flex items-center">
           <input
             type="text"
@@ -93,7 +102,7 @@ export function Dashboard() {
       </div>
 
       {/* Mobile Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-r from-orange-500 to-pink-500 flex md:hidden justify-around items-center h-16 border-t border-white/20">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-r from-orange-500/80 to-pink-500/80 backdrop-blur-lg flex md:hidden justify-around items-center h-16 border-t border-white/20">
         {tabs.map((tab) => (
           <button
             key={tab.id}
