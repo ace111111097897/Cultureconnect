@@ -14,7 +14,6 @@ export function Dashboard() {
   const [activeTab, setActiveTab] = useState("discover");
 
   // Get notification counts
-  const unreadNotifications = useQuery(api.notifications.getUnreadNotificationCount);
   const unreadMessages = useQuery(api.conversations.getUnreadMessageCount);
 
   const tabs = [
@@ -22,7 +21,7 @@ export function Dashboard() {
     { id: "matches", label: "Matches", icon: "💫" },
     { id: "friends", label: "Friends", icon: "👥" },
     { id: "conversations", label: "Messages", icon: "💬", badge: unreadMessages },
-    { id: "notifications", label: "Notifications", icon: "🔔", badge: unreadNotifications },
+    { id: "notifications", label: "Notifications", icon: "🔔", badge: 0 },
     { id: "kandi", label: "Kandi", icon: "🐕" },
     { id: "stories", label: "Stories", icon: "📖" },
     { id: "profile", label: "Profile", icon: "👤" },
