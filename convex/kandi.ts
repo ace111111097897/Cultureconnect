@@ -1,11 +1,45 @@
-import { action } from "./_generated/server";
+import { action, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { mutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+
+const KANDI_SYSTEM_PROMPT = "You are Kandi, a friendly and playful dog AI assistant for the Culture App. Respond as Kandi, never mention Gemini or Google. Always use a warm, playful, and helpful tone.";
+
+export const kandiChat = action({
+  args: { message: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    if (!GEMINI_API_KEY) return { reply: "Kandi is not configured. Please try again later." };
+    try {
+      const requestBody = {
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: KANDI_SYSTEM_PROMPT },
+              { text: args.message }
+            ]
+          }
+        ]
+      };
+      const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody)
+      });
+      if (!response.ok) throw new Error("Kandi is having trouble responding right now.");
+      const result = await response.json();
+      const reply = result.candidates?.[0]?.content?.parts?.[0]?.text || "Woof! Kandi didn't understand that. Try again!";
+      return { reply };
+    } catch (error) {
+      return { reply: "Kandi is having technical difficulties. Please try again later!" };
+    }
+  }
+});
 
 const KANDI_WELCOME_MESSAGE = `Woof! 🐾 Welcome to the Culture App, where your adventure into the rich tapestry of world cultures begins! I’m Kandi, your friendly AI dog and guide, excited to lead you through this amazing journey.
 
@@ -25,47 +59,6 @@ Thank you for joining us, and remember—Kandi is always here to help! Feel free
 Woofingly yours,
 Kandi 🐶
 Your Guide at Culture App`;
-
-export const geminiChat = action({
-  args: {
-    message: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-    if (!GEMINI_API_KEY) {
-      return { reply: "Gemini AI is not configured. Please set up the GEMINI_API_KEY." };
-    }
-    try {
-      const requestBody = {
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { text: args.message }
-            ]
-          }
-        ]
-      };
-      const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(requestBody)
-      });
-      if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.status} - ${await response.text()}`);
-      }
-      const result = await response.json();
-      const reply = result.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, Gemini could not generate a response.";
-      return { reply };
-    } catch (error) {
-      console.error("Gemini AI error:", error);
-      return { reply: "Sorry, Gemini is having technical difficulties right now. Try again later!" };
-    }
-  },
-});
 
 export const sendKandiWelcome = mutation({
   args: {
