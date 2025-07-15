@@ -43,6 +43,57 @@ export function ProfilePage() {
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isUploadingVideo, setIsUploadingVideo] = useState(false);
 
+  // Predefined options for different categories
+  const culturalOptions = [
+    "African", "Asian", "European", "Latin American", "Middle Eastern", "North American", 
+    "Pacific Islander", "Caribbean", "Indigenous", "Mixed Heritage", "Other"
+  ];
+
+  const languageOptions = [
+    "English", "Spanish", "French", "German", "Italian", "Portuguese", "Russian", 
+    "Chinese", "Japanese", "Korean", "Arabic", "Hindi", "Bengali", "Urdu", "Turkish",
+    "Dutch", "Swedish", "Norwegian", "Danish", "Finnish", "Polish", "Czech", "Hungarian",
+    "Greek", "Hebrew", "Thai", "Vietnamese", "Indonesian", "Malay", "Tagalog", "Other"
+  ];
+
+  const traditionOptions = [
+    "Religious Celebrations", "Cultural Festivals", "Family Gatherings", "Traditional Cooking",
+    "Art & Crafts", "Music & Dance", "Storytelling", "Meditation", "Yoga", "Tea Ceremony",
+    "Traditional Medicine", "Folk Tales", "Seasonal Celebrations", "Coming of Age Rituals",
+    "Wedding Traditions", "Funeral Customs", "New Year Celebrations", "Harvest Festivals", "Other"
+  ];
+
+  const foodOptions = [
+    "Italian", "Mexican", "Chinese", "Japanese", "Indian", "Thai", "French", "Greek",
+    "Mediterranean", "Middle Eastern", "African", "Caribbean", "Latin American", "Korean",
+    "Vietnamese", "Spanish", "German", "American", "British", "Russian", "Turkish", "Other"
+  ];
+
+  const musicOptions = [
+    "Pop", "Rock", "Hip Hop", "R&B", "Jazz", "Classical", "Country", "Electronic",
+    "Folk", "Blues", "Reggae", "Salsa", "Flamenco", "K-Pop", "J-Pop", "Bollywood",
+    "Traditional Folk", "World Music", "Gospel", "Punk", "Metal", "Indie", "Other"
+  ];
+
+  const travelOptions = [
+    "Beach Destinations", "Mountain Adventures", "City Exploration", "Cultural Heritage Sites",
+    "Food Tours", "Wildlife Safaris", "Historical Sites", "Religious Pilgrimages",
+    "Adventure Sports", "Wellness Retreats", "Volunteer Travel", "Backpacking", "Luxury Travel",
+    "Road Trips", "Island Hopping", "Desert Expeditions", "Arctic Adventures", "Other"
+  ];
+
+  const goalOptions = [
+    "Career Growth", "Education", "Family", "Travel", "Health & Fitness", "Creative Pursuits",
+    "Community Service", "Financial Independence", "Personal Development", "Cultural Exchange",
+    "Language Learning", "Skill Development", "Relationship Building", "Spiritual Growth", "Other"
+  ];
+
+  const valueOptions = [
+    "Family", "Friendship", "Education", "Creativity", "Adventure", "Peace", "Justice",
+    "Compassion", "Honesty", "Respect", "Diversity", "Equality", "Sustainability",
+    "Tradition", "Innovation", "Community", "Independence", "Loyalty", "Courage", "Other"
+  ];
+
   const handleEdit = () => {
     if (profile) {
       setEditData({
@@ -150,9 +201,9 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4 md:space-y-8 px-2 sm:px-0">
+    <div className="max-w-4xl mx-auto space-y-6 px-2 sm:px-0">
       {/* Profile Header */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-8 border border-white/20">
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
         <div className="flex flex-col sm:flex-row items-start justify-between mb-6 space-y-4 sm:space-y-0">
           <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
             <div className="relative">
@@ -191,207 +242,138 @@ export function ProfilePage() {
             </div>
           </div>
           
-          <button
-            onClick={isEditing ? handleSave : handleEdit}
-            className="px-4 md:px-6 py-2 md:py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all text-sm md:text-base w-full sm:w-auto"
-          >
-            {isEditing ? "Save Changes" : "Edit Profile"}
-          </button>
+          <div className="flex space-x-3 w-full sm:w-auto">
+            <button
+              onClick={isEditing ? handleSave : handleEdit}
+              className="flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all text-sm md:text-base"
+            >
+              {isEditing ? "💾 Save Changes" : "✏️ Edit Profile"}
+            </button>
+            {isEditing && (
+              <button
+                onClick={() => setIsEditing(false)}
+                className="px-4 py-2 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all"
+              >
+                ✕ Cancel
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Profile Video */}
-        {profile.profileVideoUrl && (
-          <div className="mb-6">
-            <h3 className="text-white/80 font-medium mb-3">Profile Video</h3>
-            <div className="relative">
-              <video
-                src={profile.profileVideoUrl}
-                className="w-full max-w-md h-48 object-cover rounded-xl"
-                controls
-                muted
-              />
-              <label className="absolute top-2 right-2 w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center cursor-pointer hover:from-blue-600 hover:to-cyan-600 transition-all border-2 border-white">
-                {isUploadingVideo ? (
-                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                ) : (
-                  <span className="text-white text-sm">📹</span>
-                )}
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={handleVideoUpload}
-                  className="hidden"
-                  disabled={isUploadingVideo}
-                />
-              </label>
-            </div>
-          </div>
-        )}
-
-        {/* Video Upload Button (if no video exists) */}
-        {!profile.profileVideoUrl && (
-          <div className="mb-6">
-            <h3 className="text-white/80 font-medium mb-3">Add Profile Video</h3>
-            <label className="block w-full max-w-md h-32 border-2 border-dashed border-white/30 rounded-xl flex items-center justify-center cursor-pointer hover:border-white/50 transition-all">
-              {isUploadingVideo ? (
-                <div className="animate-spin w-8 h-8 border-2 border-white border-t-transparent rounded-full"></div>
-              ) : (
-                <div className="text-center">
-                  <div className="text-2xl mb-2">📹</div>
-                  <p className="text-white/60 text-sm">Click to upload video</p>
-                </div>
-              )}
-              <input
-                type="file"
-                accept="video/*"
-                onChange={handleVideoUpload}
-                className="hidden"
-                disabled={isUploadingVideo}
-              />
-            </label>
-          </div>
-        )}
-
-        {isEditing && (
-          <div className="space-y-6 border-t border-white/20 pt-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-white/80 mb-2">Display Name</label>
-                <input
-                  type="text"
-                  value={editData.displayName}
-                  onChange={(e) => setEditData(prev => ({ ...prev, displayName: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                />
-              </div>
-              <div>
-                <label className="block text-white/80 mb-2">Relationship Goals</label>
-                <input
-                  type="text"
-                  value={editData.relationshipGoals}
-                  onChange={(e) => setEditData(prev => ({ ...prev, relationshipGoals: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                />
-              </div>
-            </div>
-            
+        {/* Basic Info Section */}
+        {isEditing ? (
+          <div className="grid md:grid-cols-2 gap-6">
             <div>
+              <label className="block text-white/80 mb-2">Display Name</label>
+              <input
+                type="text"
+                value={editData.displayName}
+                onChange={(e) => setEditData(prev => ({ ...prev, displayName: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                placeholder="Your display name"
+              />
+            </div>
+            <div>
+              <label className="block text-white/80 mb-2">Age</label>
+              <input
+                type="number"
+                value={editData.age}
+                onChange={(e) => setEditData(prev => ({ ...prev, age: parseInt(e.target.value) || 18 }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                min="18"
+                max="100"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-white/80 mb-2">Location</label>
+              <input
+                type="text"
+                value={editData.location}
+                onChange={(e) => setEditData(prev => ({ ...prev, location: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                placeholder="City, Country"
+              />
+            </div>
+            <div className="md:col-span-2">
               <label className="block text-white/80 mb-2">Bio</label>
               <textarea
                 value={editData.bio}
                 onChange={(e) => setEditData(prev => ({ ...prev, bio: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 h-24"
-                placeholder="Tell us about yourself, your cultural background, and what you're looking for..."
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 h-32 resize-none"
+                placeholder="Tell us about yourself..."
               />
             </div>
-
-            {/* Social Media Links */}
-            <div>
-              <label className="block text-white/80 mb-4">Social Media Links</label>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-white/60 mb-1 text-sm">Instagram</label>
-                  <input
-                    type="url"
-                    value={editData.socialLinks.instagram}
-                    onChange={(e) => setEditData(prev => ({ 
-                      ...prev, 
-                      socialLinks: { ...prev.socialLinks, instagram: e.target.value }
-                    }))}
-                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
-                    placeholder="https://instagram.com/username"
-                  />
-                </div>
-                <div>
-                  <label className="block text-white/60 mb-1 text-sm">Twitter</label>
-                  <input
-                    type="url"
-                    value={editData.socialLinks.twitter}
-                    onChange={(e) => setEditData(prev => ({ 
-                      ...prev, 
-                      socialLinks: { ...prev.socialLinks, twitter: e.target.value }
-                    }))}
-                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
-                    placeholder="https://twitter.com/username"
-                  />
-                </div>
-                <div>
-                  <label className="block text-white/60 mb-1 text-sm">Facebook</label>
-                  <input
-                    type="url"
-                    value={editData.socialLinks.facebook}
-                    onChange={(e) => setEditData(prev => ({ 
-                      ...prev, 
-                      socialLinks: { ...prev.socialLinks, facebook: e.target.value }
-                    }))}
-                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
-                    placeholder="https://facebook.com/username"
-                  />
-                </div>
-                <div>
-                  <label className="block text-white/60 mb-1 text-sm">LinkedIn</label>
-                  <input
-                    type="url"
-                    value={editData.socialLinks.linkedin}
-                    onChange={(e) => setEditData(prev => ({ 
-                      ...prev, 
-                      socialLinks: { ...prev.socialLinks, linkedin: e.target.value }
-                    }))}
-                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
-                    placeholder="https://linkedin.com/in/username"
-                  />
-                </div>
-                <div>
-                  <label className="block text-white/60 mb-1 text-sm">TikTok</label>
-                  <input
-                    type="url"
-                    value={editData.socialLinks.tiktok}
-                    onChange={(e) => setEditData(prev => ({ 
-                      ...prev, 
-                      socialLinks: { ...prev.socialLinks, tiktok: e.target.value }
-                    }))}
-                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
-                    placeholder="https://tiktok.com/@username"
-                  />
-                </div>
-                <div>
-                  <label className="block text-white/60 mb-1 text-sm">YouTube</label>
-                  <input
-                    type="url"
-                    value={editData.socialLinks.youtube}
-                    onChange={(e) => setEditData(prev => ({ 
-                      ...prev, 
-                      socialLinks: { ...prev.socialLinks, youtube: e.target.value }
-                    }))}
-                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm"
-                    placeholder="https://youtube.com/@username"
-                  />
-                </div>
-              </div>
-            </div>
           </div>
-        )}
+        ) : null}
       </div>
 
-      {/* Cultural Information */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20">
-          <h2 className="text-lg md:text-xl font-bold text-white mb-4">🌍 Cultural Identity</h2>
-          
-          <div className="space-y-4">
+      {/* Cultural Identity Section */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+        <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+          <span className="mr-2">🌍</span>
+          Cultural Identity
+        </h2>
+        
+        {isEditing ? (
+          <div className="space-y-6">
+            {/* Cultural Background */}
             <div>
-              <h3 className="text-white/80 font-medium mb-2">Languages</h3>
-              <div className="flex flex-wrap gap-2">
-                {profile.languages.map((lang, index) => (
-                  <span key={index} className="px-3 py-1 bg-blue-500/20 text-blue-200 rounded-full text-sm">
-                    {lang}
-                  </span>
+              <label className="block text-white/80 mb-3">Cultural Background</label>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {culturalOptions.map((option) => (
+                  <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editData.culturalBackground.includes(option)}
+                      onChange={() => handleArrayChange('culturalBackground', option)}
+                      className="rounded border-white/20 bg-white/10 text-orange-500 focus:ring-orange-400"
+                    />
+                    <span className="text-white/80 text-sm">{option}</span>
+                  </label>
                 ))}
               </div>
             </div>
 
+            {/* Languages */}
             <div>
-              <h3 className="text-white/80 font-medium mb-2">Cultural Background</h3>
+              <label className="block text-white/80 mb-3">Languages</label>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {languageOptions.map((option) => (
+                  <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editData.languages.includes(option)}
+                      onChange={() => handleArrayChange('languages', option)}
+                      className="rounded border-white/20 bg-white/10 text-orange-500 focus:ring-orange-400"
+                    />
+                    <span className="text-white/80 text-sm">{option}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Traditions */}
+            <div>
+              <label className="block text-white/80 mb-3">Traditions</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                {traditionOptions.map((option) => (
+                  <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editData.traditions.includes(option)}
+                      onChange={() => handleArrayChange('traditions', option)}
+                      className="rounded border-white/20 bg-white/10 text-orange-500 focus:ring-orange-400"
+                    />
+                    <span className="text-white/80 text-sm">{option}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-white font-semibold mb-2">Cultural Background</h3>
               <div className="flex flex-wrap gap-2">
                 {profile.culturalBackground.map((bg, index) => (
                   <span key={index} className="px-3 py-1 bg-purple-500/20 text-purple-200 rounded-full text-sm">
@@ -400,9 +382,18 @@ export function ProfilePage() {
                 ))}
               </div>
             </div>
-
             <div>
-              <h3 className="text-white/80 font-medium mb-2">Traditions</h3>
+              <h3 className="text-white font-semibold mb-2">Languages</h3>
+              <div className="flex flex-wrap gap-2">
+                {profile.languages.map((lang, index) => (
+                  <span key={index} className="px-3 py-1 bg-blue-500/20 text-blue-200 rounded-full text-sm">
+                    {lang}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-2">Traditions</h3>
               <div className="flex flex-wrap gap-2">
                 {profile.traditions.map((tradition, index) => (
                   <span key={index} className="px-3 py-1 bg-green-500/20 text-green-200 rounded-full text-sm">
@@ -412,14 +403,112 @@ export function ProfilePage() {
               </div>
             </div>
           </div>
-        </div>
+        )}
+      </div>
 
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20">
-          <h2 className="text-lg md:text-xl font-bold text-white mb-4">💫 Interests & Values</h2>
-          
+      {/* Interests & Values Section */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+        <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+          <span className="mr-2">💫</span>
+          Interests & Values
+        </h2>
+        
+        {isEditing ? (
+          <div className="space-y-6">
+            {/* Food Preferences */}
+            <div>
+              <label className="block text-white/80 mb-3">Food Preferences</label>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {foodOptions.map((option) => (
+                  <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editData.foodPreferences.includes(option)}
+                      onChange={() => handleArrayChange('foodPreferences', option)}
+                      className="rounded border-white/20 bg-white/10 text-orange-500 focus:ring-orange-400"
+                    />
+                    <span className="text-white/80 text-sm">{option}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Music Genres */}
+            <div>
+              <label className="block text-white/80 mb-3">Music Genres</label>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {musicOptions.map((option) => (
+                  <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editData.musicGenres.includes(option)}
+                      onChange={() => handleArrayChange('musicGenres', option)}
+                      className="rounded border-white/20 bg-white/10 text-orange-500 focus:ring-orange-400"
+                    />
+                    <span className="text-white/80 text-sm">{option}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Travel Interests */}
+            <div>
+              <label className="block text-white/80 mb-3">Travel Interests</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                {travelOptions.map((option) => (
+                  <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editData.travelInterests.includes(option)}
+                      onChange={() => handleArrayChange('travelInterests', option)}
+                      className="rounded border-white/20 bg-white/10 text-orange-500 focus:ring-orange-400"
+                    />
+                    <span className="text-white/80 text-sm">{option}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Life Goals */}
+            <div>
+              <label className="block text-white/80 mb-3">Life Goals</label>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                {goalOptions.map((option) => (
+                  <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editData.lifeGoals.includes(option)}
+                      onChange={() => handleArrayChange('lifeGoals', option)}
+                      className="rounded border-white/20 bg-white/10 text-orange-500 focus:ring-orange-400"
+                    />
+                    <span className="text-white/80 text-sm">{option}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Values */}
+            <div>
+              <label className="block text-white/80 mb-3">Values</label>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                {valueOptions.map((option) => (
+                  <label key={option} className="flex items-center space-x-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={editData.values.includes(option)}
+                      onChange={() => handleArrayChange('values', option)}
+                      className="rounded border-white/20 bg-white/10 text-orange-500 focus:ring-orange-400"
+                    />
+                    <span className="text-white/80 text-sm">{option}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
           <div className="space-y-4">
             <div>
-              <h3 className="text-white/80 font-medium mb-2">Food Preferences</h3>
+              <h3 className="text-white font-semibold mb-2">Food Preferences</h3>
               <div className="flex flex-wrap gap-2">
                 {profile.foodPreferences.map((food, index) => (
                   <span key={index} className="px-3 py-1 bg-orange-500/20 text-orange-200 rounded-full text-sm">
@@ -428,9 +517,8 @@ export function ProfilePage() {
                 ))}
               </div>
             </div>
-
             <div>
-              <h3 className="text-white/80 font-medium mb-2">Music Genres</h3>
+              <h3 className="text-white font-semibold mb-2">Music Genres</h3>
               <div className="flex flex-wrap gap-2">
                 {profile.musicGenres.map((music, index) => (
                   <span key={index} className="px-3 py-1 bg-pink-500/20 text-pink-200 rounded-full text-sm">
@@ -439,9 +527,8 @@ export function ProfilePage() {
                 ))}
               </div>
             </div>
-
             <div>
-              <h3 className="text-white/80 font-medium mb-2">Travel Interests</h3>
+              <h3 className="text-white font-semibold mb-2">Travel Interests</h3>
               <div className="flex flex-wrap gap-2">
                 {profile.travelInterests.map((travel, index) => (
                   <span key={index} className="px-3 py-1 bg-cyan-500/20 text-cyan-200 rounded-full text-sm">
@@ -450,9 +537,8 @@ export function ProfilePage() {
                 ))}
               </div>
             </div>
-
             <div>
-              <h3 className="text-white/80 font-medium mb-2">Life Goals</h3>
+              <h3 className="text-white font-semibold mb-2">Life Goals</h3>
               <div className="flex flex-wrap gap-2">
                 {profile.lifeGoals.map((goal, index) => (
                   <span key={index} className="px-3 py-1 bg-yellow-500/20 text-yellow-200 rounded-full text-sm">
@@ -461,51 +547,96 @@ export function ProfilePage() {
                 ))}
               </div>
             </div>
-
             <div>
-              <h3 className="text-white/80 font-medium mb-2">Values</h3>
+              <h3 className="text-white font-semibold mb-2">Values</h3>
               <div className="flex flex-wrap gap-2">
                 {profile.values.map((value, index) => (
-                  <span key={index} className="px-3 py-1 bg-emerald-500/20 text-emerald-200 rounded-full text-sm">
+                  <span key={index} className="px-3 py-1 bg-indigo-500/20 text-indigo-200 rounded-full text-sm">
                     {value}
                   </span>
                 ))}
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Social Media Links Display */}
-      {profile.socialLinks && Object.values(profile.socialLinks).some(url => url) && (
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 md:p-6 border border-white/20">
-          <h2 className="text-lg md:text-xl font-bold text-white mb-4">📱 Social Media</h2>
-          <div className="flex flex-wrap gap-3">
-            {Object.entries(profile.socialLinks).map(([platform, url]) => {
-              if (!url) return null;
-              return (
-                <a
-                  key={platform}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 bg-white/10 text-white rounded-lg border border-white/20 hover:bg-white/20 transition-all flex items-center space-x-2"
-                >
-                  <span className="text-lg">
-                    {platform === 'instagram' ? '📷' : 
-                     platform === 'twitter' ? '🐦' : 
-                     platform === 'facebook' ? '📘' : 
-                     platform === 'linkedin' ? '💼' : 
-                     platform === 'tiktok' ? '🎵' : 
-                     platform === 'youtube' ? '📺' : '🔗'}
-                  </span>
-                  <span className="capitalize">{platform}</span>
-                </a>
-              );
-            })}
+      {/* Preferences Section */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+        <h2 className="text-xl font-bold text-white mb-6 flex items-center">
+          <span className="mr-2">⚙️</span>
+          Preferences
+        </h2>
+        
+        {isEditing ? (
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-white/80 mb-2">Age Range (Min)</label>
+              <input
+                type="number"
+                value={editData.ageRangeMin}
+                onChange={(e) => setEditData(prev => ({ ...prev, ageRangeMin: parseInt(e.target.value) || 18 }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                min="18"
+                max="100"
+              />
+            </div>
+            <div>
+              <label className="block text-white/80 mb-2">Age Range (Max)</label>
+              <input
+                type="number"
+                value={editData.ageRangeMax}
+                onChange={(e) => setEditData(prev => ({ ...prev, ageRangeMax: parseInt(e.target.value) || 50 }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                min="18"
+                max="100"
+              />
+            </div>
+            <div>
+              <label className="block text-white/80 mb-2">Max Distance (miles)</label>
+              <input
+                type="number"
+                value={editData.maxDistance}
+                onChange={(e) => setEditData(prev => ({ ...prev, maxDistance: parseInt(e.target.value) || 50 }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                min="1"
+                max="500"
+              />
+            </div>
+            <div>
+              <label className="block text-white/80 mb-2">Relationship Goals</label>
+              <select
+                value={editData.relationshipGoals}
+                onChange={(e) => setEditData(prev => ({ ...prev, relationshipGoals: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+              >
+                <option value="">Select relationship goals</option>
+                <option value="friendship">Friendship</option>
+                <option value="dating">Dating</option>
+                <option value="serious_relationship">Serious Relationship</option>
+                <option value="marriage">Marriage</option>
+                <option value="casual">Casual</option>
+                <option value="cultural_exchange">Cultural Exchange</option>
+              </select>
+            </div>
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-white font-semibold mb-2">Age Range</h3>
+              <p className="text-white/70">{profile.ageRangeMin} - {profile.ageRangeMax} years old</p>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-2">Max Distance</h3>
+              <p className="text-white/70">{profile.maxDistance} miles</p>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-2">Relationship Goals</h3>
+              <p className="text-white/70">{profile.relationshipGoals || "Not specified"}</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -8,7 +8,8 @@ import { StoriesSection } from "./StoriesSection";
 import { ProfilePage } from "./ProfilePage";
 import { FriendsSection } from "./FriendsSection";
 import { KandiChat } from "./KandiChat";
-import { NotificationsSection } from "./NotificationsSection";
+import { GamesSection } from "./GamesSection";
+import { CultureFeed } from "./CultureFeed";
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("discover");
@@ -17,8 +18,9 @@ export function Dashboard() {
     { id: "discover", label: "Discover", icon: "🔍" },
     { id: "matches", label: "Matches", icon: "💫" },
     { id: "friends", label: "Friends", icon: "👥" },
-    { id: "conversations", label: "Messages", icon: "💬", badge: 0 },
-    { id: "notifications", label: "Notifications", icon: "🔔", badge: 0 },
+    { id: "conversations", label: "Messages", icon: "💬" },
+    { id: "games", label: "Games", icon: "🎮" },
+    { id: "news", label: "News", icon: "📰" },
     { id: "kandi", label: "Kandi", icon: "🐕" },
     { id: "stories", label: "Stories", icon: "📖" },
     { id: "profile", label: "Profile", icon: "👤" },
@@ -34,8 +36,10 @@ export function Dashboard() {
         return <FriendsSection />;
       case "conversations":
         return <ConversationsSection />;
-      case "notifications":
-        return <NotificationsSection />;
+      case "games":
+        return <GamesSection />;
+      case "news":
+        return <CultureFeed />;
       case "kandi":
         return <KandiChat />;
       case "stories":
@@ -64,11 +68,6 @@ export function Dashboard() {
             >
               <span className="text-lg">{tab.icon}</span>
               <span>{tab.label}</span>
-              {tab.badge && tab.badge > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                  {tab.badge > 99 ? '99+' : tab.badge}
-                </span>
-              )}
             </button>
           ))}
         </div>

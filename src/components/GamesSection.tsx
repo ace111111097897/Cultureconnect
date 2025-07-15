@@ -1,411 +1,484 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
 
 export function GamesSection() {
-  const [activeGame, setActiveGame] = useState<string | null>(null);
-  const [localUnoGame, setLocalUnoGame] = useState({
-    playerCards: [] as string[],
-    currentCard: "Red 5",
-    gameStarted: false,
+  const [activeTab, setActiveTab] = useState<"trivia" | "history" | "leaderboard">("trivia");
+  const [selectedGame, setSelectedGame] = useState<any>(null);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [gameStarted, setGameStarted] = useState(false);
+  const [showCreateGame, setShowCreateGame] = useState(false);
+  const [newGameData, setNewGameData] = useState({
+    title: "",
+    category: "cultural",
+    timeLimit: 30,
+    questions: [
+      { question: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" }
+    ]
   });
-  const [quizState, setQuizState] = useState({
-    currentQuestion: 0,
-    score: 0,
-    gameStarted: false,
-    answered: false,
-  });
 
-  const submitScore = useMutation(api.games.submitScore);
-  const userProfile = useQuery(api.profiles.getCurrentUserProfile);
-  const unoGame = useQuery(api.games.getUnoGameForUser);
-  const matchPlayersToGame = useMutation(api.games.matchPlayersToGame);
-  const playUnoCardMutation = useMutation(api.games.playUnoCard);
-  const unoLobbies = useQuery(api.unoLobbies.listUnoLobbies) || [];
-  const createUnoLobby = useMutation(api.unoLobbies.createUnoLobby);
-  const joinUnoLobby = useMutation(api.unoLobbies.joinUnoLobby);
-  const leaveUnoLobby = useMutation(api.unoLobbies.leaveUnoLobby);
-  const startUnoLobbyGame = useMutation(api.unoLobbies.startUnoLobbyGame);
-  const [selectedLobby, setSelectedLobby] = useState<string | null>(null);
-  const [myLobby, setMyLobby] = useState<any>(null);
-  const friends = useQuery(api.friends.getFriends) || [];
-  const createUnoGameWithFriend = useMutation(api.games.createUnoGameWithFriend);
+  const triviaGames = useQuery(api.games.getTriviaGames);
+  const activeSessions = useQuery(api.games.getActiveTriviaSessions, { isPublic: true });
+  const userHistory = useQuery(api.games.getUserTriviaHistory);
+  const leaderboard = useQuery(api.games.getTriviaLeaderboard, { limit: 10 });
 
-  // Helper: Find the lobby the user is in
-  useEffect(() => {
-    if (!userProfile) return;
-    const lobby = unoLobbies.find(l => l.playerIds.includes(userProfile.userId));
-    setMyLobby(lobby || null);
-  }, [unoLobbies, userProfile]);
+  const createTriviaGame = useMutation(api.games.createTriviaGame);
+  const createTriviaSession = useMutation(api.games.createTriviaSession);
+  const joinTriviaSession = useMutation(api.games.joinTriviaSession);
+  const startTriviaSession = useMutation(api.games.startTriviaSession);
+  const submitTriviaAnswer = useMutation(api.games.submitTriviaAnswer);
 
-  const inGame = !!unoGame;
-
-  const handleJoinQueue = async () => {
-    await joinUnoQueue();
-    toast.success("Joined UNO queue! Waiting for other players...");
-  };
-  const handleLeaveQueue = async () => {
-    await leaveUnoQueue();
-    toast("Left UNO queue.");
-  };
-  const handleStartMatch = async () => {
-    await matchPlayersToGame({ minPlayers: 2, maxPlayers: 4 });
-  };
-
-  const culturalQuestions = [
-    {
-      question: "Which festival is known as the 'Festival of Colors'?",
-      options: ["Diwali", "Holi", "Eid", "Christmas"],
-      correct: 1,
-      category: "Hindu Traditions"
-    },
-    {
-      question: "What is the traditional Japanese art of paper folding called?",
-      options: ["Ikebana", "Origami", "Calligraphy", "Bonsai"],
-      correct: 1,
-      category: "Japanese Culture"
-    },
-    {
-      question: "Which country is famous for the tango dance?",
-      options: ["Spain", "Brazil", "Argentina", "Mexico"],
-      correct: 2,
-      category: "Dance & Music"
-    },
-    {
-      question: "What is the traditional Scottish garment worn by men?",
-      options: ["Kilt", "Toga", "Kimono", "Sari"],
-      correct: 0,
-      category: "Traditional Clothing"
-    },
-    {
-      question: "Which spice is known as 'red gold'?",
-      options: ["Paprika", "Saffron", "Turmeric", "Cinnamon"],
-      correct: 1,
-      category: "Culinary Culture"
-    }
-  ];
-
-  const startUnoGame = () => {
-    const cards = ["Red 1", "Red 2", "Blue 3", "Yellow 4", "Green 5", "Red Skip", "Blue Draw 2"];
-    setLocalUnoGame({
-      playerCards: cards.slice(0, 7),
-      currentCard: "Red 5",
-      gameStarted: true,
-    });
-    setActiveGame("uno");
-  };
-
-  const playUnoCard = (card: string) => {
-    const newCards = localUnoGame.playerCards.filter(c => c !== card);
-    setLocalUnoGame(prev => ({
-      ...prev,
-      playerCards: newCards,
-      currentCard: card,
-    }));
-
-    if (newCards.length === 0) {
-      toast.success("UNO! You won! 🎉");
-      submitScore({ gameType: "uno", score: 100 });
-      setActiveGame(null);
+  const handleCreateGame = async () => {
+    try {
+      await createTriviaGame(newGameData);
+      toast.success("Trivia game created successfully!");
+      setShowCreateGame(false);
+      setNewGameData({
+        title: "",
+        category: "cultural",
+        timeLimit: 30,
+        questions: [
+          { question: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" }
+        ]
+      });
+    } catch (error) {
+      toast.error("Failed to create trivia game");
     }
   };
 
-  const startQuiz = () => {
-    setQuizState({
-      currentQuestion: 0,
-      score: 0,
-      gameStarted: true,
-      answered: false,
-    });
-    setActiveGame("quiz");
+  const handleJoinSession = async (sessionId: string) => {
+    try {
+      await joinTriviaSession({ sessionId: sessionId as any });
+      toast.success("Joined trivia session!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to join session");
+    }
   };
 
-  const answerQuestion = (answerIndex: number) => {
-    if (quizState.answered) return;
-
-    const isCorrect = answerIndex === culturalQuestions[quizState.currentQuestion].correct;
-    const newScore = isCorrect ? quizState.score + 20 : quizState.score;
-
-    setQuizState(prev => ({ ...prev, score: newScore, answered: true }));
-
-    if (isCorrect) {
-      toast.success("Correct! +20 points 🎉");
-    } else {
-      toast.error("Incorrect! Try the next one 💪");
+  const handleStartSession = async (sessionId: string) => {
+    try {
+      await startTriviaSession({ sessionId: sessionId as any });
+      toast.success("Trivia session started!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to start session");
     }
+  };
 
-    setTimeout(() => {
-      if (quizState.currentQuestion < culturalQuestions.length - 1) {
-        setQuizState(prev => ({
-          ...prev,
-          currentQuestion: prev.currentQuestion + 1,
-          answered: false,
-        }));
+  const handleCreateSession = async (gameId: string) => {
+    try {
+      await createTriviaSession({ gameId: gameId as any, maxPlayers: 4, isPublic: true });
+      toast.success("Trivia session created!");
+    } catch (error: any) {
+      toast.error("Failed to create session");
+    }
+  };
+
+  const handleSubmitAnswer = async () => {
+    if (selectedAnswer === null || !selectedGame) return;
+
+    try {
+      await submitTriviaAnswer({
+        sessionId: selectedGame._id,
+        questionIndex: currentQuestion,
+        selectedAnswer,
+        timeSpent: 30 - timeLeft,
+      });
+
+      if (currentQuestion < selectedGame.questions.length - 1) {
+        setCurrentQuestion(currentQuestion + 1);
+        setSelectedAnswer(null);
+        setTimeLeft(30);
       } else {
-        toast.success(`Quiz complete! Final score: ${newScore} points`);
-        submitScore({ gameType: "quiz", score: newScore });
-        setActiveGame(null);
+        setGameStarted(false);
+        setSelectedGame(null);
+        toast.success("Game completed!");
       }
-    }, 1500);
+    } catch (error) {
+      toast.error("Failed to submit answer");
+    }
   };
 
-  function MultiplayerUnoGame({ unoGame, userProfile }: { unoGame: any, userProfile: any }) {
-    if (!unoGame || !userProfile) return null;
-    const state = JSON.parse(unoGame.state);
-    const playerIndex = unoGame.playerIds.findIndex((id: string) => id === userProfile.userId);
-    const isMyTurn = unoGame.currentTurn === playerIndex;
-    const myHand = state.playerHands[playerIndex] || [];
-    const otherPlayers = unoGame.playerIds.map((id: string, idx: number) => ({
-      id,
-      cardCount: state.playerHands[idx]?.length || 0,
-      isCurrent: unoGame.currentTurn === idx,
-      isMe: idx === playerIndex,
+  const addQuestion = () => {
+    setNewGameData(prev => ({
+      ...prev,
+      questions: [...prev.questions, { question: "", options: ["", "", "", ""], correctAnswer: 0, explanation: "" }]
     }));
-    const winnerIdx = unoGame.winnerId ? unoGame.playerIds.findIndex((id: string) => id === unoGame.winnerId) : null;
+  };
 
-    const handlePlayCard = async (card: string) => {
-      await playUnoCardMutation({ card });
-    };
+  const removeQuestion = (index: number) => {
+    if (newGameData.questions.length > 1) {
+      setNewGameData(prev => ({
+        ...prev,
+        questions: prev.questions.filter((_, i) => i !== index)
+      }));
+    }
+  };
 
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-white">🎮 Multiplayer UNO</h2>
-          {winnerIdx !== null && (
-            <span className="text-green-400 font-bold">Winner: Player {winnerIdx + 1}</span>
-          )}
-        </div>
-        <div className="flex space-x-4 mb-4">
-          {otherPlayers.map((p, idx) => (
-            <div key={p.id} className={`flex flex-col items-center ${p.isMe ? 'font-bold text-orange-400' : 'text-white/70'}`}> 
-              <span>Player {idx + 1}{p.isMe ? ' (You)' : ''}</span>
-              <span>{p.cardCount} cards</span>
-              {p.isCurrent && <span className="text-green-400">⬅️ Turn</span>}
-            </div>
-          ))}
-        </div>
-        <div className="text-center mb-6">
-          <div className="w-24 h-36 bg-gradient-to-br from-red-500 to-red-700 rounded-lg mx-auto flex items-center justify-center border-4 border-white/20">
-            <span className="text-white font-bold text-lg">{state.currentCard || '...'}</span>
-          </div>
-          <p className="text-white/70 mt-2">Current Card</p>
-        </div>
-        <div>
-          <h3 className="text-white/80 font-medium mb-2">Your Hand</h3>
-          <div className="grid grid-cols-4 md:grid-cols-7 gap-3">
-            {myHand.map((card: string, idx: number) => (
-              <button
-                key={idx}
-                onClick={() => isMyTurn && handlePlayCard(card)}
-                disabled={!isMyTurn}
-                className={`w-full h-24 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center border-2 border-white/20 transition-all text-white font-semibold text-sm ${isMyTurn ? 'hover:border-white/50' : 'opacity-50 cursor-not-allowed'}`}
-              >
-                {card}
-              </button>
-            ))}
-          </div>
-          {!isMyTurn && <p className="text-white/60 mt-4">Waiting for your turn...</p>}
-        </div>
-      </div>
-    );
-  }
-
-  if (activeGame === "uno") {
-    return (
-      <div className="max-w-4xl mx-auto space-y-6 px-2 sm:px-0">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-white">🎮 Cultural UNO</h2>
-            <button
-              onClick={() => setActiveGame(null)}
-              className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all"
-            >
-              Back to Games
-            </button>
-          </div>
-
-          <div className="text-center mb-6">
-            <div className="w-24 h-36 bg-gradient-to-br from-red-500 to-red-700 rounded-lg mx-auto flex items-center justify-center border-4 border-white/20">
-              <span className="text-white font-bold text-lg">{unoGame.currentCard}</span>
-            </div>
-            <p className="text-white/70 mt-2">Current Card</p>
-          </div>
-
-          <div className="grid grid-cols-4 md:grid-cols-7 gap-3">
-            {unoGame.playerCards.map((card, index) => (
-              <button
-                key={index}
-                onClick={() => playUnoCard(card)}
-                className="w-full h-24 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center border-2 border-white/20 hover:border-white/50 transition-all text-white font-semibold text-sm"
-              >
-                {card}
-              </button>
-            ))}
-          </div>
-
-          <p className="text-center text-white/70 mt-4">
-            Cards remaining: {unoGame.playerCards.length}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (activeGame === "quiz") {
-    const currentQ = culturalQuestions[quizState.currentQuestion];
-    return (
-      <div className="max-w-4xl mx-auto space-y-6 px-2 sm:px-0">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-white">🧠 Cultural Quiz</h2>
-            <button
-              onClick={() => setActiveGame(null)}
-              className="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all"
-            >
-              Back to Games
-            </button>
-          </div>
-
-          <div className="text-center mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-white/70">Question {quizState.currentQuestion + 1} of {culturalQuestions.length}</span>
-              <span className="text-white font-bold">Score: {quizState.score}</span>
-            </div>
-            <div className="w-full bg-white/20 rounded-full h-2 mb-4">
-              <div 
-                className="bg-gradient-to-r from-orange-500 to-pink-500 h-2 rounded-full transition-all"
-                style={{ width: `${((quizState.currentQuestion + 1) / culturalQuestions.length) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-
-          <div className="bg-white/5 rounded-xl p-6 mb-6">
-            <span className="text-orange-400 text-sm font-medium">{currentQ.category}</span>
-            <h3 className="text-xl font-bold text-white mt-2 mb-6">{currentQ.question}</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {currentQ.options.map((option, index) => (
-                <button
-                  key={index}
-                  onClick={() => answerQuestion(index)}
-                  disabled={quizState.answered}
-                  className={`p-4 rounded-lg text-left transition-all ${
-                    quizState.answered
-                      ? index === currentQ.correct
-                        ? 'bg-green-500/20 border-green-400 text-green-200'
-                        : 'bg-white/10 text-white/50'
-                      : 'bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40'
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const updateQuestion = (index: number, field: string, value: any) => {
+    setNewGameData(prev => ({
+      ...prev,
+      questions: prev.questions.map((q, i) => 
+        i === index ? { ...q, [field]: value } : q
+      )
+    }));
+  };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 px-2 sm:px-0">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="text-center space-y-4">
-        <h1 className="text-3xl font-bold text-white">🎮 Cultural Games & Challenges</h1>
-        <p className="text-white/70">Test your cultural knowledge and have fun!</p>
+      <div className="flex justify-center">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/20">
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setActiveTab("trivia")}
+              className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                activeTab === "trivia"
+                  ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              🎮 Trivia Games
+            </button>
+            <button
+              onClick={() => setActiveTab("history")}
+              className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                activeTab === "history"
+                  ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              📊 History
+            </button>
+            <button
+              onClick={() => setActiveTab("leaderboard")}
+              className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                activeTab === "leaderboard"
+                  ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white'
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              🏆 Leaderboard
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Games Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* UNO Game Section (Lobby-based) */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center mx-auto">
-              <span className="text-2xl">🎴</span>
-            </div>
-            <h3 className="text-xl font-bold text-white">Cultural UNO</h3>
-            <p className="text-white/70">Play UNO with a cultural twist! Join or create a lobby to play with others.</p>
-            {!userProfile ? (
-              <p className="text-white/60">Sign in to play UNO with friends!</p>
-            ) : unoGame ? (
-              <MultiplayerUnoGame unoGame={unoGame} userProfile={userProfile} />
+      {/* Trivia Games Tab */}
+      {activeTab === "trivia" && (
+        <div className="space-y-6">
+          {/* Create Game Button */}
+          <div className="flex justify-center">
+            <button
+              onClick={() => setShowCreateGame(true)}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold hover:from-green-600 hover:to-emerald-600 transition-all"
+            >
+              🎯 Create New Trivia Game
+            </button>
+          </div>
+
+          {/* Active Sessions */}
+          <div>
+            <h3 className="text-xl font-bold text-white mb-4">🎪 Active Sessions</h3>
+            {!activeSessions ? (
+              <div className="flex justify-center items-center h-32">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/30 border-t-white"></div>
+              </div>
+            ) : activeSessions.length === 0 ? (
+              <div className="text-center bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+                <div className="text-4xl mb-4">🎪</div>
+                <h4 className="text-lg font-semibold text-white mb-2">No active sessions</h4>
+                <p className="text-white/70">Create a new trivia game to get started!</p>
+              </div>
             ) : (
-              <div>
-                <h4 className="text-white font-semibold mb-2">Invite a Friend to Play UNO</h4>
-                {friends.length === 0 && <p className="text-white/60">You have no friends to invite.</p>}
-                <ul className="space-y-2">
-                  {friends.map(friend => (
-                    <li key={friend._id} className="flex items-center justify-between bg-white/10 rounded p-2">
-                      <span className="text-white">{friend.displayName}</span>
-                      <button onClick={async () => {
-                        const res = await createUnoGameWithFriend({ friendUserId: friend.userId });
-                        if (res?.alreadyExists) {
-                          toast("Game already exists! Redirecting...");
-                        } else {
-                          toast.success("Game created! Redirecting...");
-                        }
-                        // Optionally, trigger a refetch or UI update
-                      }} className="px-3 py-1 rounded bg-green-500 text-white hover:bg-green-600">Invite</button>
-                    </li>
-                  ))}
-                </ul>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {activeSessions.map((session) => (
+                  <div key={session._id} className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h4 className="text-lg font-semibold text-white">Session #{session._id.slice(-6)}</h4>
+                        <p className="text-white/70 text-sm">{session.players.length}/{session.maxPlayers} players</p>
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        session.status === "waiting" ? "bg-yellow-500/20 text-yellow-200" :
+                        session.status === "active" ? "bg-green-500/20 text-green-200" :
+                        "bg-gray-500/20 text-gray-200"
+                      }`}>
+                        {session.status}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {session.status === "waiting" && (
+                        <button
+                          onClick={() => handleJoinSession(session._id)}
+                          className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-medium hover:from-blue-600 hover:to-cyan-600 transition-all"
+                        >
+                          Join Session
+                        </button>
+                      )}
+                      {session.status === "waiting" && session.players.length >= 2 && (
+                        <button
+                          onClick={() => handleStartSession(session._id)}
+                          className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium hover:from-green-600 hover:to-emerald-600 transition-all"
+                        >
+                          Start Game
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Available Games */}
+          <div>
+            <h3 className="text-xl font-bold text-white mb-4">🎯 Available Games</h3>
+            {!triviaGames ? (
+              <div className="flex justify-center items-center h-32">
+                <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/30 border-t-white"></div>
+              </div>
+            ) : triviaGames.length === 0 ? (
+              <div className="text-center bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+                <div className="text-4xl mb-4">🎯</div>
+                <h4 className="text-lg font-semibold text-white mb-2">No games available</h4>
+                <p className="text-white/70">Create the first trivia game!</p>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {triviaGames.map((game) => (
+                  <div key={game._id} className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                    <h4 className="text-lg font-semibold text-white mb-2">{game.title}</h4>
+                    <p className="text-white/70 text-sm mb-4">{game.category} • {game.timeLimit}s per question</p>
+                    
+                    <button
+                      onClick={() => handleCreateSession(game._id)}
+                      className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium hover:from-orange-600 hover:to-pink-600 transition-all"
+                    >
+                      Create Session
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
           </div>
         </div>
+      )}
 
-        {/* Quiz Game */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-          <div className="text-center space-y-4">
-            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto">
-              <span className="text-2xl">🧠</span>
+      {/* History Tab */}
+      {activeTab === "history" && (
+        <div>
+          <h3 className="text-xl font-bold text-white mb-4">📊 Your Game History</h3>
+          {!userHistory ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/30 border-t-white"></div>
             </div>
-            <h3 className="text-xl font-bold text-white">Cultural Quiz</h3>
-            <p className="text-white/70">Test your knowledge about world cultures, traditions, and customs. Earn points for correct answers!</p>
-            <button
-              onClick={startQuiz}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 transition-all"
-            >
-              Start Quiz
-            </button>
+          ) : userHistory.length === 0 ? (
+            <div className="text-center bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+              <div className="text-4xl mb-4">📊</div>
+              <h4 className="text-lg font-semibold text-white mb-2">No games played yet</h4>
+              <p className="text-white/70">Start playing trivia games to see your history!</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {userHistory.map((game) => (
+                <div key={game._id} className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h4 className="text-lg font-semibold text-white">{game.gameTitle}</h4>
+                      <p className="text-white/70 text-sm">
+                        {game.correctAnswers}/{game.totalQuestions} correct • Score: {game.score}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-white">{game.score}</div>
+                      <div className="text-white/60 text-sm">points</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Leaderboard Tab */}
+      {activeTab === "leaderboard" && (
+        <div>
+          <h3 className="text-xl font-bold text-white mb-4">🏆 Top Players</h3>
+          {!leaderboard ? (
+            <div className="flex justify-center items-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-white/30 border-t-white"></div>
+            </div>
+          ) : leaderboard.length === 0 ? (
+            <div className="text-center bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+              <div className="text-4xl mb-4">🏆</div>
+              <h4 className="text-lg font-semibold text-white mb-2">No players yet</h4>
+              <p className="text-white/70">Be the first to play and top the leaderboard!</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {leaderboard.map((player, index) => (
+                <div key={player.userId} className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold ${
+                        index === 0 ? 'bg-yellow-500' :
+                        index === 1 ? 'bg-gray-400' :
+                        index === 2 ? 'bg-orange-600' :
+                        'bg-purple-500'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold text-white">{player.displayName}</h4>
+                        <p className="text-white/70 text-sm">{player.gamesPlayed} games • Avg: {player.averageScore}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-white">{player.totalScore}</div>
+                      <div className="text-white/60 text-sm">total points</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Create Game Modal */}
+      {showCreateGame && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 max-w-2xl w-full border border-white/20 max-h-[80vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-white mb-4">Create New Trivia Game</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-white/80 mb-2">Game Title</label>
+                <input
+                  type="text"
+                  value={newGameData.title}
+                  onChange={(e) => setNewGameData(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  placeholder="Enter game title"
+                />
+              </div>
+
+              <div>
+                <label className="block text-white/80 mb-2">Category</label>
+                <select
+                  value={newGameData.category}
+                  onChange={(e) => setNewGameData(prev => ({ ...prev, category: e.target.value }))}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                >
+                  <option value="cultural">Cultural</option>
+                  <option value="general">General</option>
+                  <option value="history">History</option>
+                  <option value="geography">Geography</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-white/80 mb-2">Time Limit (seconds)</label>
+                <input
+                  type="number"
+                  value={newGameData.timeLimit}
+                  onChange={(e) => setNewGameData(prev => ({ ...prev, timeLimit: parseInt(e.target.value) || 30 }))}
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  min="10"
+                  max="120"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="block text-white/80">Questions</label>
+                  <button
+                    onClick={addQuestion}
+                    className="px-3 py-1 rounded-lg bg-green-500/20 text-green-200 text-sm hover:bg-green-500/30"
+                  >
+                    + Add Question
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  {newGameData.questions.map((question, index) => (
+                    <div key={index} className="bg-white/5 rounded-xl p-4 border border-white/10">
+                      <div className="flex justify-between items-start mb-3">
+                        <h4 className="text-white font-medium">Question {index + 1}</h4>
+                        {newGameData.questions.length > 1 && (
+                          <button
+                            onClick={() => removeQuestion(index)}
+                            className="text-red-400 hover:text-red-300"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <input
+                          type="text"
+                          value={question.question}
+                          onChange={(e) => updateQuestion(index, 'question', e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          placeholder="Enter question"
+                        />
+                        
+                        {question.options.map((option, optionIndex) => (
+                          <div key={optionIndex} className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              name={`correct-${index}`}
+                              checked={question.correctAnswer === optionIndex}
+                              onChange={() => updateQuestion(index, 'correctAnswer', optionIndex)}
+                              className="text-orange-500 focus:ring-orange-400"
+                            />
+                            <input
+                              type="text"
+                              value={option}
+                              onChange={(e) => updateQuestion(index, 'options', question.options.map((o, i) => i === optionIndex ? e.target.value : o))}
+                              className="flex-1 px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                              placeholder={`Option ${optionIndex + 1}`}
+                            />
+                          </div>
+                        ))}
+                        
+                        <input
+                          type="text"
+                          value={question.explanation}
+                          onChange={(e) => updateQuestion(index, 'explanation', e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                          placeholder="Explanation (optional)"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex space-x-3 mt-6">
+              <button
+                onClick={() => setShowCreateGame(false)}
+                className="flex-1 px-4 py-2 rounded-lg bg-white/10 text-white border border-white/20 hover:bg-white/20"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateGame}
+                className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-white font-semibold"
+              >
+                Create Game
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Daily Challenges */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">🌟 Daily Challenges</h2>
-        
-        <div className="grid md:grid-cols-3 gap-4">
-          <div className="bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl p-4 border border-yellow-400/30">
-            <div className="text-center">
-              <span className="text-2xl mb-2 block">🎯</span>
-              <h3 className="font-semibold text-white mb-2">Daily Quiz</h3>
-              <p className="text-white/70 text-sm mb-3">Complete today's cultural quiz</p>
-              <div className="text-yellow-400 font-bold">+50 XP</div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl p-4 border border-blue-400/30">
-            <div className="text-center">
-              <span className="text-2xl mb-2 block">🎴</span>
-              <h3 className="font-semibold text-white mb-2">UNO Master</h3>
-              <p className="text-white/70 text-sm mb-3">Win 3 UNO games today</p>
-              <div className="text-blue-400 font-bold">+100 XP</div>
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-green-500/20 to-teal-500/20 rounded-xl p-4 border border-green-400/30">
-            <div className="text-center">
-              <span className="text-2xl mb-2 block">🌍</span>
-              <h3 className="font-semibold text-white mb-2">Culture Explorer</h3>
-              <p className="text-white/70 text-sm mb-3">Learn about 5 new cultures</p>
-              <div className="text-green-400 font-bold">+75 XP</div>
-            </div>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

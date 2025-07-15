@@ -8,11 +8,22 @@ export function FriendsSection() {
   const [showMessagePrompt, setShowMessagePrompt] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState<any>(null);
   const [messagePrompt, setMessagePrompt] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   
   const friends = useQuery(api.friends.getFriends);
   const friendRequests = useQuery(api.friends.getFriendRequests);
   const respondToRequest = useMutation(api.friends.respondToFriendRequest);
   const sendMessage = useMutation(api.conversations.sendMessage);
+
+  // Filter friends based on search query
+  const filteredFriends = friends?.filter(friend => 
+    friend?.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    friend?.bio?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    friend?.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    friend?.culturalBackground?.some((bg: string) => 
+      bg.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  ) || [];
 
   const handleRespondToRequest = async (requestId: string, response: "accepted" | "rejected") => {
     try {
@@ -97,6 +108,32 @@ export function FriendsSection() {
         </div>
       </div>
 
+      {/* Search Bar - Only show for friends tab */}
+      {activeTab === "friends" && (
+        <div className="max-w-md mx-auto">
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span className="text-white/50">🔍</span>
+            </div>
+            <input
+              type="text"
+              placeholder="Search friends by name, bio, location, or culture..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-white/50 hover:text-white"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Friends Tab */}
       {activeTab === "friends" ? (
         <div>
@@ -114,9 +151,19 @@ export function FriendsSection() {
                 </p>
               </div>
             </div>
+          ) : filteredFriends.length === 0 ? (
+            <div className="text-center space-y-6">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
+                <div className="text-6xl mb-4">🔍</div>
+                <h3 className="text-2xl font-bold text-white mb-4">No friends found</h3>
+                <p className="text-white/70">
+                  Try adjusting your search terms to find your friends.
+                </p>
+              </div>
+            </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {friends.map((friend) => (
+              {filteredFriends.map((friend) => (
                 <div
                   key={friend!._id}
                   className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/15 transition-all"
@@ -198,24 +245,18 @@ export function FriendsSection() {
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (
-                          <span className="text-white">👤</span>
+                          <span className="text-white text-lg">👤</span>
                         )}
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-white">
-                          {request.senderProfile?.displayName || 'Unknown User'}
+                          {request.senderProfile?.displayName}
                         </h3>
                         <p className="text-white/70 text-sm">
-                          Sent {new Date(request.timestamp).toLocaleDateString()}
+                          {request.senderProfile?.location}
                         </p>
-                        {request.senderProfile?.bio && (
-                          <p className="text-white/60 text-sm mt-1 line-clamp-2">
-                            {request.senderProfile.bio}
-                          </p>
-                        )}
                       </div>
                     </div>
-                    
                     <div className="flex space-x-2">
                       <button
                         onClick={() => handleRespondToRequest(request._id, "accepted")}
@@ -240,62 +281,30 @@ export function FriendsSection() {
 
       {/* Message Prompt Modal */}
       {showMessagePrompt && selectedFriend && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 max-w-md w-full">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-2xl font-bold text-white">Send Message</h3>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 max-w-md w-full border border-white/20">
+            <h3 className="text-xl font-bold text-white mb-4">
+              Message {selectedFriend.displayName}
+            </h3>
+            <textarea
+              value={messagePrompt}
+              onChange={(e) => setMessagePrompt(e.target.value)}
+              placeholder="Write your message..."
+              className="w-full h-32 p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 resize-none"
+            />
+            <div className="flex space-x-3 mt-4">
               <button
                 onClick={() => setShowMessagePrompt(false)}
-                className="text-white/70 hover:text-white text-2xl"
+                className="flex-1 px-4 py-2 rounded-lg bg-white/10 text-white border border-white/20 hover:bg-white/20"
               >
-                ✕
+                Cancel
               </button>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                  {selectedFriend.profileImageUrl ? (
-                    <img
-                      src={selectedFriend.profileImageUrl}
-                      alt={selectedFriend.displayName}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-sm">👤</span>
-                  )}
-                </div>
-                <div>
-                  <p className="text-white font-medium">{selectedFriend.displayName}</p>
-                  <p className="text-white/60 text-sm">{selectedFriend.location}</p>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-white/80 mb-2">Message</label>
-                <textarea
-                  value={messagePrompt}
-                  onChange={(e) => setMessagePrompt(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 h-32"
-                  placeholder="Write a message to start a conversation..."
-                />
-              </div>
-
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => setShowMessagePrompt(false)}
-                  className="flex-1 px-4 py-3 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSendMessage}
-                  disabled={!messagePrompt.trim()}
-                  className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                >
-                  Send Message
-                </button>
-              </div>
+              <button
+                onClick={handleSendMessage}
+                className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold"
+              >
+                Send
+              </button>
             </div>
           </div>
         </div>
