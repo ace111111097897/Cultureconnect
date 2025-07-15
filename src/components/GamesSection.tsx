@@ -20,8 +20,6 @@ export function GamesSection() {
   const submitScore = useMutation(api.games.submitScore);
   const userProfile = useQuery(api.profiles.getCurrentUserProfile);
   const unoGame = useQuery(api.games.getUnoGameForUser);
-  const joinUnoQueue = useMutation(api.games.joinUnoQueue);
-  const leaveUnoQueue = useMutation(api.games.leaveUnoQueue);
   const matchPlayersToGame = useMutation(api.games.matchPlayersToGame);
   const playUnoCardMutation = useMutation(api.games.playUnoCard);
   const unoLobbies = useQuery(api.unoLobbies.listUnoLobbies) || [];
