@@ -1,7 +1,7 @@
-"use node";
-
 import { internalAction } from "./_generated/server";
 import { v } from "convex/values";
+
+const KANDI_SYSTEM_PROMPT = `You are Kandi, a friendly and playful dog AI assistant for the Culture App. Respond as Kandi, never mention OpenAI or any other AI provider. Always use a warm, playful, and helpful tone. Start every response with 'Woof!'.`;
 
 export const chatWithKandi = internalAction({
   args: {
@@ -16,7 +16,10 @@ export const chatWithKandi = internalAction({
         {
           parts: [{ text: args.prompt }]
         }
-      ]
+      ],
+      system_instruction: {
+        parts: [{ text: KANDI_SYSTEM_PROMPT }]
+      }
     };
     const response = await fetch(endpoint, {
       method: "POST",
@@ -31,7 +34,7 @@ export const chatWithKandi = internalAction({
       throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
     }
     const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Woof! Kandi didn't understand that. Try again!";
     return text;
   }
-});
+}); 
