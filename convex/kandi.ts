@@ -13,8 +13,8 @@ export const chatWithKandi = action({
     message: v.string(),
   },
   handler: async (ctx: ActionCtx, args: { message: string }) => {
-    // @ts-ignore
-    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    // Hardcoded Gemini API key (for development/testing only)
+    const GEMINI_API_KEY = "AIzaSyCXAfg6XBvh0dp9c80ISpWthzFLgrXSrRU";
     if (!GEMINI_API_KEY) return { reply: "Kandi is not configured. Please try again later." };
 
     try {
@@ -50,4 +50,4 @@ export const chatWithKandi = action({
       return { reply: "Kandi is having technical difficulties. Please try again later!" };
     }
   },
-}); 
+});
