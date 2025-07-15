@@ -7,7 +7,7 @@ import { ConversationsSection } from "./ConversationsSection";
 import { StoriesSection } from "./StoriesSection";
 import { ProfilePage } from "./ProfilePage";
 import { FriendsSection } from "./FriendsSection";
-import { KandiChat } from "./KandiChat";
+import { GeminiChat } from "./KandiChat";
 import { GamesSection } from "./GamesSection";
 import { CultureFeed } from "./CultureFeed";
 
@@ -41,7 +41,7 @@ export function Dashboard() {
       case "news":
         return <CultureFeed />;
       case "kandi":
-        return <KandiChat />;
+        return <GeminiChat />;
       case "stories":
         return <StoriesSection />;
       case "profile":
