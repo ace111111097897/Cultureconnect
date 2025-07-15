@@ -119,9 +119,9 @@ export function DiscoverSection() {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="relative w-full max-w-md mx-auto rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#a18cd1] via-[#fbc2eb] to-[#fcb69f]" style={{ boxShadow: '0 4px 32px 0 rgba(80,120,255,0.15), 0 0 16px 4px rgba(160,80,255,0.10)' }}>
+        <div className="relative w-full max-w-md mx-auto rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e]" style={{ boxShadow: '0 4px 32px 0 rgba(80,120,255,0.15), 0 0 16px 4px rgba(160,80,255,0.10)' }}>
           {/* Top Gradient Section */}
-          <div className="relative bg-gradient-to-br from-[#a18cd1] via-[#fbc2eb] to-[#fcb69f] h-48 flex flex-col items-center justify-center">
+          <div className="relative bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] h-48 flex flex-col items-center justify-center">
             {/* Match % */}
             <div className="absolute top-4 right-4 bg-black/40 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg z-10">0% Match</div>
             {/* Left/Right Arrows */}
@@ -137,7 +137,7 @@ export function DiscoverSection() {
             </div>
           </div>
           {/* Info Section */}
-          <div className="bg-gradient-to-br from-[#4e54c8]/80 via-[#8f94fb]/80 to-[#fbc2eb]/80 p-8 flex flex-col gap-4 backdrop-blur-xl">
+          <div className="bg-gradient-to-br from-[#1a1a2e]/90 via-[#16213e]/90 to-[#0f3460]/90 p-8 flex flex-col gap-4 backdrop-blur-xl">
             <div className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
               {profile.displayName && <span>{profile.displayName}</span>}
               {profile.age && <span className="text-white/70 text-lg font-normal">, {profile.age}</span>}
@@ -148,7 +148,7 @@ export function DiscoverSection() {
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="globe">🌍</span> Cultural Background</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.culturalBackground.map((c: string) => (
-                    <span key={c} className="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/30">{c}</span>
+                    <span key={c} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/20">{c}</span>
                   ))}
                 </div>
               </div>
@@ -159,7 +159,7 @@ export function DiscoverSection() {
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="languages">🗣️</span> Languages</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.languages.map((l: string) => (
-                    <span key={l} className="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/30">{l}</span>
+                    <span key={l} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/20">{l}</span>
                   ))}
                 </div>
               </div>
@@ -170,7 +170,7 @@ export function DiscoverSection() {
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="values">💡</span> Values</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.values.map((v: string) => (
-                    <span key={v} className="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/30">{v}</span>
+                    <span key={v} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/20">{v}</span>
                   ))}
                 </div>
               </div>
@@ -181,7 +181,7 @@ export function DiscoverSection() {
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="food">🍽️</span> Food Interests</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.foodPreferences.map((f: string) => (
-                    <span key={f} className="bg-white/20 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/30">{f}</span>
+                    <span key={f} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/20">{f}</span>
                   ))}
                 </div>
               </div>
@@ -189,13 +189,13 @@ export function DiscoverSection() {
             {/* Action Buttons */}
             <div className="flex gap-4 mt-6 w-full">
               <button
-                className="flex-1 bg-white/10 text-white rounded-xl px-6 py-3 font-semibold hover:bg-purple-500/80 hover:text-white transition shadow-md border border-white/30 text-lg"
+                className="flex-1 bg-white/10 text-white rounded-xl px-6 py-3 font-semibold hover:bg-purple-500/80 hover:text-white transition shadow-md border border-white/20 text-lg"
                 onClick={handlePass}
               >
                 Pass
               </button>
               <button
-                className="flex-1 bg-gradient-to-r from-orange-400 to-pink-500 text-white rounded-xl px-6 py-3 font-semibold hover:from-orange-500 hover:to-pink-600 transition shadow-md border border-white/30 text-lg"
+                className="flex-1 bg-gradient-to-r from-[#4e54c8] to-[#8f94fb] text-white rounded-xl px-6 py-3 font-semibold hover:from-[#3d43a8] hover:to-[#7e84db] transition shadow-md border border-white/20 text-lg"
                 onClick={() => handleAddFriend(profile)}
               >
                 Add Friend
