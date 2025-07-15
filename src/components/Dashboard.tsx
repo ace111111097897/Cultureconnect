@@ -53,24 +53,22 @@ export function Dashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      {/* Navigation Tabs */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-2 mb-8 border border-white/20">
-        <div className="flex flex-wrap justify-center gap-2">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`relative px-4 py-3 rounded-xl font-medium transition-all flex items-center space-x-2 ${
-                activeTab === tab.id
-                  ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg'
-                  : 'text-white/70 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <span className="text-lg">{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
+      {/* Top Toolbar */}
+      <div className="flex overflow-x-auto whitespace-nowrap scrollbar-hide py-2 px-1 md:px-0" style={{ WebkitOverflowScrolling: 'touch' }}>
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`relative px-4 py-3 rounded-xl font-medium transition-all flex items-center space-x-2 ${
+              activeTab === tab.id
+                ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg'
+                : 'text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <span className="text-lg">{tab.icon}</span>
+            <span>{tab.label}</span>
+          </button>
+        ))}
       </div>
 
       {/* Content Area */}

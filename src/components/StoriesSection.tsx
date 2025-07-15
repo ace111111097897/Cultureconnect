@@ -358,7 +358,7 @@ export function StoriesSection() {
           </div>
         </div>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex overflow-x-auto whitespace-nowrap scrollbar-hide py-2 px-1 md:px-0" style={{ WebkitOverflowScrolling: 'touch' }}>
           {stories.map((story) => (
             <div
               key={story._id}
