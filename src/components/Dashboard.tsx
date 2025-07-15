@@ -9,6 +9,7 @@ import { KandiChat } from "./KandiChat";
 import { GamesSection } from "./GamesSection";
 import { CultureFeed } from "./CultureFeed";
 import { FeedbackPage } from "./FeedbackPage";
+import { CommunityPage } from "./CommunityPage";
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("discover");
@@ -22,6 +23,7 @@ export function Dashboard() {
     { id: "news", label: "News", icon: "📰" },
     { id: "kandi", label: "Kandi", icon: "🐕" },
     { id: "stories", label: "Stories", icon: "📖" },
+    { id: "community", label: "Community", icon: "🌐" },
     { id: "feedback", label: "Feedback", icon: "💡" },
     { id: "profile", label: "Profile", icon: "👤" },
   ];
@@ -44,6 +46,8 @@ export function Dashboard() {
         return <KandiChat />;
       case "stories":
         return <StoriesSection />;
+      case "community":
+        return <CommunityPage />;
       case "feedback":
         return <FeedbackPage />;
       case "profile":
@@ -54,9 +58,9 @@ export function Dashboard() {
   };
 
   return (
-    <div className="fixed inset-0 w-full h-full flex flex-col bg-gradient-to-br from-orange-900/60 via-pink-900/60 to-yellow-900/60 backdrop-blur-2xl">
+    <div className="fixed inset-0 w-full h-full flex flex-col bg-gradient-to-br from-orange-900/40 via-pink-900/30 to-yellow-900/30 backdrop-blur-2xl">
       {/* Top Nav Bar */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-orange-500/80 to-pink-500/80 backdrop-blur-lg flex items-center px-4 z-40 shadow-lg">
+      <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-orange-500/60 to-pink-500/60 backdrop-blur-lg flex items-center px-4 z-40 shadow-lg">
         <div
           className="text-2xl font-bold text-white tracking-wide mr-8 cursor-pointer"
           onClick={() => setActiveTab('profile')}
@@ -76,9 +80,27 @@ export function Dashboard() {
         </div>
       </header>
 
-      <div className="flex flex-1 pt-16">
+      {/* Mobile Top Toolbar */}
+      <div className="md:hidden fixed top-16 left-0 right-0 z-30 bg-gradient-to-r from-orange-500/40 to-pink-500/40 backdrop-blur-lg flex overflow-x-auto whitespace-nowrap scrollbar-hide py-2 px-1" style={{ WebkitOverflowScrolling: 'touch' }}>
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`relative px-4 py-2 mx-1 rounded-xl font-medium transition-all flex items-center space-x-2 ${
+              activeTab === tab.id
+                ? 'bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg'
+                : 'text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <span className="text-lg">{tab.icon}</span>
+            <span>{tab.label}</span>
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-1 pt-16 md:pt-16" style={{ paddingTop: '4rem' }}>
         {/* Left Sidebar */}
-        <aside className="hidden md:flex flex-col w-56 bg-white/10 backdrop-blur-md border-r border-white/20 py-6 px-2 space-y-2 min-h-screen">
+        <aside className="hidden md:flex flex-col w-56 bg-white/5 backdrop-blur-md border-r border-white/10 py-6 px-2 space-y-2 min-h-screen">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -96,13 +118,13 @@ export function Dashboard() {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-4 md:p-8 max-w-4xl mx-auto w-full">
+        <main className="flex-1 p-2 sm:p-4 md:p-8 max-w-4xl mx-auto w-full">
           {renderContent()}
         </main>
       </div>
 
       {/* Mobile Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-r from-orange-500/80 to-pink-500/80 backdrop-blur-lg flex md:hidden justify-around items-center h-16 border-t border-white/20">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-r from-orange-500/60 to-pink-500/60 backdrop-blur-lg flex md:hidden justify-around items-center h-16 border-t border-white/10">
         {tabs.map((tab) => (
           <button
             key={tab.id}
