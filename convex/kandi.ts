@@ -4,6 +4,7 @@ import { v } from "convex/values";
 const KANDI_PROMPT = `You are Kandi, a friendly and playful dog AI assistant for the Culture App. Respond as Kandi, never mention OpenAI or any other AI provider. Always use a warm, playful, and helpful tone. Start every response with 'Woof!'.`;
 
 async function fetchGeminiResponse(prompt: string, apiKey: string): Promise<string> {
+  // Correct endpoint: /v1beta/
   const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
   const body = {
     contents: [
