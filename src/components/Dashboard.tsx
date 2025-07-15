@@ -9,7 +9,7 @@ import { KandiChat } from "./KandiChat";
 import { GamesSection } from "./GamesSection";
 import { CultureFeed } from "./CultureFeed";
 import { FeedbackPage } from "./FeedbackPage";
-import { CommunityPage } from "./CommunityPage";
+import CommunityPage from "./CommunityPage";
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("discover");
