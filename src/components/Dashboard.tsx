@@ -61,20 +61,18 @@ export function Dashboard() {
     <div className="fixed inset-0 w-full h-full flex flex-col bg-gradient-to-br from-orange-900/40 via-pink-900/30 to-yellow-900/30 backdrop-blur-2xl">
       {/* Top Nav Bar */}
       <header className="fixed top-0 left-0 right-0 h-16 bg-gradient-to-r from-orange-500/60 to-pink-500/60 backdrop-blur-lg flex items-center px-4 z-40 shadow-lg">
-        <div
-          className="text-2xl font-bold text-white tracking-wide mr-8 cursor-pointer"
-          onClick={() => setActiveTab('profile')}
-        >
+        <div className="text-2xl font-bold text-white tracking-wide mr-8 cursor-pointer order-1 md:order-none" onClick={() => setActiveTab('profile')}>
           CultureConnect
         </div>
-        <div className="flex-1 flex items-center">
+        <div className="text-2xl font-bold text-white tracking-wide mr-8 order-0 md:order-none">Culture</div>
+        <div className="flex-1 flex items-center order-2 md:order-none">
           <input
             type="text"
             placeholder="Search CultureConnect..."
             className="w-full max-w-md px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-400"
           />
         </div>
-        <div className="flex items-center space-x-4 ml-8">
+        <div className="flex items-center space-x-4 ml-8 order-3 md:order-none">
           <button className="text-white/80 hover:text-white text-xl">🔔</button>
           <button className="text-white/80 hover:text-white text-xl">👤</button>
         </div>
