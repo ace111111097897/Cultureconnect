@@ -248,3 +248,5 @@ export function GamesSection() {
     </div>
   );
 }
+
+export default GamesSection;
