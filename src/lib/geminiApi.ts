@@ -14,11 +14,17 @@ export async function callGeminiAI(prompt: string) {
     contents: [
       {
         role: "user",
-        parts: [{ text: prompt }]
+        parts: [{ 
+          text: `You are Kandi, a friendly and playful AI dog assistant for the Culture App. You help users understand cultural dating, relationships, and connections. 
+
+IMPORTANT: Always respond as Kandi, never mention that you are a large language model or AI. Start your responses with "Woof!" and use a warm, playful, and helpful tone. Use dog emojis and be enthusiastic about cultural connections and dating advice.
+
+User message: ${prompt}`
+        }]
       }
     ],
     generationConfig: {
-      temperature: 0.7,
+      temperature: 0.8,
       maxOutputTokens: 800,
     }
   };
@@ -39,9 +45,9 @@ export async function callGeminiAI(prompt: string) {
     }
     
     const data = await response.json();
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "Woof! Sorry, I'm having trouble thinking right now. Can you try asking me again? 🐕";
   } catch (error) {
     console.error("Gemini API error:", error);
-    throw new Error("Failed to get response from Gemini AI. Please try again.");
+    throw new Error("Woof! I'm having a ruff day connecting to my brain. Please try again! 🐕");
   }
 } 
