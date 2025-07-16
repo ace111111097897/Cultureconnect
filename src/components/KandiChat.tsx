@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { callKandiAI } from "../lib/kandiApi";
+import { callGeminiAI } from "../lib/geminiApi";
 
 export default function KandiChat() {
   const [input, setInput] = useState("");
@@ -18,10 +18,10 @@ export default function KandiChat() {
     setLoading(true);
     setError(null);
     try {
-      const data = await callKandiAI(input);
-      setMessages((msgs) => [...msgs, { from: "kandi", text: data.reply || JSON.stringify(data) }]);
+      const reply = await callGeminiAI(input);
+      setMessages((msgs) => [...msgs, { from: "kandi", text: reply }]);
     } catch (err: any) {
-      setError(err.message || "Error contacting Kandi AI");
+      setError(err.message || "Error contacting Gemini AI");
     } finally {
       setLoading(false);
       setInput("");
