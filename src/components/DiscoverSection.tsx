@@ -46,6 +46,14 @@ export function DiscoverSection() {
   const [showModal, setShowModal] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
+  // Simulate current user for mutual interests and completion
+  const currentUser = {
+    languages: ["English", "Spanish"],
+    values: ["Personal growth", "Environmental consciousness"],
+    foodPreferences: ["Latin American", "Fusion"],
+    profileCompletion: 80,
+  };
+
   // Sync visibleProfiles with profiles from backend
   useEffect(() => {
     if (profiles) setVisibleProfiles(profiles);
@@ -82,6 +90,18 @@ export function DiscoverSection() {
     if (deltaX < -50) setCurrentIndex(idx => Math.max(idx - 1, 0));
     else if (deltaX > 50) setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1));
     touchStartX.current = null;
+  };
+
+  const [liked, setLiked] = useState(false);
+  const [showMatch, setShowMatch] = useState(false);
+
+  // Like/Heart button handler
+  const handleLike = () => {
+    setLiked(true);
+    // Simulate a match (in real app, check backend)
+    setTimeout(() => setShowMatch(true), 600);
+    setTimeout(() => setLiked(false), 1200);
+    setTimeout(() => setShowMatch(false), 2500);
   };
 
   if (!profiles) {
@@ -131,11 +151,38 @@ export function DiscoverSection() {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
+        {/* Profile Completion Progress Bar */}
+        <div className="w-full max-w-2xl mx-auto mb-4">
+          <div className="w-full bg-white/10 rounded-full h-3">
+            <div className="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full transition-all duration-500" style={{ width: `${currentUser.profileCompletion}%` }}></div>
+          </div>
+          <div className="text-right text-xs text-white/60 mt-1">Profile Completion: {currentUser.profileCompletion}%</div>
+        </div>
         {/* Profile Counter */}
         <div className="mb-4 text-white/80 text-lg font-semibold select-none">
           Profile {currentIndex + 1} of {visibleProfiles.length}
         </div>
         <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-8 py-12">
+          {/* Floating Like/Heart Button */}
+          <button
+            className={`absolute top-8 right-8 z-30 w-16 h-16 flex items-center justify-center rounded-full bg-pink-500/80 shadow-xl text-4xl text-white transition-all duration-200 hover:scale-110 focus:outline-none ${liked ? 'animate-ping-fast' : ''}`}
+            onClick={handleLike}
+            aria-label="Like Profile"
+            title="Like (L)"
+            style={{ boxShadow: liked ? '0 0 0 12px rgba(236,72,153,0.25)' : undefined }}
+          >
+            <span className={`transition-all duration-200 ${liked ? 'scale-125 text-pink-300' : ''}`}>❤️</span>
+          </button>
+          {/* Match Animation/Modal */}
+          {showMatch && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fadeIn">
+              <div className="bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 rounded-3xl shadow-2xl p-12 flex flex-col items-center animate-bounceIn">
+                <div className="text-6xl mb-4">🎉</div>
+                <div className="text-3xl font-bold text-white mb-2">It's a Match!</div>
+                <div className="text-white/80 mb-4">You and {profile.displayName} like each other!</div>
+              </div>
+            </div>
+          )}
           {/* Left Arrow */}
           <button
             className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 w-20 h-20 flex items-center justify-center text-5xl rounded-full transition-all duration-200
@@ -191,35 +238,35 @@ export function DiscoverSection() {
                 </div>
               </div>
             )}
-            {/* Languages */}
+            {/* Languages (highlight mutuals) */}
             {profile.languages && profile.languages.length > 0 && (
               <div className="w-full">
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="languages">🗣️</span> Languages</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.languages.map((l: string) => (
-                    <span key={l} className="bg-white/10 text-white px-4 py-2 rounded-full text-base font-semibold shadow-inner border border-white/20">{l}</span>
+                    <span key={l} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUser.languages.includes(l) ? 'bg-green-500/30 border-green-400 text-green-100' : 'bg-white/10 border-white/20 text-white'}`}>{l}{currentUser.languages.includes(l) && ' • Mutual'}</span>
                   ))}
                 </div>
               </div>
             )}
-            {/* Values */}
+            {/* Values (highlight mutuals) */}
             {profile.values && profile.values.length > 0 && (
               <div className="w-full">
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="values">💡</span> Values</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.values.map((v: string) => (
-                    <span key={v} className="bg-white/10 text-white px-4 py-2 rounded-full text-base font-semibold shadow-inner border border-white/20">{v}</span>
+                    <span key={v} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUser.values.includes(v) ? 'bg-blue-500/30 border-blue-400 text-blue-100' : 'bg-white/10 border-white/20 text-white'}`}>{v}{currentUser.values.includes(v) && ' • Mutual'}</span>
                   ))}
                 </div>
               </div>
             )}
-            {/* Food Preferences */}
+            {/* Food Preferences (highlight mutuals) */}
             {profile.foodPreferences && profile.foodPreferences.length > 0 && (
               <div className="w-full">
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="food">🍽️</span> Food Interests</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.foodPreferences.map((f: string) => (
-                    <span key={f} className="bg-white/10 text-white px-4 py-2 rounded-full text-base font-semibold shadow-inner border border-white/20">{f}</span>
+                    <span key={f} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUser.foodPreferences.includes(f) ? 'bg-pink-500/30 border-pink-400 text-pink-100' : 'bg-white/10 border-white/20 text-white'}`}>{f}{currentUser.foodPreferences.includes(f) && ' • Mutual'}</span>
                   ))}
                 </div>
               </div>
