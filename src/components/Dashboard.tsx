@@ -8,6 +8,7 @@ import { FriendsSection } from "./FriendsSection";
 import { KandiChat } from "./KandiChat";
 import { GamesSection } from "./GamesSection";
 import { CultureFeed } from "./CultureFeed";
+import CommunityPage from "./CommunityPage";
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("discover");
@@ -79,6 +80,8 @@ export function Dashboard() {
         return <KandiChat />;
       case "stories":
         return <StoriesSection />;
+      case "community":
+        return <CommunityPage />;
       case "profile":
         return <ProfilePage />;
       default:
