@@ -4,11 +4,13 @@ import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { MessagingPrompts } from "./MessagingPrompts";
 import KandiBubble from "./KandiBubble";
+import { toast } from "sonner";
 
 export function ConversationsSection() {
   const [selectedConversation, setSelectedConversation] = useState<Id<"conversations"> | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [showPrompts, setShowPrompts] = useState(false);
+  const [isSending, setIsSending] = useState(false);
   
   const conversations = useQuery(api.conversations.getUserConversations);
   const messages = useQuery(
@@ -20,18 +22,33 @@ export function ConversationsSection() {
   const sendMessage = useMutation(api.conversations.sendMessage);
   const markAsRead = useMutation(api.conversations.markMessagesAsRead);
 
+  // Debug logging
+  console.log("ConversationsSection - Conversations:", conversations);
+  console.log("ConversationsSection - Selected Conversation:", selectedConversation);
+  console.log("ConversationsSection - Messages:", messages);
+  console.log("ConversationsSection - User Profile:", userProfile);
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedConversation) return;
+    if (!newMessage.trim() || !selectedConversation || isSending) return;
+
+    const messageContent = newMessage.trim();
+    setNewMessage(""); // Clear input immediately for better UX
+    setIsSending(true);
 
     try {
+      console.log("Sending message:", { conversationId: selectedConversation, content: messageContent });
       await sendMessage({
         conversationId: selectedConversation,
-        content: newMessage.trim(),
+        content: messageContent,
       });
-      setNewMessage("");
+      console.log("Message sent successfully");
     } catch (error) {
       console.error("Failed to send message:", error);
+      setNewMessage(messageContent); // Restore the message if it failed
+      toast.error("Failed to send message. Please try again.");
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -209,10 +226,10 @@ export function ConversationsSection() {
                   />
                   <button
                     type="submit"
-                    disabled={!newMessage.trim()}
+                    disabled={!newMessage.trim() || isSending}
                     className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold hover:from-orange-500 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                   >
-                    Send
+                    {isSending ? "Sending..." : "Send"}
                   </button>
                 </div>
               </form>

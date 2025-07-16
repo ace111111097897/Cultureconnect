@@ -105,18 +105,24 @@ export const respondToFriendRequest = mutation({
 
     // If accepted, create friendship
     if (args.response === "accepted") {
-      await ctx.db.insert("friends", {
-        user1Id: request.fromUserId,
-        user2Id: request.toUserId,
-        timestamp: Date.now(),
-      });
+      try {
+        await ctx.db.insert("friends", {
+          user1Id: request.fromUserId,
+          user2Id: request.toUserId,
+          timestamp: Date.now(),
+        });
 
-      // Create a conversation for the new friends
-      await ctx.db.insert("conversations", {
-        participants: [request.fromUserId, request.toUserId],
-        type: "direct",
-        isActive: true,
-      });
+        // Create a conversation for the new friends
+        await ctx.db.insert("conversations", {
+          participants: [request.fromUserId, request.toUserId],
+          type: "direct",
+          isActive: true,
+          lastMessageTime: Date.now(),
+        });
+      } catch (error) {
+        console.error("Error creating friendship/conversation:", error);
+        throw new Error("Failed to create friendship");
+      }
     }
 
     return args.response;

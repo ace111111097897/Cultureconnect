@@ -89,44 +89,27 @@ export const sendMessage = mutation({
       throw new Error("Conversation not found or not authorized");
     }
 
-    const messageId = await ctx.db.insert("messages", {
-      conversationId: args.conversationId,
-      senderId: userId,
-      content: args.content,
-      messageType: "text",
-      timestamp: Date.now(),
-      isRead: false,
-    });
+    try {
+      const messageId = await ctx.db.insert("messages", {
+        conversationId: args.conversationId,
+        senderId: userId,
+        content: args.content,
+        messageType: "text",
+        timestamp: Date.now(),
+        isRead: false,
+      });
 
-    // Update conversation with last message info
-    await ctx.db.patch(args.conversationId, {
-      lastMessage: args.content,
-      lastMessageTime: Date.now(),
-    });
+      // Update conversation with last message info
+      await ctx.db.patch(args.conversationId, {
+        lastMessage: args.content,
+        lastMessageTime: Date.now(),
+      });
 
-    // Send notification to other participants
-    const otherParticipants = conversation.participants.filter(id => id !== userId);
-    
-    for (const participantId of otherParticipants) {
-      // Get sender's profile for notification
-      const senderProfile = await ctx.db
-        .query("profiles")
-        .withIndex("by_user", (q) => q.eq("userId", userId))
-        .unique();
-
-      if (senderProfile) {
-        await ctx.runMutation(api.notifications.createNotification, {
-          userId: participantId,
-          type: "message",
-          title: `New message from ${senderProfile.displayName}`,
-          message: args.content.length > 50 ? `${args.content.substring(0, 50)}...` : args.content,
-          relatedUserId: userId,
-          relatedConversationId: args.conversationId,
-        });
-      }
+      return messageId;
+    } catch (error) {
+      console.error("Error sending message:", error);
+      throw new Error("Failed to send message");
     }
-
-    return messageId;
   },
 });
 
@@ -188,5 +171,35 @@ export const getUnreadMessageCount = query({
     }
 
     return totalUnread;
+  },
+});
+
+export const createConversation = mutation({
+  args: {
+    participantIds: v.array(v.id("users")),
+    type: v.string(), // "direct" or "group"
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    // Ensure the current user is in the participants
+    if (!args.participantIds.includes(userId)) {
+      throw new Error("Current user must be a participant");
+    }
+
+    try {
+      const conversationId = await ctx.db.insert("conversations", {
+        participants: args.participantIds,
+        type: args.type,
+        isActive: true,
+        lastMessageTime: Date.now(),
+      });
+
+      return conversationId;
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+      throw new Error("Failed to create conversation");
+    }
   },
 });
