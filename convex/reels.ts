@@ -34,21 +34,27 @@ export const getPublicReels = query({
       .order("desc")
       .take(args.limit || 20);
 
-    // Get user profiles and video URLs
-    const reelsWithDetails = await Promise.all(
-      reels.map(async (reel) => {
-        const user = await ctx.db
+    // Get user profiles and video URLs, skip if missing
+    const reelsWithDetails = [];
+    for (const reel of reels) {
+      let user = null;
+      try {
+        user = await ctx.db
           .query("profiles")
           .withIndex("by_user", (q) => q.eq("userId", reel.userId))
           .unique();
-        const videoUrl = await ctx.storage.getUrl(reel.video);
-        return {
-          ...reel,
-          user,
-          videoUrl,
-        };
-      })
-    );
+      } catch (e) {
+        // Skip if no user profile
+        continue;
+      }
+      const videoUrl = await ctx.storage.getUrl(reel.video);
+      if (!videoUrl) continue; // Skip if video is missing
+      reelsWithDetails.push({
+        ...reel,
+        user,
+        videoUrl,
+      });
+    }
     return reelsWithDetails;
   },
 });
