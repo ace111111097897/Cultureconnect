@@ -113,13 +113,13 @@ export function ProfilePage() {
         ageRangeMin: profile.ageRangeMin,
         ageRangeMax: profile.ageRangeMax,
         maxDistance: profile.maxDistance,
-        socialLinks: profile.socialLinks || {
-          instagram: "",
-          twitter: "",
-          facebook: "",
-          linkedin: "",
-          tiktok: "",
-          youtube: "",
+        socialLinks: {
+          instagram: (profile.socialLinks?.instagram ?? "") as string,
+          twitter: (profile.socialLinks?.twitter ?? "") as string,
+          facebook: (profile.socialLinks?.facebook ?? "") as string,
+          linkedin: (profile.socialLinks?.linkedin ?? "") as string,
+          tiktok: (profile.socialLinks?.tiktok ?? "") as string,
+          youtube: (profile.socialLinks?.youtube ?? "") as string,
         },
       });
       setIsEditing(true);
@@ -193,12 +193,19 @@ export function ProfilePage() {
   };
 
   if (!profile) {
+    console.log("ProfilePage: No profile data available");
     return (
       <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/30 border-t-white"></div>
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/30 border-t-white"></div>
+          <p className="text-white/70">Loading profile...</p>
+          <p className="text-white/50 text-sm">If this takes too long, you may need to create a profile first.</p>
+        </div>
       </div>
     );
   }
+
+  console.log("ProfilePage: Profile data loaded:", profile);
 
   return (
     <div className="w-full max-w-3xl mx-auto p-2 sm:p-6 overflow-y-auto max-h-screen">
