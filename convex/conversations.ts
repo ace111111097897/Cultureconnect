@@ -1,7 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { internal } from "./_generated/api";
+import { api } from "./_generated/api";
 
 export const getUserConversations = query({
   args: {},
@@ -115,7 +115,7 @@ export const sendMessage = mutation({
         .unique();
 
       if (senderProfile) {
-        await ctx.runMutation(internal.notifications.createNotification, {
+        await ctx.runMutation(api.notifications.createNotification, {
           userId: participantId,
           type: "message",
           title: `New message from ${senderProfile.displayName}`,

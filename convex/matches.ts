@@ -1,7 +1,8 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
-import { internal } from "./_generated/api";
+import { api } from "./_generated/api";
+import { Id } from "./_generated/dataModel";
 
 export const createMatch = mutation({
   args: {
@@ -64,7 +65,7 @@ export const createMatch = mutation({
           });
 
           // Create match notifications for both users
-          await ctx.runMutation(internal.notifications.createNotification, {
+          await ctx.runMutation(api.notifications.createNotification, {
             userId,
             type: "match",
             title: "New Match! 🎉",
@@ -72,7 +73,7 @@ export const createMatch = mutation({
             relatedUserId: args.targetUserId,
           });
 
-          await ctx.runMutation(internal.notifications.createNotification, {
+          await ctx.runMutation(api.notifications.createNotification, {
             userId: args.targetUserId,
             type: "match",
             title: "New Match! 🎉",
@@ -197,7 +198,7 @@ export const getFriendsOfFriends = query({
       Array.from(friendsOfFriends).slice(0, args.limit || 10).map(async (fofId) => {
         const profile = await ctx.db
           .query("profiles")
-          .withIndex("by_user", (q) => q.eq("userId", fofId))
+          .withIndex("by_user", (q) => q.eq("userId", fofId as Id<'users'>))
           .unique();
 
         if (!profile) return null;

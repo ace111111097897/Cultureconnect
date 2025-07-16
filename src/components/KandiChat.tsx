@@ -21,7 +21,7 @@ export function KandiChat() {
     setLastUserMessage(userMessage);
 
     try {
-      const response = await chatWithKandi({ message: userMessage });
+      const response = await chatWithKandi({ prompt: userMessage });
       setKandiResponse(response);
     } catch (error) {
       toast.error("Failed to send message to Kandi");

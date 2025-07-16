@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "./auth";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 // Get published news articles
 export const getNewsArticles = query({
