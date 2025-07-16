@@ -13,7 +13,6 @@ const navItems = [
   { label: "Messages", icon: "chat" },
   { label: "Games", icon: "sports_esports" },
   { label: "News", icon: "newspaper" },
-  { label: "Kandi", icon: "smart_toy" },
   { label: "Stories", icon: "auto_stories" },
   { label: "Community", icon: "diversity_3" },
   { label: "Feedback", icon: "feedback" },

@@ -5,10 +5,10 @@ import { ConversationsSection } from "./ConversationsSection";
 import { StoriesSection } from "./StoriesSection";
 import { ProfilePage } from "./ProfilePage";
 import { FriendsSection } from "./FriendsSection";
-import { KandiChat } from "./KandiChat";
 import { GamesSection } from "./GamesSection";
 import { CultureFeed } from "./CultureFeed";
 import CommunityPage from "./CommunityPage";
+import { ExploreSection } from "./ExploreSection";
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("discover");
@@ -47,10 +47,9 @@ export function Dashboard() {
     { id: "conversations", label: "Messages", icon: "💬" },
     { id: "games", label: "Games", icon: "🎮" },
     { id: "news", label: "News", icon: "📰" },
-    { id: "kandi", label: "Kandi", icon: "🐕" },
     { id: "stories", label: "Stories", icon: "📖" },
     { id: "events", label: "Events", icon: "📅", onClick: () => setShowEvents(true) },
-    { id: "explore", label: "Explore", icon: "🧭", onClick: () => setShowExplore(true) },
+    { id: "explore", label: "Explore", icon: "🧭" },
     { id: "icebreakers", label: "Icebreakers", icon: "✨", onClick: () => setShowIcebreakers(true) },
     { id: "success", label: "Success Stories", icon: "💖", onClick: () => setShowStories(true) },
     { id: "community", label: "Community", icon: "🌐" },
@@ -76,14 +75,14 @@ export function Dashboard() {
         return <GamesSection />;
       case "news":
         return <CultureFeed />;
-      case "kandi":
-        return <KandiChat />;
       case "stories":
         return <StoriesSection />;
       case "community":
         return <CommunityPage />;
       case "profile":
         return <ProfilePage />;
+      case "explore":
+        return <ExploreSection />;
       default:
         return <DiscoverSection />;
     }

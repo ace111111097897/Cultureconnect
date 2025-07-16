@@ -4,7 +4,6 @@ import * as profiles from "./profiles";
 import * as stories from "./stories";
 import * as storyReactions from "./storyReactions";
 import * as conversations from "./conversations";
-import * as kandi from "./kandi";
 import * as prompts from "./prompts";
 import * as news from "./news";
 
@@ -15,7 +14,6 @@ export default {
   stories,
   storyReactions,
   conversations,
-  kandi,
   prompts,
   news,
 }; 

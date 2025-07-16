@@ -27,6 +27,7 @@ import type * as news from "../news.js";
 import type * as notifications from "../notifications.js";
 import type * as profiles from "../profiles.js";
 import type * as prompts from "../prompts.js";
+import type * as reels from "../reels.js";
 import type * as router from "../router.js";
 import type * as stories from "../stories.js";
 import type * as storyReactions from "../storyReactions.js";
@@ -54,6 +55,7 @@ declare const fullApi: ApiFromModules<{
   notifications: typeof notifications;
   profiles: typeof profiles;
   prompts: typeof prompts;
+  reels: typeof reels;
   router: typeof router;
   stories: typeof stories;
   storyReactions: typeof storyReactions;

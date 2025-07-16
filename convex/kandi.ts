@@ -1,74 +1,43 @@
+"use node";
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 
 const KANDI_PROMPT = `You are Kandi, a friendly and playful dog AI assistant for the Culture App. Respond as Kandi, never mention OpenAI or any other AI provider. Always use a warm, playful, and helpful tone. Start every response with 'Woof!'.`;
 
-async function fetchGeminiResponse(prompt: string, apiKey: string): Promise<string> {
-  // Correct endpoint: /v1beta/
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`;
-  const body = {
-    contents: [
-      {
-        parts: [{ text: prompt }]
-      }
-    ],
-    system_instruction: {
-      parts: [{ text: KANDI_PROMPT }]
-    }
-  };
-  let response;
-  try {
-    response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-  } catch (err) {
-    return "Woof! Sorry, I can't fetch my thoughts right now. Please try again soon!";
-  }
-  if (response.status === 401) {
-    return "Woof! My brain key isn't working. Please check my configuration!";
-  }
-  if (!response.ok) {
-    return `Woof! I'm having a technical issue (error ${response.status}). Try again later!`;
-  }
-  let data;
-  try {
-    data = await response.json();
-  } catch (err) {
-    return "Woof! I got a confusing answer from my brain. Try again!";
-  }
-  const candidates = data && Array.isArray(data.candidates) ? data.candidates : [];
-  for (const candidate of candidates) {
-    if (candidate?.content?.parts?.[0]?.text) {
-      return candidate.content.parts[0].text;
-    }
-  }
-  return "Woof! Kandi didn't understand that. Try again!";
-}
-
 export const chatWithKandi = action({
-  args: v.object({
-    prompt: v.optional(v.string()),
-    message: v.optional(v.string()),
-  }),
-  handler: async (_ctx, args) => {
-    const apiKey = process.env.CONVEX_GEMINI_API_KEY;
-    if (!apiKey) {
-      return "Woof! My brain key is missing. Please set it up!";
-    }
-    const prompt = args.prompt || args.message || "";
-    return await fetchGeminiResponse(prompt, apiKey);
-  }
-});
-
-export const chatWithKandiV2 = action({
   args: { prompt: v.string() },
-  handler: async (_ctx, args) => {
-    const apiKey = process.env.CONVEX_GEMINI_API_KEY;
+  returns: v.string(),
+  handler: async (ctx, args) => {
+    const apiKey = process.env.CONVEX_OPENAI_API_KEY;
     if (!apiKey) {
-      return "Woof! My brain key is missing. Please set it up!";
+      throw new Error("OpenAI API key not set in environment.");
     }
-    return await fetchGeminiResponse(args.prompt, apiKey);
-  }
+    const systemPrompt = KANDI_PROMPT;
+    const userPrompt = args.prompt;
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        max_tokens: 256,
+        temperature: 0.8,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error("No content in OpenAI response");
+    }
+    return content;
+  },
 }); 

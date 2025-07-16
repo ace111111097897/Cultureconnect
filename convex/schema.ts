@@ -121,16 +121,6 @@ const applicationTables = {
     .index("by_sender", ["senderId"])
     .index("by_timestamp", ["timestamp"]),
 
-  // NEW: Kandi AI messages
-  kandiMessages: defineTable({
-    userId: v.id("users"),
-    userMessage: v.string(),
-    kandiResponse: v.string(),
-    timestamp: v.number(),
-  })
-    .index("by_user", ["userId"])
-    .index("by_timestamp", ["timestamp"]),
-
   culturalStories: defineTable({
     userId: v.id("users"),
     title: v.string(),
@@ -239,6 +229,18 @@ const applicationTables = {
     .index("by_type", ["type"])
     .index("by_read", ["isRead"])
     .index("by_timestamp", ["timestamp"]),
+
+  reels: defineTable({
+    userId: v.id("users"),
+    video: v.id("_storage"),
+    caption: v.string(),
+    likes: v.number(),
+    comments: v.number(),
+    timestamp: v.number(),
+    isPublic: v.boolean(),
+  })
+    .index("by_user", ["userId"]) 
+    .index("by_public", ["isPublic"]),
 };
 
 export default defineSchema({
