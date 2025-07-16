@@ -90,10 +90,10 @@ export function ConversationsSection() {
   };
 
   return (
-    <div className="grid lg:grid-cols-3 gap-4 md:gap-6 h-[600px] md:h-[700px] bg-white rounded-2xl shadow-sm md:bg-transparent md:shadow-none overflow-hidden">
+    <div className="grid lg:grid-cols-3 gap-4 md:gap-6 h-[600px] md:h-[700px]">
       {/* Conversations List */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden">
-        <div className="p-3 md:p-4 border-b border-white/20 bg-white/5">
+        <div className="p-3 md:p-4 border-b border-white/20">
           <h3 className="text-base md:text-lg font-semibold text-white">Messages</h3>
         </div>
         

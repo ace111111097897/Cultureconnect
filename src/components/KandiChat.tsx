@@ -77,7 +77,7 @@ export default function KandiChat() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-start bg-gradient-to-br from-purple-800 via-blue-700 to-pink-500 rounded-2xl p-4 md:p-8 shadow-lg min-h-[60vh] md:min-h-[70vh]">
+    <div className="flex flex-col items-center justify-start bg-gradient-to-br from-purple-800 via-blue-700 to-pink-500 rounded-2xl p-4 md:p-8 shadow-lg min-h-[60vh]">
       <div className="flex flex-col items-center mb-6 md:mb-8">
         <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-yellow-200 flex items-center justify-center mb-4 shadow-lg border-4 border-white">
           <span className="text-4xl md:text-5xl">🐕</span>
@@ -91,35 +91,24 @@ export default function KandiChat() {
         )}
       </div>
 
-      {/* Chat Messages */}
-      <div className="w-full max-w-2xl mb-4 md:mb-6 flex-1 overflow-y-auto space-y-4 max-h-[40vh] md:max-h-[50vh]">
-        {messages.map((message, index) => (
+      <div className="w-full max-w-2xl bg-white/10 rounded-xl p-4 md:p-6 mb-4 border border-white/20">
+        {messages.map((msg, i) => (
           <div
-            key={index}
-            className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`max-w-[80%] p-3 md:p-4 rounded-2xl ${
-                message.sender === "user"
-                  ? "bg-white text-gray-800 rounded-br-md"
-                  : "bg-white/20 text-white rounded-bl-md"
+            key={i}
+            className={`mb-4 p-4 rounded-lg ${msg.from === "kandi"
+              ? "bg-gradient-to-br from-purple-400/60 to-pink-400/60 text-white border border-yellow-300"
+              : "bg-white/80 text-black border border-gray-200"
               }`}
-            >
-              <p className="text-sm md:text-base whitespace-pre-wrap">{message.text}</p>
+          >
+            <div className="font-semibold mb-1 flex items-center">
+              {msg.from === "kandi" && <span className="mr-2">🐕 Kandi</span>}
+              {msg.from === "user" && <span className="mr-2">You</span>}
             </div>
+            <div>{msg.text}</div>
           </div>
         ))}
-        {loading && (
-          <div className="flex justify-start">
-            <div className="bg-white/20 text-white rounded-2xl rounded-bl-md p-3 md:p-4">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-              </div>
-            </div>
-          </div>
-        )}
+        {loading && <div className="text-white">🐕 Kandi is thinking...</div>}
+        {error && <div className="text-red-500">{error}</div>}
       </div>
 
       {/* Suggested Questions */}

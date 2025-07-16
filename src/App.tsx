@@ -9,26 +9,26 @@ import { Dashboard } from "./components/Dashboard";
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800">
-      {/* Desktop Header */}
-      <header className="hidden md:block sticky top-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/20">
-        <div className="w-full px-4 sm:px-4 h-16 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-2xl font-bold text-white">CultureConnect</h1>
-            <span className="px-3 py-1 bg-white/10 rounded-full text-white text-sm">Cultural Dating</span>
+    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-800 to-orange-600">
+      <div className="min-h-screen bg-black/20 backdrop-blur-sm">
+        <header className="sticky top-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/20">
+          <div className="w-full px-4 sm:px-4 h-16 flex justify-between items-center">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full"></div>
+              <h1 className="text-2xl font-bold text-white">Culture</h1>
+            </div>
+            <Authenticated>
+              <SignOutButton />
+            </Authenticated>
           </div>
-          <div className="flex items-center space-x-4">
-            <button className="px-4 py-2 bg-white/10 rounded-lg text-white hover:bg-white/20 transition">
-              Settings
-            </button>
-            <SignOutButton />
-          </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="w-full px-3 sm:px-4 py-6 sm:py-8">
-        <Content />
-      </main>
+        <main className="w-full px-2 sm:px-4 py-4 sm:py-8">
+          <Content />
+        </main>
+        
+        <Toaster />
+      </div>
     </div>
   );
 }

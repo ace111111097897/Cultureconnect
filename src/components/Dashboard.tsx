@@ -114,149 +114,160 @@ export function Dashboard() {
         </div>
       </header>
       {/* Mobile Top Toolbar and Sidebar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-xl border-b border-gray-200/50 shadow-sm">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-              <span className="text-white text-sm font-bold">C</span>
-            </div>
-            <h1 className="text-lg font-bold text-gray-800">CultureConnect</h1>
-          </div>
-          <div className="flex items-center space-x-2">
-            <button className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-              <span className="text-gray-600">🔍</span>
-            </button>
-            <button className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
-              <span className="text-gray-600">🔔</span>
-            </button>
-          </div>
-        </div>
-        
-        {/* Mobile Tab Navigation */}
-        <div className="flex overflow-x-auto scrollbar-hide px-4 pb-3" style={{ WebkitOverflowScrolling: 'touch' }}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`relative flex-shrink-0 px-4 py-2 mx-1 rounded-full font-medium transition-all flex items-center space-x-2 ${
-                activeTab === tab.id
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-              }`}
-            >
-              <span className="text-base">{tab.icon}</span>
-              <span className="text-sm">{tab.label}</span>
-            </button>
-          ))}
-        </div>
+      <div className="md:hidden fixed top-16 left-0 right-0 z-30 bg-white/10 backdrop-blur-md flex overflow-x-auto whitespace-nowrap scrollbar-hide py-3 px-2" style={{ WebkitOverflowScrolling: 'touch' }}>
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`relative px-4 py-3 mx-1 rounded-xl font-medium transition-all flex items-center space-x-2 ${
+              activeTab === tab.id
+                ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
+                : 'text-white/70 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <span className="text-lg">{tab.icon}</span>
+            <span>{tab.label}</span>
+          </button>
+        ))}
       </div>
       
-      <div className="flex flex-1 pt-24 md:pt-16 min-h-screen">
-        {/* Desktop Sidebar */}
-        <div className="hidden md:flex md:w-80 lg:w-96 flex-col bg-white/10 backdrop-blur-md border-r border-white/20">
-          {/* Desktop Sidebar Content */}
-          <div className="p-6">
-            <div className="flex items-center space-x-3 mb-8">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
-                <span className="text-white text-lg font-bold">C</span>
+      <div className="flex flex-1 pt-20 md:pt-16 min-h-[calc(100vh-5rem)]" style={{ paddingTop: '5rem' }}>
+        {/* Left Sidebar */}
+        {/* Example sidebar layout for desktop (md+): */}
+        <aside className="hidden md:flex flex-col w-64 h-full bg-gradient-to-b from-purple-900 via-blue-900 to-pink-800 p-6 text-white rounded-r-2xl shadow-xl">
+          {/* Top section: Profile and Settings */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-full bg-yellow-200 flex items-center justify-center border-2 border-white">
+                <span className="text-3xl">👤</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">CultureConnect</h1>
-                <p className="text-white/70 text-sm">Cultural Dating</p>
+                <div className="font-bold text-lg">Your Profile</div>
+                <div className="text-sm text-white/70">Verified User</div>
               </div>
             </div>
-            
-            {/* Desktop Navigation */}
-            <nav className="space-y-2">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-all ${
-                    activeTab === tab.id
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                      : 'text-white/70 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  <span className="text-xl">{tab.icon}</span>
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
-        </div>
-
-        {/* Main Content Area - Full Screen */}
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto w-full bg-gray-50 md:bg-transparent pb-20 md:pb-6">
-          {/* Mobile Culture Tags */}
-          <div className="md:hidden mb-6">
-            <div className="flex items-center space-x-2 overflow-x-auto scrollbar-hide pb-2">
-              <span className="px-3 py-1.5 bg-white rounded-full text-gray-700 text-sm font-medium shadow-sm">Mediterranean</span>
-              <span className="px-3 py-1.5 bg-white rounded-full text-gray-700 text-sm font-medium shadow-sm">Fusion • Mutual</span>
-              <span className="px-3 py-1.5 bg-white rounded-full text-gray-700 text-sm font-medium shadow-sm">Cultural Exchange</span>
-            </div>
+            <button 
+              className="p-2 rounded-full hover:bg-white/20 transition" 
+              title="Settings"
+              onClick={() => setShowSettings(true)}
+            >
+              <span className="text-2xl">⚙️</span>
+            </button>
           </div>
           
-          {/* Desktop Culture Tags */}
-          <div className="hidden md:block mb-6">
-            <div className="flex items-center space-x-4 mb-4">
+          {/* Kandi under Profile */}
+          <button
+            className="flex items-center space-x-2 py-3 px-4 rounded-xl bg-gradient-to-r from-yellow-300 to-pink-300 text-black font-semibold mb-6 hover:scale-105 transition shadow-lg"
+            onClick={() => setActiveTab("kandi")}
+          >
+            <span className="text-2xl">🐕</span>
+            <span>Kandi AI</span>
+          </button>
+          
+          {/* Main navigation */}
+          <nav className="flex flex-col space-y-2 flex-1">
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("discover")}
+            >
+              <span className="text-xl">🔍</span>
+              <span>Discover</span>
+            </button>
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("matches")}
+            >
+              <span className="text-xl">💫</span>
+              <span>Matches</span>
+            </button>
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("friends")}
+            >
+              <span className="text-xl">👥</span>
+              <span>Friends</span>
+            </button>
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("messages")}
+            >
+              <span className="text-xl">💬</span>
+              <span>Messages</span>
+            </button>
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("community")}
+            >
+              <span className="text-xl">🏘️</span>
+              <span>Community</span>
+            </button>
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("explore")}
+            >
+              <span className="text-xl">📱</span>
+              <span>Explore</span>
+            </button>
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("games")}
+            >
+              <span className="text-xl">🎮</span>
+              <span>Games</span>
+            </button>
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("stories")}
+            >
+              <span className="text-xl">📖</span>
+              <span>Stories</span>
+            </button>
+          </nav>
+          
+          {/* Bottom section */}
+          <div className="mt-auto pt-6 border-t border-white/20">
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left w-full"
+              onClick={() => setShowVerification(true)}
+            >
+              <span className="text-xl">✅</span>
+              <span>Verification</span>
+              {isVerified && <span className="ml-auto text-green-400">✔️</span>}
+            </button>
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-red-500/20 transition text-left w-full mt-2 text-red-300 hover:text-red-200"
+              onClick={() => setShowConfirm({ type: 'logout', open: true })}
+            >
+              <span className="text-xl">🚪</span>
+              <span>Logout</span>
+            </button>
+          </div>
+        </aside>
+
+        {/* Main Content Area - Full Screen */}
+        <main className="flex-1 p-4 md:p-6 overflow-y-auto w-full">
+          {/* Top section with culture tags */}
+          <div className="mb-6 md:mb-8">
+            <div className="flex items-center space-x-3 md:space-x-4 mb-4">
               <span className="px-3 py-2 bg-white/10 rounded-full text-white text-sm">Mediterranean</span>
               <span className="px-3 py-2 bg-white/10 rounded-full text-white text-sm">Fusion • Mutual</span>
             </div>
           </div>
-
+          
           {/* Content based on active tab - Full Width */}
           <div className="w-full">
-            {activeTab === "discover" && (
-              <div className="bg-white rounded-2xl shadow-sm md:bg-transparent md:shadow-none">
-                <DiscoverSection />
-              </div>
-            )}
-            {activeTab === "matches" && (
-              <div className="bg-white rounded-2xl shadow-sm md:bg-transparent md:shadow-none">
-                <MatchesSection />
-              </div>
-            )}
-            {activeTab === "friends" && (
-              <div className="bg-white rounded-2xl shadow-sm md:bg-transparent md:shadow-none">
-                <FriendsSection />
-              </div>
-            )}
-            {activeTab === "messages" && (
-              <div className="bg-white rounded-2xl shadow-sm md:bg-transparent md:shadow-none">
-                <ConversationsSection />
-              </div>
-            )}
-            {activeTab === "community" && (
-              <div className="bg-white rounded-2xl shadow-sm md:bg-transparent md:shadow-none">
-                <CommunityPage />
-              </div>
-            )}
-            {activeTab === "explore" && (
-              <div className="bg-white rounded-2xl shadow-sm md:bg-transparent md:shadow-none">
-                <ExploreSection />
-              </div>
-            )}
-            {activeTab === "games" && (
-              <div className="bg-white rounded-2xl shadow-sm md:bg-transparent md:shadow-none">
-                <GamesSection />
-              </div>
-            )}
-            {activeTab === "stories" && (
-              <div className="bg-white rounded-2xl shadow-sm md:bg-transparent md:shadow-none">
-                <StoriesSection />
-              </div>
-            )}
-            {activeTab === "profile" && (
-              <div className="bg-white rounded-2xl shadow-sm md:bg-transparent md:shadow-none">
-                <ProfilePage />
-              </div>
-            )}
+            {activeTab === "discover" && <DiscoverSection />}
+            {activeTab === "matches" && <MatchesSection />}
+            {activeTab === "friends" && <FriendsSection />}
+            {activeTab === "messages" && <ConversationsSection />}
+            {activeTab === "community" && <CommunityPage />}
+            {activeTab === "explore" && <ExploreSection />}
+            {activeTab === "games" && <GamesSection />}
+            {activeTab === "stories" && <StoriesSection />}
+            {activeTab === "profile" && <ProfilePage />}
             {activeTab === "kandi" && (
               <div className="w-full">
-                <div className="bg-white rounded-2xl shadow-sm md:bg-transparent md:shadow-none">
-                  <KandiChat />
-                </div>
+                <KandiChat />
               </div>
             )}
           </div>
@@ -495,26 +506,6 @@ export function Dashboard() {
           </div>
         </div>
       )}
-
-      {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-xl border-t border-gray-200/50 shadow-lg">
-        <div className="flex justify-around items-center py-2">
-          {tabs.slice(0, 5).map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex flex-col items-center space-y-1 px-3 py-2 rounded-lg transition-all ${
-                activeTab === tab.id
-                  ? 'text-blue-600 bg-blue-50'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              <span className="text-xl">{tab.icon}</span>
-              <span className="text-xs font-medium">{tab.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
