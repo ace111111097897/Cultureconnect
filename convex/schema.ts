@@ -241,6 +241,35 @@ const applicationTables = {
   })
     .index("by_user", ["userId"]) 
     .index("by_public", ["isPublic"]),
+
+  // Advanced: Likes for Reels
+  reelLikes: defineTable({
+    reelId: v.id("reels"),
+    userId: v.id("users"),
+    timestamp: v.number(),
+  })
+    .index("by_reel", ["reelId"])
+    .index("by_user", ["userId"])
+    .index("by_reel_and_user", ["reelId", "userId"]),
+
+  // Advanced: Comments for Reels
+  reelComments: defineTable({
+    reelId: v.id("reels"),
+    userId: v.id("users"),
+    text: v.string(),
+    timestamp: v.number(),
+  })
+    .index("by_reel", ["reelId"])
+    .index("by_user", ["userId"]),
+
+  // Persistent Kandi chat history
+  kandiChats: defineTable({
+    userId: v.id("users"),
+    from: v.union(v.literal("user"), v.literal("kandi")),
+    text: v.string(),
+    timestamp: v.number(),
+  })
+    .index("by_user", ["userId"]),
 };
 
 export default defineSchema({

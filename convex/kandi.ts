@@ -1,6 +1,7 @@
 "use node";
-import { action } from "./_generated/server";
+import { mutation, query, action } from "./_generated/server";
 import { v } from "convex/values";
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 const KANDI_PROMPT = `You are Kandi, a friendly and playful dog AI assistant for the Culture App. Respond as Kandi, never mention OpenAI or any other AI provider. Always use a warm, playful, and helpful tone. Start every response with 'Woof!'.`;
 
@@ -39,5 +40,34 @@ export const chatWithKandi = action({
       throw new Error("No content in OpenAI response");
     }
     return content;
+  },
+});
+
+// Persistent Kandi chat history
+export const addKandiMessage = mutation({
+  args: { from: v.union(v.literal("user"), v.literal("kandi")), text: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    return await ctx.db.insert("kandiChats", {
+      userId,
+      from: args.from,
+      text: args.text,
+      timestamp: Date.now(),
+    });
+  },
+});
+
+export const getKandiChat = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+    const messages = await ctx.db
+      .query("kandiChats")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .order("asc")
+      .collect();
+    return messages;
   },
 }); 
