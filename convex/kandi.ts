@@ -60,4 +60,15 @@ export const chatWithKandi = action({
     const prompt = args.prompt || args.message || "";
     return await fetchGeminiResponse(prompt, apiKey);
   }
+});
+
+export const chatWithKandiV2 = action({
+  args: { prompt: v.string() },
+  handler: async (_ctx, args) => {
+    const apiKey = process.env.CONVEX_GEMINI_API_KEY;
+    if (!apiKey) {
+      return "Woof! My brain key is missing. Please set it up!";
+    }
+    return await fetchGeminiResponse(args.prompt, apiKey);
+  }
 }); 

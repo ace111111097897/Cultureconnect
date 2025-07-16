@@ -9,7 +9,7 @@ export function KandiChat() {
   const [kandiResponse, setKandiResponse] = useState<string | null>(null);
   const [lastUserMessage, setLastUserMessage] = useState<string | null>(null);
 
-  const chatWithKandi = useAction(api.kandi.chatWithKandi);
+  const chatWithKandiV2 = useAction(api.kandi.chatWithKandiV2);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,19 +21,7 @@ export function KandiChat() {
     setLastUserMessage(userMessage);
 
     try {
-      let response;
-      try {
-        response = await chatWithKandi({ prompt: userMessage });
-      } catch (err1) {
-        try {
-          response = await chatWithKandi({ message: userMessage });
-        } catch (err2) {
-          toast.error("Kandi is not available. Please contact support.");
-          console.error("Kandi error (prompt and message failed):", err1, err2);
-          setKandiResponse("Woof! Sorry, I'm having technical issues. Please try again later.");
-          return;
-        }
-      }
+      const response = await chatWithKandiV2({ prompt: userMessage });
       setKandiResponse(response);
     } catch (error) {
       toast.error("Failed to send message to Kandi");
