@@ -99,7 +99,7 @@ const applicationTables = {
 
   conversations: defineTable({
     participants: v.array(v.id("users")),
-    type: v.string(), // "direct", "group", "kandi"
+    type: v.string(), // "direct", "group"
     title: v.optional(v.string()),
     culturalTheme: v.optional(v.string()),
     lastMessage: v.optional(v.string()),
@@ -113,7 +113,7 @@ const applicationTables = {
     conversationId: v.id("conversations"),
     senderId: v.id("users"),
     content: v.string(),
-    messageType: v.string(), // "text", "story", "cultural_moment", "kandi"
+    messageType: v.string(), // "text", "story", "cultural_moment"
     timestamp: v.number(),
     isRead: v.boolean(),
   })

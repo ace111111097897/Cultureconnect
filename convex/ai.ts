@@ -1,5 +1,3 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
-
-// Remove callKandiAI action and Kandi-specific logic 
+import { getAuthUserId } from "@convex-dev/auth/server"; 
