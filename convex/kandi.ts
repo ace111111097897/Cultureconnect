@@ -48,12 +48,16 @@ async function fetchGeminiResponse(prompt: string, apiKey: string): Promise<stri
 }
 
 export const chatWithKandi = action({
-  args: { prompt: v.string() },
+  args: v.object({
+    prompt: v.optional(v.string()),
+    message: v.optional(v.string()),
+  }),
   handler: async (_ctx, args) => {
     const apiKey = process.env.CONVEX_GEMINI_API_KEY;
     if (!apiKey) {
       return "Woof! My brain key is missing. Please set it up!";
     }
-    return await fetchGeminiResponse(args.prompt, apiKey);
+    const prompt = args.prompt || args.message || "";
+    return await fetchGeminiResponse(prompt, apiKey);
   }
 }); 
