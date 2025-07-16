@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { callGeminiAI } from "../lib/geminiApi";
+import { useAction } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 // Auto-generated question prompts for Kandi
 const SUGGESTED_QUESTIONS = [
@@ -10,7 +12,9 @@ const SUGGESTED_QUESTIONS = [
   "How can I plan a culturally-themed date?",
   "What should I know about cross-cultural relationships?",
   "How do I handle cultural differences in dating?",
-  "What are good conversation starters for cultural topics?"
+  "What are good conversation starters for cultural topics?",
+  "Tell me about users with similar cultural backgrounds",
+  "What cultural activities would I enjoy based on my profile?"
 ];
 
 export default function KandiChat() {
@@ -24,6 +28,22 @@ export default function KandiChat() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [userData, setUserData] = useState<any>(null);
+
+  const getKandiUserData = useAction(api.ai.getKandiUserData);
+
+  // Fetch user data when component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const data = await getKandiUserData({});
+        setUserData(data);
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+      }
+    };
+    fetchUserData();
+  }, [getKandiUserData]);
 
   const sendMessage = async (messageText?: string) => {
     const textToSend = messageText || input;
@@ -35,7 +55,8 @@ export default function KandiChat() {
     setShowSuggestions(false);
     
     try {
-      const reply = await callGeminiAI(textToSend);
+      // Pass user data to Kandi for personalized responses
+      const reply = await callGeminiAI(textToSend, userData);
       setMessages((msgs) => [...msgs, { from: "kandi", text: reply }]);
     } catch (err: any) {
       setError(err.message || "Error contacting Gemini AI");
@@ -50,6 +71,11 @@ export default function KandiChat() {
     await sendMessage(analysisPrompt);
   };
 
+  const askAboutUsers = async () => {
+    const userPrompt = `Based on my profile and the available users on the platform, can you tell me about interesting people I might connect with? What cultural connections or shared interests might we have?`;
+    await sendMessage(userPrompt);
+  };
+
   return (
     <div className="flex flex-col items-center justify-start bg-gradient-to-br from-purple-800 via-blue-700 to-pink-500 rounded-2xl p-8 shadow-lg min-h-[60vh]">
       <div className="flex flex-col items-center mb-8">
@@ -58,6 +84,9 @@ export default function KandiChat() {
         </div>
         <h2 className="text-3xl font-bold text-white mb-2">Chat with Kandi</h2>
         <p className="text-lg text-white/80 mb-2">Your friendly AI companion for cultural dating advice!</p>
+        {userData?.currentUser && (
+          <p className="text-sm text-white/60">Connected as {userData.currentUser.displayName} from {userData.currentUser.location}</p>
+        )}
       </div>
 
       {/* Suggested Questions */}
@@ -75,12 +104,20 @@ export default function KandiChat() {
               </button>
             ))}
           </div>
-          <button
-            onClick={analyzeConversation}
-            className="mt-3 p-3 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg text-white font-semibold hover:scale-105 transition"
-          >
-            🔍 Analyze My Conversation
-          </button>
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={analyzeConversation}
+              className="flex-1 p-3 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg text-white font-semibold hover:scale-105 transition"
+            >
+              🔍 Analyze My Conversation
+            </button>
+            <button
+              onClick={askAboutUsers}
+              className="flex-1 p-3 bg-gradient-to-r from-purple-400 to-pink-500 rounded-lg text-white font-semibold hover:scale-105 transition"
+            >
+              👥 Tell Me About Users
+            </button>
+          </div>
         </div>
       )}
 

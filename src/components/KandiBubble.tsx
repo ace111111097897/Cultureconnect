@@ -1,17 +1,38 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { callGeminiAI } from "../lib/geminiApi";
+import { useAction } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 interface KandiBubbleProps {
   conversationHistory?: string;
   recipientName?: string;
+  recipientUserId?: string;
   onClose?: () => void;
 }
 
-export default function KandiBubble({ conversationHistory, recipientName, onClose }: KandiBubbleProps) {
+export default function KandiBubble({ conversationHistory, recipientName, recipientUserId, onClose }: KandiBubbleProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Array<{ from: "user" | "kandi"; text: string }>>([]);
   const [loading, setLoading] = useState(false);
+  const [userData, setUserData] = useState<any>(null);
+
+  const getKandiUserData = useAction(api.ai.getKandiUserData);
+
+  // Fetch user data when component mounts
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const data = await getKandiUserData({ 
+          targetUserId: recipientUserId 
+        });
+        setUserData(data);
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+      }
+    };
+    fetchUserData();
+  }, [getKandiUserData, recipientUserId]);
 
   const quickAdvice = [
     "Ask about their cultural background",
@@ -33,7 +54,8 @@ export default function KandiBubble({ conversationHistory, recipientName, onClos
         ? `Context: You're helping me chat with ${recipientName || 'someone'}. Here's our conversation history: ${conversationHistory}. User question: ${textToSend}`
         : textToSend;
       
-      const reply = await callGeminiAI(contextPrompt);
+      // Pass user data to Kandi for personalized responses
+      const reply = await callGeminiAI(contextPrompt, userData);
       setMessages((msgs) => [...msgs, { from: "kandi", text: reply }]);
     } catch (err: any) {
       setMessages((msgs) => [...msgs, { from: "kandi", text: "Woof! I'm having trouble thinking right now. Can you try again? 🐕" }]);
@@ -51,6 +73,15 @@ export default function KandiBubble({ conversationHistory, recipientName, onClos
     
     const analysisPrompt = `Analyze this conversation with ${recipientName || 'someone'} and give me advice: ${conversationHistory}. What are their interests, communication style, and what topics should I discuss next?`;
     await sendMessage(analysisPrompt);
+  };
+
+  const getPersonalizedAdvice = async () => {
+    if (userData?.targetUser) {
+      const advicePrompt = `Based on my profile and ${recipientName || 'this person'}'s profile, what are some great conversation starters or topics we could discuss? What cultural connections might we have?`;
+      await sendMessage(advicePrompt);
+    } else {
+      await sendMessage("What are some good cultural conversation starters I can use?");
+    }
   };
 
   if (!isExpanded) {
@@ -94,12 +125,20 @@ export default function KandiBubble({ conversationHistory, recipientName, onClos
             </button>
           ))}
         </div>
-        <button
-          onClick={analyzeConversation}
-          className="mt-2 w-full p-2 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition"
-        >
-          🔍 Analyze Conversation
-        </button>
+        <div className="flex gap-1 mt-2">
+          <button
+            onClick={analyzeConversation}
+            className="flex-1 p-2 bg-green-500 text-white text-xs rounded hover:bg-green-600 transition"
+          >
+            🔍 Analyze
+          </button>
+          <button
+            onClick={getPersonalizedAdvice}
+            className="flex-1 p-2 bg-purple-500 text-white text-xs rounded hover:bg-purple-600 transition"
+          >
+            💡 Personalized
+          </button>
+        </div>
       </div>
 
       {/* Chat Area */}
@@ -107,6 +146,11 @@ export default function KandiBubble({ conversationHistory, recipientName, onClos
         {messages.length === 0 && (
           <div className="text-gray-500 text-sm text-center">
             Ask Kandi for advice about your conversation! 🐕
+            {userData?.targetUser && (
+              <div className="mt-2 text-xs text-blue-600">
+                Connected with {userData.targetUser.displayName} ({userData.targetUser.compatibilityScore}% compatibility)
+              </div>
+            )}
           </div>
         )}
         {messages.map((msg, i) => (

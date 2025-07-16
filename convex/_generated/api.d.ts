@@ -19,6 +19,7 @@ import type * as conversations from "../conversations.js";
 import type * as emailActions from "../emailActions.js";
 import type * as friends from "../friends.js";
 import type * as functions from "../functions.js";
+import type * as games from "../games.js";
 import type * as http from "../http.js";
 import type * as index from "../index.js";
 import type * as matches from "../matches.js";
@@ -46,6 +47,7 @@ declare const fullApi: ApiFromModules<{
   emailActions: typeof emailActions;
   friends: typeof friends;
   functions: typeof functions;
+  games: typeof games;
   http: typeof http;
   index: typeof index;
   matches: typeof matches;

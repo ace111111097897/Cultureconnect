@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { MessagingPrompts } from "./MessagingPrompts";
+import KandiBubble from "./KandiBubble";
 
 export function ConversationsSection() {
   const [selectedConversation, setSelectedConversation] = useState<Id<"conversations"> | null>(null);
@@ -77,6 +78,16 @@ export function ConversationsSection() {
   }
 
   const selectedConversationData = getSelectedConversationData();
+
+  // Get conversation history for Kandi
+  const getConversationHistory = () => {
+    if (!messages || !selectedConversationData) return "";
+    return messages.map(msg => {
+      const isOtherUser = msg.senderId === (selectedConversationData as any)?.otherProfile?.userId;
+      const senderName = isOtherUser ? (selectedConversationData as any)?.otherProfile?.displayName : "You";
+      return `${senderName}: ${msg.content}`;
+    }).join("\n");
+  };
 
   return (
     <div className="grid lg:grid-cols-3 gap-6 h-[700px]">
@@ -239,6 +250,15 @@ export function ConversationsSection() {
           </div>
         )}
       </div>
+      
+      {/* Kandi Bubble for real-time advice */}
+      {selectedConversationData && (
+        <KandiBubble
+          conversationHistory={getConversationHistory()}
+          recipientName={(selectedConversationData as any)?.otherProfile?.displayName}
+          recipientUserId={(selectedConversationData as any)?.otherProfile?.userId}
+        />
+      )}
     </div>
   );
 }

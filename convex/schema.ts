@@ -180,10 +180,47 @@ const applicationTables = {
     maxPlayers: v.number(),
     isActive: v.boolean(),
     status: v.string(), // "waiting", "playing", "finished"
+    createdAt: v.number(),
   })
     .index("by_host", ["hostId"])
     .index("by_active", ["isActive"])
     .index("by_status", ["status"]),
+
+  unoGames: defineTable({
+    lobbyId: v.id("unoLobbies"),
+    players: v.array(v.object({
+      userId: v.id("users"),
+      displayName: v.string(),
+      hand: v.array(v.string()), // Card strings like "red_5", "wild", "skip_blue"
+      isCurrentTurn: v.boolean(),
+      hasSaidUno: v.boolean(),
+      isWinner: v.boolean(),
+    })),
+    deck: v.array(v.string()),
+    discardPile: v.array(v.string()),
+    currentPlayerIndex: v.number(),
+    direction: v.number(), // 1 for clockwise, -1 for counter-clockwise
+    currentColor: v.string(), // Current color to match
+    currentValue: v.string(), // Current value to match
+    gameStatus: v.string(), // "waiting", "playing", "finished"
+    winnerId: v.optional(v.id("users")),
+    createdAt: v.number(),
+    lastActionTime: v.number(),
+  })
+    .index("by_lobby", ["lobbyId"])
+    .index("by_status", ["gameStatus"]),
+
+  unoGameActions: defineTable({
+    gameId: v.id("unoGames"),
+    playerId: v.id("users"),
+    actionType: v.string(), // "play_card", "draw_card", "say_uno", "skip_turn"
+    cardPlayed: v.optional(v.string()),
+    newColor: v.optional(v.string()),
+    timestamp: v.number(),
+  })
+    .index("by_game", ["gameId"])
+    .index("by_player", ["playerId"])
+    .index("by_timestamp", ["timestamp"]),
 
   // NEW: News Feed system
   newsArticles: defineTable({
