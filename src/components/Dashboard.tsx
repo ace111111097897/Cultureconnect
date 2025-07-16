@@ -243,8 +243,31 @@ export function Dashboard() {
           </div>
         </aside>
         {/* Main Content Area */}
-        <main className="flex-1 p-2 sm:p-4 md:p-8 w-full min-h-[calc(100vh-4rem)]">
-          {renderContent()}
+        <main className="flex-1 p-6 overflow-y-auto">
+          {/* Top section with culture tags */}
+          <div className="mb-6">
+            <div className="flex items-center space-x-4 mb-4">
+              <span className="px-3 py-1 bg-white/10 rounded-full text-white text-sm">Mediterranean</span>
+              <span className="px-3 py-1 bg-white/10 rounded-full text-white text-sm">Fusion • Mutual</span>
+            </div>
+          </div>
+
+          {/* Content based on active tab */}
+          <div className="min-h-[calc(100vh-200px)]">
+            {activeTab === "discover" && <DiscoverSection />}
+            {activeTab === "matches" && <MatchesSection />}
+            {activeTab === "friends" && <FriendsSection />}
+            {activeTab === "messages" && <ConversationsSection />}
+            {activeTab === "community" && <CommunityPage />}
+            {activeTab === "explore" && <ExploreSection />}
+            {activeTab === "games" && <GamesSection />}
+            {activeTab === "stories" && <StoriesSection />}
+            {activeTab === "kandi" && (
+              <div className="max-w-4xl mx-auto">
+                <KandiChat />
+              </div>
+            )}
+          </div>
         </main>
       </div>
 
