@@ -214,39 +214,7 @@ export default function CommunityPage() {
         </div>
       )}
       {/* Profile Section (unchanged) */}
-      <div className="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-10">
-        {profiles.map((profile) => (
-          <div
-            key={profile.id}
-            className="bg-white/20 rounded-2xl shadow-lg flex flex-col items-center justify-center p-8 cursor-pointer hover:scale-105 transition-transform min-h-[260px] min-w-[260px] max-w-full"
-            onClick={() => setSelectedProfile(profile)}
-          >
-            {/* Avatar */}
-            <div className="w-24 h-24 rounded-full bg-gray-200 mb-4 overflow-hidden flex items-center justify-center">
-              {profile.avatar ? (
-                <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
-              ) : (
-                <span className="material-symbols-outlined text-6xl text-gray-400">person</span>
-              )}
-            </div>
-            {/* Name and Bio */}
-            <div className="text-center">
-              <div className="font-bold text-2xl text-white mb-1">{profile.name}</div>
-              <div className="text-white/80 text-base">{profile.bio || "No bio yet."}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Profile Modal */}
-      {selectedProfile && (
-        <ProfileModal
-          profile={selectedProfile}
-          onClose={() => setSelectedProfile(null)}
-          onAddFriend={handleAddFriend}
-          onPass={handlePass}
-          onMessage={handleMessage}
-        />
-      )}
+      {/* Remove profile grid and modal */}
     </div>
   );
 } 

@@ -7,9 +7,9 @@ export function CultureFeed() {
   const [showKabukiModal, setShowKabukiModal] = useState(false);
   const [showRecipesModal, setShowRecipesModal] = useState(false);
   const userProfile = useQuery(api.profiles.getCurrentUserProfile);
-  
-  // Example cultural news data - in a real app, this would come from an API
-  const culturalNews = [
+
+  // News post state
+  const [newsPosts, setNewsPosts] = useState([
     {
       id: 1,
       title: "Diwali Celebrations Light Up Cities Worldwide",
@@ -65,7 +65,8 @@ export function CultureFeed() {
       likes: 567,
       comments: 89
     }
-  ];
+  ]);
+  const [newPost, setNewPost] = useState({ title: "", summary: "", category: "all", country: "", image: "📰" });
 
   const categories = [
     { id: "all", label: "All", icon: "🌍" },
@@ -77,8 +78,25 @@ export function CultureFeed() {
   ];
 
   const filteredNews = selectedCategory === "all" 
-    ? culturalNews 
-    : culturalNews.filter(item => item.category === selectedCategory);
+    ? newsPosts 
+    : newsPosts.filter(item => item.category === selectedCategory);
+
+  // Handle new post
+  const handlePostNews = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPost.title.trim() || !newPost.summary.trim()) return;
+    setNewsPosts(prev => [
+      {
+        ...newPost,
+        id: Date.now(),
+        timeAgo: "just now",
+        likes: 0,
+        comments: 0
+      },
+      ...prev
+    ]);
+    setNewPost({ title: "", summary: "", category: "all", country: "", image: "📰" });
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 px-2 sm:px-0">
@@ -86,6 +104,52 @@ export function CultureFeed() {
       <div className="text-center space-y-4">
         <h1 className="text-3xl font-bold text-white">🌍 Culture Feed</h1>
         <p className="text-white/70">Stay updated with cultural events and news from around the world</p>
+      </div>
+
+      {/* Post News Form */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 mb-4">
+        <form className="space-y-4" onSubmit={handlePostNews}>
+          <div className="flex flex-col md:flex-row gap-4">
+            <input
+              className="flex-1 px-4 py-2 rounded-xl bg-white/20 border border-white/30 text-black placeholder-gray-400 focus:outline-none"
+              placeholder="Title"
+              value={newPost.title}
+              onChange={e => setNewPost({ ...newPost, title: e.target.value })}
+              required
+            />
+            <input
+              className="flex-1 px-4 py-2 rounded-xl bg-white/20 border border-white/30 text-black placeholder-gray-400 focus:outline-none"
+              placeholder="Country/Region"
+              value={newPost.country}
+              onChange={e => setNewPost({ ...newPost, country: e.target.value })}
+            />
+            <select
+              className="px-4 py-2 rounded-xl bg-white/20 border border-white/30 text-black focus:outline-none"
+              value={newPost.category}
+              onChange={e => setNewPost({ ...newPost, category: e.target.value })}
+            >
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.label}</option>
+              ))}
+            </select>
+            <input
+              className="w-20 px-2 py-2 rounded-xl bg-white/20 border border-white/30 text-black focus:outline-none"
+              placeholder="Emoji"
+              value={newPost.image}
+              onChange={e => setNewPost({ ...newPost, image: e.target.value })}
+              maxLength={2}
+            />
+          </div>
+          <textarea
+            className="w-full px-4 py-2 rounded-xl bg-white/20 border border-white/30 text-black placeholder-gray-400 focus:outline-none"
+            placeholder="Summary / Details"
+            value={newPost.summary}
+            onChange={e => setNewPost({ ...newPost, summary: e.target.value })}
+            rows={3}
+            required
+          />
+          <button type="submit" className="w-full bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold py-2 rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all">Post News</button>
+        </form>
       </div>
 
       {/* Category Filter */}
