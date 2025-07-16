@@ -16,6 +16,10 @@ export function Dashboard() {
   const [showHelp, setShowHelp] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
+  const [showConfirm, setShowConfirm] = useState<{ type: string; open: boolean }>({ type: '', open: false });
+  const [darkMode, setDarkMode] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [isVerified, setIsVerified] = useState(false);
 
   const tabs = [
     { id: "discover", label: "Discover", icon: "🔍" },
@@ -61,7 +65,7 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800 backdrop-blur-2xl">
+    <div className={`min-h-screen w-full flex flex-col bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800 backdrop-blur-2xl${darkMode ? ' dark' : ''}`}>
       {/* Top Nav Bar */}
       <header className="hidden md:flex fixed top-0 left-0 right-0 h-16 bg-white/10 backdrop-blur-md items-center px-4 z-40 shadow-lg">
         <div className="text-2xl font-bold text-white tracking-wide mr-8 cursor-pointer" onClick={() => setActiveTab('profile')}>
@@ -114,12 +118,13 @@ export function Dashboard() {
               >
                 <span>{tab.icon}</span>
                 <span>{tab.label}</span>
+                {tab.id === 'verification' && isVerified && <span className="ml-2 text-green-500">✔️</span>}
               </button>
             ))}
           </div>
           {/* Logout at the bottom */}
           <button
-            onClick={() => alert('Logged out!')}
+            onClick={() => setShowConfirm({ type: 'logout', open: true })}
             className="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all text-lg w-full text-left text-red-400 hover:text-red-600 hover:bg-white/10 mt-8"
           >
             <span>🚪</span>
@@ -168,12 +173,12 @@ export function Dashboard() {
               {/* Dark Mode Toggle */}
               <div className="flex items-center justify-between">
                 <span className="text-gray-700 font-medium">Dark Mode</span>
-                <input type="checkbox" className="w-6 h-6" disabled title="Demo only" />
+                <input type="checkbox" className="w-6 h-6" checked={darkMode} onChange={() => setDarkMode(d => !d)} />
               </div>
               {/* Notification Preferences */}
               <div className="flex items-center justify-between">
                 <span className="text-gray-700 font-medium">Enable Notifications</span>
-                <input type="checkbox" className="w-6 h-6" disabled title="Demo only" />
+                <input type="checkbox" className="w-6 h-6" checked={notificationsEnabled} onChange={() => setNotificationsEnabled(n => !n)} />
               </div>
               {/* Account Info */}
               <div>
@@ -181,7 +186,7 @@ export function Dashboard() {
                 <div className="text-gray-500 text-sm">Email: user@email.com</div>
                 <div className="text-gray-500 text-sm">Username: demo_user</div>
               </div>
-              <button className="w-full mt-4 bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition">Delete Account</button>
+              <button className="w-full mt-4 bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition" onClick={() => setShowConfirm({ type: 'delete', open: true })}>Delete Account</button>
             </div>
           </div>
         </div>
@@ -202,7 +207,7 @@ export function Dashboard() {
               <div className="mt-4">
                 <a href="mailto:support@cultureconnect.com" className="text-blue-600 hover:underline">Contact Support</a>
               </div>
-              <button className="w-full mt-4 bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition">Report / Block User</button>
+              <button className="w-full mt-4 bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition" onClick={() => setShowConfirm({ type: 'report', open: true })}>Report / Block User</button>
             </div>
           </div>
         </div>
@@ -225,8 +230,9 @@ export function Dashboard() {
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-green-500 text-2xl">✅</span>
                 <span className="text-gray-700 font-medium">Get Verified for Extra Trust</span>
+                {isVerified && <span className="ml-2 text-green-500 font-bold">Verified!</span>}
               </div>
-              <form className="space-y-4" onSubmit={e => { e.preventDefault(); alert('Verification submitted! (Demo)'); }}>
+              <form className="space-y-4" onSubmit={e => { e.preventDefault(); setIsVerified(true); setShowConfirm({ type: 'verified', open: true }); }}>
                 <label className="block text-gray-700 font-medium mb-1">Upload a selfie for verification:</label>
                 <input type="file" accept="image/*" className="w-full border rounded-lg p-2" disabled title="Demo only" />
                 <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition mt-2">Submit for Review</button>
@@ -236,6 +242,34 @@ export function Dashboard() {
                 <span className="text-gray-600 text-sm">Verified users get a badge and more matches!</span>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+      {/* Confirmation Modal */}
+      {showConfirm.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full relative text-center">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowConfirm({ type: '', open: false })}>✕</button>
+            {showConfirm.type === 'delete' && <>
+              <div className="text-xl font-bold mb-4 text-red-600">Delete Account</div>
+              <div className="text-gray-700 mb-6">Are you sure you want to delete your account? This cannot be undone.</div>
+              <button className="w-full bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition" onClick={() => { setShowConfirm({ type: '', open: false }); alert('Account deleted! (Demo)'); }}>Yes, Delete</button>
+            </>}
+            {showConfirm.type === 'logout' && <>
+              <div className="text-xl font-bold mb-4">Logout</div>
+              <div className="text-gray-700 mb-6">Are you sure you want to log out?</div>
+              <button className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition" onClick={() => { setShowConfirm({ type: '', open: false }); alert('Logged out! (Demo)'); }}>Logout</button>
+            </>}
+            {showConfirm.type === 'report' && <>
+              <div className="text-xl font-bold mb-4 text-red-600">Report / Block User</div>
+              <div className="text-gray-700 mb-6">User has been reported/blocked. Thank you for helping keep the community safe!</div>
+              <button className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition" onClick={() => setShowConfirm({ type: '', open: false })}>OK</button>
+            </>}
+            {showConfirm.type === 'verified' && <>
+              <div className="text-xl font-bold mb-4 text-green-600">Verification Submitted</div>
+              <div className="text-gray-700 mb-6">Your verification is under review. You'll get a badge when approved!</div>
+              <button className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition" onClick={() => setShowConfirm({ type: '', open: false })}>OK</button>
+            </>}
           </div>
         </div>
       )}
