@@ -142,48 +142,105 @@ export function Dashboard() {
               </div>
               <div>
                 <div className="font-bold text-lg">Your Profile</div>
-                {/* Optionally, show username/email here */}
+                <div className="text-sm text-white/70">Verified User</div>
               </div>
             </div>
-            <button className="p-2 rounded-full hover:bg-white/20 transition" title="Settings">
+            <button 
+              className="p-2 rounded-full hover:bg-white/20 transition" 
+              title="Settings"
+              onClick={() => setShowSettings(true)}
+            >
               <span className="text-2xl">⚙️</span>
             </button>
           </div>
+          
           {/* Kandi under Profile */}
           <button
-            className="flex items-center space-x-2 py-2 px-3 rounded-lg bg-gradient-to-r from-yellow-300 to-pink-300 text-black font-semibold mb-6 hover:scale-105 transition"
+            className="flex items-center space-x-2 py-3 px-4 rounded-xl bg-gradient-to-r from-yellow-300 to-pink-300 text-black font-semibold mb-6 hover:scale-105 transition shadow-lg"
             onClick={() => setActiveTab("kandi")}
           >
             <span className="text-2xl">🐕</span>
             <span>Kandi AI</span>
           </button>
+          
           {/* Main navigation */}
-          <nav className="flex flex-col space-y-2 mt-2">
-            <button className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-white/10 transition">
+          <nav className="flex flex-col space-y-2 flex-1">
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("discover")}
+            >
               <span className="text-xl">🔍</span>
               <span>Discover</span>
             </button>
-            <button className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-white/10 transition">
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("matches")}
+            >
               <span className="text-xl">💫</span>
               <span>Matches</span>
             </button>
-            <button className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-white/10 transition">
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("friends")}
+            >
               <span className="text-xl">👥</span>
               <span>Friends</span>
             </button>
-            <button className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-white/10 transition">
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("messages")}
+            >
               <span className="text-xl">💬</span>
               <span>Messages</span>
             </button>
-            <button className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-white/10 transition">
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("community")}
+            >
+              <span className="text-xl">🏘️</span>
+              <span>Community</span>
+            </button>
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("explore")}
+            >
+              <span className="text-xl">📱</span>
+              <span>Explore</span>
+            </button>
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("games")}
+            >
               <span className="text-xl">🎮</span>
               <span>Games</span>
             </button>
-            <button className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-white/10 transition">
-              <span className="text-xl">📰</span>
-              <span>News</span>
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left"
+              onClick={() => setActiveTab("stories")}
+            >
+              <span className="text-xl">📖</span>
+              <span>Stories</span>
             </button>
           </nav>
+          
+          {/* Bottom section */}
+          <div className="mt-auto pt-6 border-t border-white/20">
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left w-full"
+              onClick={() => setShowVerification(true)}
+            >
+              <span className="text-xl">✅</span>
+              <span>Verification</span>
+              {isVerified && <span className="ml-auto text-green-400">✔️</span>}
+            </button>
+            <button 
+              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-red-500/20 transition text-left w-full mt-2 text-red-300 hover:text-red-200"
+              onClick={() => setShowConfirm({ type: 'logout', open: true })}
+            >
+              <span className="text-xl">🚪</span>
+              <span>Logout</span>
+            </button>
+          </div>
         </aside>
         {/* Main Content Area */}
         <main className="flex-1 p-2 sm:p-4 md:p-8 w-full min-h-[calc(100vh-4rem)]">
