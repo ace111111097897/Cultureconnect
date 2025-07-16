@@ -81,10 +81,15 @@ export function DiscoverSection() {
       console.log("Sending friend request to:", profile);
       console.log("Profile userId:", profile.userId);
       await sendFriendRequest({ toUserId: profile.userId });
-      setNotifications(n => [
-        `Friend request sent to ${profile.displayName}.`,
-        ...n
-      ]);
+      
+      const notificationMessage = `Friend request sent to ${profile.displayName}.`;
+      setNotifications(n => [notificationMessage, ...n]);
+      
+      // Remove the notification after 1 second
+      setTimeout(() => {
+        setNotifications(n => n.filter(notification => notification !== notificationMessage));
+      }, 1000);
+      
       toast.success(`Friend request sent to ${profile.displayName}!`);
     } catch (error: any) {
       console.error("Error sending friend request:", error);

@@ -14,6 +14,8 @@ export function FriendsSection({
   const [searchQuery, setSearchQuery] = useState("");
   const [showNewRequestNotification, setShowNewRequestNotification] = useState(false);
   const [lastRequestCount, setLastRequestCount] = useState(0);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<any>(null);
   
   const friends = useQuery(api.friends.getFriends);
   const friendRequests = useQuery(api.friends.getFriendRequests);
@@ -95,9 +97,8 @@ export function FriendsSection({
   };
 
   const handleViewProfile = (friend: any) => {
-    // Navigate to friend's profile
-    toast.info(`Viewing ${friend.displayName}'s profile...`);
-    // You could add navigation logic here
+    setSelectedProfile(friend);
+    setShowProfileModal(true);
   };
 
   return (
@@ -330,6 +331,215 @@ export function FriendsSection({
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Profile Modal */}
+      {showProfileModal && selectedProfile && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-white/20">
+            {/* Header */}
+            <div className="p-6 border-b border-white/20 flex justify-between items-start">
+              <div className="flex items-center space-x-4">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                  {selectedProfile.profileImageUrl ? (
+                    <img
+                      src={selectedProfile.profileImageUrl}
+                      alt={selectedProfile.displayName}
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-white text-3xl">👤</span>
+                  )}
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">
+                    {selectedProfile.displayName}
+                  </h2>
+                  <p className="text-white/70">{selectedProfile.location}</p>
+                  {selectedProfile.age && (
+                    <p className="text-white/50 text-sm">{selectedProfile.age} years old</p>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => setShowProfileModal(false)}
+                className="p-2 rounded-full hover:bg-white/10 transition-all"
+              >
+                <span className="text-white text-2xl">✕</span>
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {/* Bio */}
+              {selectedProfile.bio && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-2">About</h3>
+                  <p className="text-white/80 leading-relaxed">{selectedProfile.bio}</p>
+                </div>
+              )}
+
+              {/* Cultural Background */}
+              {selectedProfile.culturalBackground && selectedProfile.culturalBackground.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>🌍</span> Cultural Background
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProfile.culturalBackground.map((bg: string) => (
+                      <span key={bg} className="bg-white/10 text-white px-3 py-1 rounded-full text-sm border border-white/20">
+                        {bg}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Languages */}
+              {selectedProfile.languages && selectedProfile.languages.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>🗣️</span> Languages
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProfile.languages.map((lang: string) => (
+                      <span key={lang} className="bg-green-500/20 text-green-100 px-3 py-1 rounded-full text-sm border border-green-400/30">
+                        {lang}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Values */}
+              {selectedProfile.values && selectedProfile.values.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>💡</span> Values
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProfile.values.map((value: string) => (
+                      <span key={value} className="bg-blue-500/20 text-blue-100 px-3 py-1 rounded-full text-sm border border-blue-400/30">
+                        {value}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Food Preferences */}
+              {selectedProfile.foodPreferences && selectedProfile.foodPreferences.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>🍽️</span> Food Interests
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProfile.foodPreferences.map((food: string) => (
+                      <span key={food} className="bg-pink-500/20 text-pink-100 px-3 py-1 rounded-full text-sm border border-pink-400/30">
+                        {food}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Traditions */}
+              {selectedProfile.traditions && selectedProfile.traditions.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>🎭</span> Traditions
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProfile.traditions.map((tradition: string) => (
+                      <span key={tradition} className="bg-purple-500/20 text-purple-100 px-3 py-1 rounded-full text-sm border border-purple-400/30">
+                        {tradition}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Music Genres */}
+              {selectedProfile.musicGenres && selectedProfile.musicGenres.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>🎵</span> Music
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProfile.musicGenres.map((music: string) => (
+                      <span key={music} className="bg-orange-500/20 text-orange-100 px-3 py-1 rounded-full text-sm border border-orange-400/30">
+                        {music}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Travel Interests */}
+              {selectedProfile.travelInterests && selectedProfile.travelInterests.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>✈️</span> Travel Interests
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProfile.travelInterests.map((travel: string) => (
+                      <span key={travel} className="bg-cyan-500/20 text-cyan-100 px-3 py-1 rounded-full text-sm border border-cyan-400/30">
+                        {travel}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Life Goals */}
+              {selectedProfile.lifeGoals && selectedProfile.lifeGoals.length > 0 && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>🎯</span> Life Goals
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedProfile.lifeGoals.map((goal: string) => (
+                      <span key={goal} className="bg-yellow-500/20 text-yellow-100 px-3 py-1 rounded-full text-sm border border-yellow-400/30">
+                        {goal}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Relationship Goals */}
+              {selectedProfile.relationshipGoals && (
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                    <span>💕</span> Relationship Goals
+                  </h3>
+                  <p className="text-white/80 bg-white/5 p-3 rounded-lg border border-white/10">
+                    {selectedProfile.relationshipGoals}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Actions */}
+            <div className="p-6 border-t border-white/20 flex space-x-3">
+              <button
+                onClick={() => {
+                  setShowProfileModal(false);
+                  handleMessage(selectedProfile);
+                }}
+                className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all"
+              >
+                Message
+              </button>
+              <button
+                onClick={() => setShowProfileModal(false)}
+                className="px-6 py-3 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
