@@ -2,32 +2,37 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import React, { useState, useEffect, useRef } from "react";
 
-// Inline ProfileModal component (restore if needed)
+// Add modal for 'View More'
 function ProfileModal({ profile, onClose }: { profile: any; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 relative mx-2 animate-fadeIn">
-        <button
-          className="absolute top-3 right-3 text-gray-400 hover:text-gray-700 text-2xl"
-          onClick={onClose}
-          aria-label="Close"
-        >
-          &times;
-        </button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-3xl shadow-2xl p-8 max-w-lg w-full relative">
+        <button className="absolute top-4 right-4 text-white/70 hover:text-white text-2xl" onClick={onClose}>✕</button>
         <div className="flex flex-col items-center">
-          <div className="w-28 h-28 rounded-full bg-gray-200 mb-4 overflow-hidden flex items-center justify-center">
-            {profile.profileImageUrl ? (
-              <img src={profile.profileImageUrl} alt={profile.displayName} className="w-full h-full object-cover" />
-            ) : (
-              <span className="material-symbols-outlined text-7xl text-gray-400">person</span>
+          {profile.profileImageUrl ? (
+            <img src={profile.profileImageUrl} alt={profile.displayName} className="w-32 h-32 rounded-full object-cover border-4 border-purple-400/40 shadow-xl mb-4" />
+          ) : (
+            <div className="w-32 h-32 rounded-full bg-white/20 flex items-center justify-center text-6xl text-white/60 border-4 border-purple-400/40 shadow-xl mb-4">👤</div>
+          )}
+          <div className="text-2xl font-bold text-white mb-2">{profile.displayName}</div>
+          <div className="text-white/80 mb-4">{profile.bio || "No bio yet."}</div>
+          {/* Show all details */}
+          <div className="w-full space-y-2">
+            {profile.culturalBackground && profile.culturalBackground.length > 0 && (
+              <div><span className="font-bold text-white">Culture:</span> <span className="text-white/80">{profile.culturalBackground.join(", ")}</span></div>
+            )}
+            {profile.languages && profile.languages.length > 0 && (
+              <div><span className="font-bold text-white">Languages:</span> <span className="text-white/80">{profile.languages.join(", ")}</span></div>
+            )}
+            {profile.values && profile.values.length > 0 && (
+              <div><span className="font-bold text-white">Values:</span> <span className="text-white/80">{profile.values.join(", ")}</span></div>
+            )}
+            {profile.foodPreferences && profile.foodPreferences.length > 0 && (
+              <div><span className="font-bold text-white">Food:</span> <span className="text-white/80">{profile.foodPreferences.join(", ")}</span></div>
             )}
           </div>
-          <div className="font-bold text-2xl mb-1 text-gray-900">{profile.displayName}</div>
-          <div className="text-gray-700 mb-2 text-center">{profile.bio || "No bio yet."}</div>
         </div>
       </div>
-      {/* Click outside to close */}
-      <div className="fixed inset-0 z-40" onClick={onClose} />
     </div>
   );
 }
@@ -38,6 +43,7 @@ export function DiscoverSection() {
   const [visibleProfiles, setVisibleProfiles] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showModal, setShowModal] = useState(false);
   const touchStartX = useRef<number | null>(null);
 
   // Sync visibleProfiles with profiles from backend
@@ -45,6 +51,17 @@ export function DiscoverSection() {
     if (profiles) setVisibleProfiles(profiles);
     setCurrentIndex(0);
   }, [profiles]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1));
+      if (e.key === 'ArrowLeft') setCurrentIndex(idx => Math.max(idx - 1, 0));
+      if (e.key === 'Enter') setShowModal(true);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [visibleProfiles.length]);
 
   const handlePass = () => {
     setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1));
@@ -56,19 +73,14 @@ export function DiscoverSection() {
     ]);
     // TODO: Call backend to add friend
   };
-  const handleMatch = () => {
-    setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1));
-  };
-
-  // Swipe gesture handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   };
   const handleTouchEnd = (e: React.TouchEvent) => {
     if (touchStartX.current === null) return;
     const deltaX = e.changedTouches[0].clientX - touchStartX.current;
-    if (deltaX < -50) setCurrentIndex(idx => Math.max(idx - 1, 0)); // swipe left to previous profile
-    else if (deltaX > 50) setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1)); // swipe right to next profile
+    if (deltaX < -50) setCurrentIndex(idx => Math.max(idx - 1, 0));
+    else if (deltaX > 50) setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1));
     touchStartX.current = null;
   };
 
@@ -97,7 +109,13 @@ export function DiscoverSection() {
   const profile = visibleProfiles[currentIndex];
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800 flex flex-col items-center justify-center py-4">
+    <div className="w-full min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800 flex flex-col items-center justify-center py-4 relative overflow-hidden">
+      {/* Animated background blobs */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-1/2 h-1/2 bg-purple-700 opacity-30 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-1/3 h-1/3 bg-pink-600 opacity-20 rounded-full blur-2xl animate-pulse" />
+        <div className="absolute top-1/2 left-1/2 w-1/4 h-1/4 bg-blue-500 opacity-20 rounded-full blur-2xl animate-pulse" />
+      </div>
       {/* Notification Area */}
       {notifications.length > 0 && (
         <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md">
@@ -109,98 +127,101 @@ export function DiscoverSection() {
         </div>
       )}
       <div
-        className="w-full flex-1 flex flex-col items-center justify-center"
+        className="w-full flex-1 flex flex-col items-center justify-center z-10"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] min-h-[calc(100vh-8rem)]" style={{ boxShadow: '0 4px 32px 0 rgba(80,120,255,0.15), 0 0 16px 4px rgba(160,80,255,0.10)' }}>
-          {/* Top Gradient Section */}
-          <div className="relative bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] h-48 flex flex-col items-center justify-center">
-            {/* Match % */}
-            <div className="absolute top-4 right-4 bg-black/40 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg z-10">0% Match</div>
-            {/* Left/Right Arrows */}
-            <button className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-purple-400/60 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-md transition z-10" onClick={() => setCurrentIndex(idx => Math.max(idx - 1, 0))} aria-label="Previous Profile">&#8592;</button>
-            <button className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-pink-400/60 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl shadow-md transition z-10" onClick={() => setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1))} aria-label="Next Profile">&#8594;</button>
-            {/* Avatar */}
+        <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-8 py-12">
+          {/* Top Gradient Section with large avatar */}
+          <div className="relative flex flex-col items-center justify-center mb-8">
+            {/* Glowing animated border */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-56 h-56 rounded-full bg-gradient-to-tr from-purple-500 via-blue-500 to-pink-500 blur-2xl opacity-40 animate-pulse" />
+            </div>
             <div className="relative z-10">
               {profile.profileImageUrl ? (
-                <img src={profile.profileImageUrl} alt={profile.displayName} className="w-24 h-24 rounded-full object-cover border-4 border-white/60 shadow-xl" />
+                <img src={profile.profileImageUrl} alt={profile.displayName} className="w-48 h-48 rounded-full object-cover border-8 border-purple-400/60 shadow-2xl" />
               ) : (
-                <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center text-6xl text-white/60 border-4 border-white/60 shadow-xl">👤</div>
+                <div className="w-48 h-48 rounded-full bg-white/20 flex items-center justify-center text-8xl text-white/60 border-8 border-purple-400/60 shadow-2xl">👤</div>
               )}
             </div>
           </div>
           {/* Info Section */}
-          <div className="bg-gradient-to-br from-[#1a1a2e]/90 via-[#16213e]/90 to-[#0f3460]/90 p-8 flex flex-col gap-4 backdrop-blur-xl">
-            <div className="text-2xl font-bold text-white mb-2 flex items-center gap-2">
+          <div className="w-full max-w-2xl mx-auto bg-gradient-to-br from-[#1a1a2e]/90 via-[#16213e]/90 to-[#0f3460]/90 p-10 rounded-2xl shadow-xl flex flex-col gap-6 items-center justify-center backdrop-blur-xl">
+            <div className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
               {profile.displayName && <span>{profile.displayName}</span>}
-              {profile.age && <span className="text-white/70 text-lg font-normal">, {profile.age}</span>}
+              {profile.age && <span className="text-white/70 text-2xl font-normal">, {profile.age}</span>}
             </div>
             {/* Cultural Background */}
             {profile.culturalBackground && profile.culturalBackground.length > 0 && (
-              <div>
+              <div className="w-full">
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="globe">🌍</span> Cultural Background</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.culturalBackground.map((c: string) => (
-                    <span key={c} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/20">{c}</span>
+                    <span key={c} className="bg-white/10 text-white px-4 py-2 rounded-full text-base font-semibold shadow-inner border border-white/20">{c}</span>
                   ))}
                 </div>
               </div>
             )}
             {/* Languages */}
             {profile.languages && profile.languages.length > 0 && (
-              <div>
+              <div className="w-full">
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="languages">🗣️</span> Languages</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.languages.map((l: string) => (
-                    <span key={l} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/20">{l}</span>
+                    <span key={l} className="bg-white/10 text-white px-4 py-2 rounded-full text-base font-semibold shadow-inner border border-white/20">{l}</span>
                   ))}
                 </div>
               </div>
             )}
             {/* Values */}
             {profile.values && profile.values.length > 0 && (
-              <div>
+              <div className="w-full">
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="values">💡</span> Values</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.values.map((v: string) => (
-                    <span key={v} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/20">{v}</span>
+                    <span key={v} className="bg-white/10 text-white px-4 py-2 rounded-full text-base font-semibold shadow-inner border border-white/20">{v}</span>
                   ))}
                 </div>
               </div>
             )}
             {/* Food Preferences */}
             {profile.foodPreferences && profile.foodPreferences.length > 0 && (
-              <div>
+              <div className="w-full">
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="food">🍽️</span> Food Interests</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.foodPreferences.map((f: string) => (
-                    <span key={f} className="bg-white/10 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-inner border border-white/20">{f}</span>
+                    <span key={f} className="bg-white/10 text-white px-4 py-2 rounded-full text-base font-semibold shadow-inner border border-white/20">{f}</span>
                   ))}
                 </div>
               </div>
             )}
             {/* Action Buttons */}
-            <div className="flex gap-4 mt-6 w-full">
+            <div className="flex gap-6 mt-8 w-full justify-center">
               <button
-                className="flex-1 bg-white/10 text-white rounded-xl px-6 py-3 font-semibold hover:bg-purple-500/80 hover:text-white transition shadow-md border border-white/20 text-lg"
+                className="flex-1 bg-white/10 text-white rounded-xl px-8 py-4 font-semibold hover:bg-purple-500/80 hover:text-white transition shadow-md border border-white/20 text-xl"
                 onClick={handlePass}
               >
                 Pass
               </button>
               <button
-                className="flex-1 bg-gradient-to-r from-[#4e54c8] to-[#8f94fb] text-white rounded-xl px-6 py-3 font-semibold hover:from-[#3d43a8] hover:to-[#7e84db] transition shadow-md border border-white/20 text-lg"
+                className="flex-1 bg-gradient-to-r from-[#4e54c8] to-[#8f94fb] text-white rounded-xl px-8 py-4 font-semibold hover:from-[#3d43a8] hover:to-[#7e84db] transition shadow-md border border-white/20 text-xl"
                 onClick={() => handleAddFriend(profile)}
               >
                 Add Friend
               </button>
+              <button
+                className="flex-1 bg-white/10 text-white rounded-xl px-8 py-4 font-semibold hover:bg-pink-500/80 hover:text-white transition shadow-md border border-white/20 text-xl"
+                onClick={() => setShowModal(true)}
+              >
+                View More
+              </button>
             </div>
           </div>
         </div>
+        {/* Modal for View More */}
+        {showModal && <ProfileModal profile={profile} onClose={() => setShowModal(false)} />}
       </div>
-      {selectedProfile && (
-        <ProfileModal profile={selectedProfile} onClose={() => setSelectedProfile(null)} />
-      )}
     </div>
   );
 }
