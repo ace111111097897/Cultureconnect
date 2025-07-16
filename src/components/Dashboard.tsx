@@ -11,6 +11,11 @@ import { CultureFeed } from "./CultureFeed";
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("discover");
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
 
   const tabs = [
     { id: "discover", label: "Discover", icon: "🔍" },
@@ -22,6 +27,11 @@ export function Dashboard() {
     { id: "kandi", label: "Kandi", icon: "🐕" },
     { id: "stories", label: "Stories", icon: "📖" },
     { id: "community", label: "Community", icon: "🌐" },
+    { id: "favorites", label: "Favorites", icon: "⭐", onClick: () => setShowFavorites(true) },
+    { id: "notifications", label: "Notifications", icon: "🔔", onClick: () => setShowNotifications(true) },
+    { id: "settings", label: "Settings", icon: "⚙️", onClick: () => setShowSettings(true) },
+    { id: "help", label: "Help & Safety", icon: "🛡️", onClick: () => setShowHelp(true) },
+    { id: "verification", label: "Verification", icon: "✅", onClick: () => setShowVerification(true) },
     { id: "profile", label: "Profile", icon: "👤" },
   ];
 
@@ -90,21 +100,31 @@ export function Dashboard() {
       </div>
       <div className="flex flex-1 pt-16 md:pt-16 min-h-[calc(100vh-4rem)]" style={{ paddingTop: '4rem' }}>
         {/* Left Sidebar */}
-        <aside className="hidden md:flex flex-col w-56 bg-white/10 backdrop-blur-md border-r border-white/10 py-6 px-2 space-y-2 min-h-screen">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all text-lg w-full text-left ${
-                activeTab === tab.id
-                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                  : 'text-white/70 hover:text-white hover:bg-white/10'
-              }`}
-            >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
+        <aside className="hidden md:flex flex-col w-56 bg-white/10 backdrop-blur-md border-r border-white/10 py-6 px-2 space-y-2 min-h-screen justify-between">
+          <div>
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={tab.onClick ? tab.onClick : () => setActiveTab(tab.id)}
+                className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all text-lg w-full text-left ${
+                  activeTab === tab.id
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
+                    : 'text-white/70 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                <span>{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+          {/* Logout at the bottom */}
+          <button
+            onClick={() => alert('Logged out!')}
+            className="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all text-lg w-full text-left text-red-400 hover:text-red-600 hover:bg-white/10 mt-8"
+          >
+            <span>🚪</span>
+            <span>Logout</span>
+          </button>
         </aside>
         {/* Main Content Area */}
         <main className="flex-1 p-2 sm:p-4 md:p-8 w-full min-h-[calc(100vh-4rem)]">
@@ -129,6 +149,52 @@ export function Dashboard() {
           </button>
         ))}
       </nav>
+      {/* Modals/Panels for new sidebar items */}
+      {showNotifications && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowNotifications(false)}>✕</button>
+            <div className="text-xl font-bold mb-4">Notifications</div>
+            <div className="text-gray-700">No new notifications yet.</div>
+          </div>
+        </div>
+      )}
+      {showSettings && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowSettings(false)}>✕</button>
+            <div className="text-xl font-bold mb-4">Settings</div>
+            <div className="text-gray-700">User preferences and account settings coming soon.</div>
+          </div>
+        </div>
+      )}
+      {showHelp && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowHelp(false)}>✕</button>
+            <div className="text-xl font-bold mb-4">Help & Safety</div>
+            <div className="text-gray-700">Read our safety tips and get support if needed.</div>
+          </div>
+        </div>
+      )}
+      {showFavorites && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowFavorites(false)}>✕</button>
+            <div className="text-xl font-bold mb-4">Favorites</div>
+            <div className="text-gray-700">Your saved profiles will appear here.</div>
+          </div>
+        </div>
+      )}
+      {showVerification && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowVerification(false)}>✕</button>
+            <div className="text-xl font-bold mb-4">Profile Verification</div>
+            <div className="text-gray-700">Get verified for extra trust and features!</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
