@@ -184,7 +184,7 @@ export function DiscoverSection() {
             </div>
           )}
           {/* Left Arrow */}
-          <button
+            <button
             className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 w-20 h-20 flex items-center justify-center text-5xl rounded-full transition-all duration-200
               ${currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 hover:bg-purple-700/30 opacity-90'}
             `}
@@ -194,9 +194,9 @@ export function DiscoverSection() {
             title="Left Arrow (←)"
           >
             &#8592;
-          </button>
+            </button>
           {/* Right Arrow */}
-          <button
+            <button
             className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 w-20 h-20 flex items-center justify-center text-5xl rounded-full transition-all duration-200
               ${currentIndex === visibleProfiles.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 hover:bg-pink-700/30 opacity-90'}
             `}
@@ -206,7 +206,7 @@ export function DiscoverSection() {
             title="Right Arrow (→)"
           >
             &#8594;
-          </button>
+            </button>
           {/* Top Gradient Section with large avatar */}
           <div className="relative flex flex-col items-center justify-center mb-8">
             {/* Glowing animated border */}
@@ -226,7 +226,7 @@ export function DiscoverSection() {
             <div className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
               {profile.displayName && <span>{profile.displayName}</span>}
               {profile.age && <span className="text-white/70 text-2xl font-normal">, {profile.age}</span>}
-            </div>
+        </div>
             {/* Cultural Background */}
             {profile.culturalBackground && profile.culturalBackground.length > 0 && (
               <div className="w-full">
@@ -235,7 +235,7 @@ export function DiscoverSection() {
                   {profile.culturalBackground.map((c: string) => (
                     <span key={c} className="bg-white/10 text-white px-4 py-2 rounded-full text-base font-semibold shadow-inner border border-white/20">{c}</span>
                   ))}
-                </div>
+      </div>
               </div>
             )}
             {/* Languages (highlight mutuals) */}
@@ -246,7 +246,7 @@ export function DiscoverSection() {
                   {profile.languages.map((l: string) => (
                     <span key={l} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUser.languages.includes(l) ? 'bg-green-500/30 border-green-400 text-green-100' : 'bg-white/10 border-white/20 text-white'}`}>{l}{currentUser.languages.includes(l) && ' • Mutual'}</span>
                   ))}
-                </div>
+            </div>
               </div>
             )}
             {/* Values (highlight mutuals) */}
@@ -257,7 +257,7 @@ export function DiscoverSection() {
                   {profile.values.map((v: string) => (
                     <span key={v} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUser.values.includes(v) ? 'bg-blue-500/30 border-blue-400 text-blue-100' : 'bg-white/10 border-white/20 text-white'}`}>{v}{currentUser.values.includes(v) && ' • Mutual'}</span>
                   ))}
-                </div>
+          </div>
               </div>
             )}
             {/* Food Preferences (highlight mutuals) */}
@@ -267,8 +267,8 @@ export function DiscoverSection() {
                 <div className="flex flex-wrap gap-2">
                   {profile.foodPreferences.map((f: string) => (
                     <span key={f} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUser.foodPreferences.includes(f) ? 'bg-pink-500/30 border-pink-400 text-pink-100' : 'bg-white/10 border-white/20 text-white'}`}>{f}{currentUser.foodPreferences.includes(f) && ' • Mutual'}</span>
-                  ))}
-                </div>
+              ))}
+            </div>
               </div>
             )}
             {/* Action Buttons */}
@@ -300,7 +300,7 @@ export function DiscoverSection() {
         </div>
         {/* Modal for View More */}
         {showModal && <ProfileModal profile={profile} onClose={() => setShowModal(false)} />}
-      </div>
+        </div>
     </div>
   );
 }

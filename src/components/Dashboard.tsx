@@ -112,18 +112,18 @@ export function Dashboard() {
       </header>
       {/* Mobile Top Toolbar and Sidebar */}
       <div className="md:hidden fixed top-16 left-0 right-0 z-30 bg-white/10 backdrop-blur-md flex overflow-x-auto whitespace-nowrap scrollbar-hide py-2 px-1" style={{ WebkitOverflowScrolling: 'touch' }}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
             className={`relative px-4 py-2 mx-1 rounded-xl font-medium transition-all flex items-center space-x-2 ${
-              activeTab === tab.id
+                activeTab === tab.id
                 ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                : 'text-white/70 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <span className="text-lg">{tab.icon}</span>
-            <span>{tab.label}</span>
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <span className="text-lg">{tab.icon}</span>
+              <span>{tab.label}</span>
           </button>
         ))}
       </div>
@@ -144,9 +144,9 @@ export function Dashboard() {
                 <span>{tab.icon}</span>
                 <span>{tab.label}</span>
                 {tab.id === 'verification' && isVerified && <span className="ml-2 text-green-500">✔️</span>}
-              </button>
-            ))}
-          </div>
+            </button>
+          ))}
+        </div>
           {/* Logout at the bottom */}
           <button
             onClick={() => setShowConfirm({ type: 'logout', open: true })}
@@ -409,7 +409,7 @@ export function Dashboard() {
               <button className="w-full bg-green-500 text-white py-2 rounded-lg font-semibold hover:bg-green-600 transition" onClick={() => setShowActionConfirm({ type: '', open: false })}>OK</button>
             </>}
           </div>
-        </div>
+      </div>
       )}
     </div>
   );
