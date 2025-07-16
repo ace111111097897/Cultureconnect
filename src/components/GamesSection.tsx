@@ -512,15 +512,30 @@ export function GamesSection() {
   }
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-6 md:space-y-8 p-4 md:p-6">
       {/* Header */}
       <div className="flex justify-center">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 md:p-2 border border-white/20">
-          <div className="flex space-x-2">
+          <div className="flex space-x-1">
             <button
-              className="px-4 py-2 rounded-xl font-medium transition-all bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+              onClick={() => setView("lobbies")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                view === "lobbies"
+                  ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
+                  : "text-white/70 hover:text-white hover:bg-white/10"
+              }`}
             >
-              🎮 UNO
+              Lobbies
+            </button>
+            <button
+              onClick={() => setView("create")}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                view === "create"
+                  ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg"
+                  : "text-white/70 hover:text-white hover:bg-white/10"
+              }`}
+            >
+              Create
             </button>
           </div>
         </div>

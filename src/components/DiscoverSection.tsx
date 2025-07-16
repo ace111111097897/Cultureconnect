@@ -130,39 +130,16 @@ export function DiscoverSection() {
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800 flex flex-col items-center justify-center py-6 md:py-4 relative overflow-hidden">
-      {/* Animated background blobs */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-1/2 h-1/2 bg-purple-700 opacity-30 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-1/3 h-1/3 bg-pink-600 opacity-20 rounded-full blur-2xl animate-pulse" />
-        <div className="absolute top-1/2 left-1/2 w-1/4 h-1/4 bg-blue-500 opacity-20 rounded-full blur-2xl animate-pulse" />
+      {/* Background decorative elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl"></div>
       </div>
-      {/* Notification Area */}
-      {notifications.length > 0 && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-md">
-          {notifications.slice(0, 3).map((note, idx) => (
-            <div key={idx} className="mb-2 px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500/80 to-pink-500/80 text-white shadow-lg text-center animate-fadeIn">
-              {note}
-            </div>
-          ))}
-        </div>
-      )}
-      <div
-        className="w-full flex-1 flex flex-col items-center justify-center z-10"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      >
-        {/* Profile Completion Progress Bar */}
-        <div className="w-full max-w-2xl mx-auto mb-4">
-          <div className="w-full bg-white/10 rounded-full h-3">
-            <div className="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full transition-all duration-500" style={{ width: `${currentUser.profileCompletion}%` }}></div>
-          </div>
-          <div className="text-right text-xs text-white/60 mt-1">Profile Completion: {currentUser.profileCompletion}%</div>
-        </div>
-        {/* Profile Counter */}
-        <div className="mb-4 text-white/80 text-lg font-semibold select-none">
-          Profile {currentIndex + 1} of {visibleProfiles.length}
-        </div>
-        <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] min-h-[calc(100vh-10rem)] flex flex-col items-center justify-center px-4 md:px-8 py-8 md:py-12">
+
+      {/* Main content container */}
+      <div className="relative w-full max-w-4xl mx-auto px-4 md:px-8">
+        <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] min-h-[calc(100vh-12rem)] flex flex-col items-center justify-center px-4 md:px-8 py-8 md:py-12">
           {/* Floating Like/Heart Button */}
           <button
             className={`absolute top-8 right-8 z-30 w-16 h-16 flex items-center justify-center rounded-full bg-pink-500/80 shadow-xl text-4xl text-white transition-all duration-200 hover:scale-110 focus:outline-none ${liked ? 'animate-ping-fast' : ''}`}
