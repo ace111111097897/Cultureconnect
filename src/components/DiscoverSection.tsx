@@ -131,7 +131,35 @@ export function DiscoverSection() {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
+        {/* Profile Counter */}
+        <div className="mb-4 text-white/80 text-lg font-semibold select-none">
+          Profile {currentIndex + 1} of {visibleProfiles.length}
+        </div>
         <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-8 py-12">
+          {/* Left Arrow */}
+          <button
+            className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 w-20 h-20 flex items-center justify-center text-5xl rounded-full transition-all duration-200
+              ${currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 hover:bg-purple-700/30 opacity-90'}
+            `}
+            onClick={() => setCurrentIndex(idx => Math.max(idx - 1, 0))}
+            aria-label="Previous Profile"
+            disabled={currentIndex === 0}
+            title="Left Arrow (←)"
+          >
+            &#8592;
+          </button>
+          {/* Right Arrow */}
+          <button
+            className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 w-20 h-20 flex items-center justify-center text-5xl rounded-full transition-all duration-200
+              ${currentIndex === visibleProfiles.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 hover:bg-pink-700/30 opacity-90'}
+            `}
+            onClick={() => setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1))}
+            aria-label="Next Profile"
+            disabled={currentIndex === visibleProfiles.length - 1}
+            title="Right Arrow (→)"
+          >
+            &#8594;
+          </button>
           {/* Top Gradient Section with large avatar */}
           <div className="relative flex flex-col items-center justify-center mb-8">
             {/* Glowing animated border */}
@@ -217,6 +245,10 @@ export function DiscoverSection() {
                 View More
               </button>
             </div>
+          </div>
+          {/* Swipe/arrow hint for desktop */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-base select-none pointer-events-none hidden md:block">
+            <span className="mr-2">←</span> Use arrows or swipe to browse <span className="ml-2">→</span>
           </div>
         </div>
         {/* Modal for View More */}
