@@ -1,4 +1,4 @@
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || "AIzaSyAGH__JCmWzkP7KEkTGTwxnbDlvMzHdehU";
 
 if (!GEMINI_API_KEY) {
   console.error("GEMINI_API_KEY is not set in environment variables");
