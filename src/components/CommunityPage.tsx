@@ -9,6 +9,13 @@ interface Profile {
   details: Record<string, any>;
 }
 
+interface Group {
+  id: number;
+  name: string;
+  members: string[];
+  messages: { user: string; text: string }[];
+}
+
 function ProfileModal({ profile, onClose, onAddFriend, onPass, onMessage }: {
   profile: Profile;
   onClose: () => void;
@@ -87,9 +94,19 @@ export default function CommunityPage() {
   ]);
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
 
-  // Button handlers
+  // Group chat state
+  const [groups, setGroups] = useState<Group[]>([
+    { id: 1, name: "Music Lovers", members: ["You"], messages: [{ user: "You", text: "Welcome to Music Lovers!" }] },
+    { id: 2, name: "NYC Foodies", members: [], messages: [] },
+  ]);
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [joinedGroupId, setJoinedGroupId] = useState<number | null>(null);
+  const [chatInput, setChatInput] = useState("");
+  const currentUser = "You";
+
+  // Profile button handlers
   const handleAddFriend = () => {
-    // TODO: Call backend to add friend
     alert(`Friend request sent to ${selectedProfile?.name}`);
     setSelectedProfile(null);
   };
@@ -100,14 +117,104 @@ export default function CommunityPage() {
     }
   };
   const handleMessage = () => {
-    // TODO: Navigate to chat or open chat window
     alert(`Starting chat with ${selectedProfile?.name}`);
     setSelectedProfile(null);
   };
 
+  // Group chat handlers
+  const handleCreateGroup = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newGroupName.trim()) return;
+    setGroups(prev => [...prev, { id: Date.now(), name: newGroupName, members: [currentUser], messages: [{ user: currentUser, text: `Welcome to ${newGroupName}!` }] }]);
+    setNewGroupName("");
+    setShowCreateGroup(false);
+  };
+  const handleJoinGroup = (id: number) => {
+    setGroups(prev => prev.map(g => g.id === id && !g.members.includes(currentUser) ? { ...g, members: [...g.members, currentUser] } : g));
+    setJoinedGroupId(id);
+  };
+  const handleLeaveGroup = (id: number) => {
+    setGroups(prev => prev.map(g => g.id === id ? { ...g, members: g.members.filter(m => m !== currentUser) } : g));
+    setJoinedGroupId(null);
+  };
+  const handleSendMessage = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatInput.trim() || joinedGroupId === null) return;
+    setGroups(prev => prev.map(g => g.id === joinedGroupId ? { ...g, messages: [...g.messages, { user: currentUser, text: chatInput }] } : g));
+    setChatInput("");
+  };
+
+  const joinedGroup = groups.find(g => g.id === joinedGroupId);
+
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-purple-900 via-purple-700 to-orange-400 p-6">
-      <div className="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+      {/* Group Chat Section */}
+      <div className="w-full max-w-3xl mb-10">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-white">Community Groups</h2>
+          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-600 transition" onClick={() => setShowCreateGroup(true)}>+ Create Group</button>
+        </div>
+        {/* List of groups */}
+        <div className="space-y-4">
+          {groups.map(group => (
+            <div key={group.id} className="bg-white/20 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+              <div className="font-bold text-lg text-purple-900 mb-2 sm:mb-0">{group.name}</div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-700">Members: {group.members.length}</span>
+                {group.members.includes(currentUser) ? (
+                  <button className="bg-red-500 text-white px-3 py-1 rounded-lg font-semibold hover:bg-red-600 transition" onClick={() => handleLeaveGroup(group.id)}>Leave</button>
+                ) : (
+                  <button className="bg-green-500 text-white px-3 py-1 rounded-lg font-semibold hover:bg-green-600 transition" onClick={() => handleJoinGroup(group.id)}>Join</button>
+                )}
+                {joinedGroupId === group.id && <span className="ml-2 text-green-600 font-bold">Joined</span>}
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Group Chat UI */}
+        {joinedGroup && (
+          <div className="mt-8 bg-white/30 rounded-2xl p-6 shadow-lg">
+            <div className="font-bold text-xl text-purple-900 mb-2">{joinedGroup.name} Chat</div>
+            <div className="h-48 overflow-y-auto bg-white/10 rounded-lg p-3 mb-4 flex flex-col gap-2">
+              {joinedGroup.messages.map((msg, i) => (
+                <div key={i} className={`flex ${msg.user === currentUser ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`px-4 py-2 rounded-xl ${msg.user === currentUser ? 'bg-blue-500 text-white' : 'bg-white/80 text-purple-900'}`}>{msg.text}</div>
+                </div>
+              ))}
+            </div>
+            <form onSubmit={handleSendMessage} className="flex gap-2">
+              <input
+                className="flex-1 px-4 py-2 rounded-xl bg-white/20 border border-white/30 text-purple-900 placeholder-purple-400 focus:outline-none"
+                placeholder="Type a message..."
+                value={chatInput}
+                onChange={e => setChatInput(e.target.value)}
+              />
+              <button type="submit" className="px-6 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all">Send</button>
+            </form>
+          </div>
+        )}
+      </div>
+      {/* Create Group Modal */}
+      {showCreateGroup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowCreateGroup(false)}>✕</button>
+            <div className="text-xl font-bold mb-4">Create Group</div>
+            <form onSubmit={handleCreateGroup} className="space-y-4">
+              <input
+                className="w-full border rounded-lg p-2"
+                placeholder="Group Name"
+                value={newGroupName}
+                onChange={e => setNewGroupName(e.target.value)}
+                required
+              />
+              <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition">Create</button>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Profile Section (unchanged) */}
+      <div className="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mt-10">
         {profiles.map((profile) => (
           <div
             key={profile.id}
