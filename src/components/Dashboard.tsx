@@ -9,7 +9,6 @@ import { GamesSection } from "./GamesSection";
 import { CultureFeed } from "./CultureFeed";
 import CommunityPage from "./CommunityPage";
 import { ExploreSection } from "./ExploreSection";
-import { KandiChat } from "./KandiChat";
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("discover");
@@ -60,7 +59,6 @@ export function Dashboard() {
     { id: "help", label: "Help & Safety", icon: "🛡️", onClick: () => setShowHelp(true) },
     { id: "verification", label: "Verification", icon: "✅", onClick: () => setShowVerification(true) },
     { id: "profile", label: "Profile", icon: "👤" },
-    { id: "kandi", label: "Kandi", icon: "🐕" },
   ];
 
   const renderContent = () => {
@@ -85,8 +83,6 @@ export function Dashboard() {
         return <ProfilePage />;
       case "explore":
         return <ExploreSection />;
-      case "kandi":
-        return <KandiChat />;
       default:
         return <DiscoverSection />;
     }

@@ -16,7 +16,6 @@ export function MessagingPrompts({ conversationId, userProfile, matchProfile, on
   const [showAIDog, setShowAIDog] = useState(false);
 
   const generateStarter = useAction(api.ai.generateConversationStarter);
-  const callKandiAI = useAction(api.ai.callKandiAI);
 
   const predefinedPrompts = [
     "What's your favorite cultural tradition and why?",
@@ -66,26 +65,6 @@ export function MessagingPrompts({ conversationId, userProfile, matchProfile, on
     }
   };
 
-  const handleGetAdvice = async () => {
-    setIsGenerating(true);
-    setShowAIDog(true);
-
-    try {
-      const advice = await callKandiAI({
-        prompt: "Give me advice for starting a meaningful conversation on a cultural dating app",
-        context: "You are a relationship coach helping people connect through shared cultural values and experiences.",
-      });
-
-      toast.success("AI Advice: " + advice);
-    } catch (error) {
-      console.error("Failed to get AI advice:", error);
-      toast.error("Failed to get AI advice");
-    } finally {
-      setIsGenerating(false);
-      setTimeout(() => setShowAIDog(false), 2000);
-    }
-  };
-
   return (
     <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 mb-4">
       <div className="flex items-center justify-between mb-4">
@@ -114,13 +93,6 @@ export function MessagingPrompts({ conversationId, userProfile, matchProfile, on
               <span>{isGenerating ? "Generating..." : "AI Starter"}</span>
             </button>
             
-            <button
-              onClick={handleGetAdvice}
-              disabled={isGenerating}
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-medium hover:from-blue-600 hover:to-cyan-600 disabled:opacity-50 transition-all"
-            >
-              💡 Advice
-            </button>
           </div>
         </div>
       </div>

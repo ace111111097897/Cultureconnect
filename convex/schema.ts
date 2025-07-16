@@ -261,15 +261,6 @@ const applicationTables = {
   })
     .index("by_reel", ["reelId"])
     .index("by_user", ["userId"]),
-
-  // Persistent Kandi chat history
-  kandiChats: defineTable({
-    userId: v.id("users"),
-    from: v.union(v.literal("user"), v.literal("kandi")),
-    text: v.string(),
-    timestamp: v.number(),
-  })
-    .index("by_user", ["userId"]),
 };
 
 export default defineSchema({
