@@ -6,7 +6,6 @@ import { Toaster } from "sonner";
 import { useState } from "react";
 import { ProfileSetup } from "./components/ProfileSetup";
 import { Dashboard } from "./components/Dashboard";
-import KandiChat from "./components/KandiChat";
 
 export default function App() {
   return (
@@ -27,9 +26,7 @@ export default function App() {
         <main className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
           <Content />
         </main>
-        <Authenticated>
-          <KandiChat />
-        </Authenticated>
+        
         <Toaster />
       </div>
     </div>
