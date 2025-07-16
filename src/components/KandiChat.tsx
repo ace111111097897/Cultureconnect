@@ -1,6 +1,18 @@
 import React, { useState } from "react";
 import { callGeminiAI } from "../lib/geminiApi";
 
+// Auto-generated question prompts for Kandi
+const SUGGESTED_QUESTIONS = [
+  "How can I start a conversation about cultural traditions?",
+  "What are good questions to ask about someone's heritage?",
+  "How do I show interest in someone's cultural background?",
+  "What are some cultural dating tips?",
+  "How can I plan a culturally-themed date?",
+  "What should I know about cross-cultural relationships?",
+  "How do I handle cultural differences in dating?",
+  "What are good conversation starters for cultural topics?"
+];
+
 export default function KandiChat() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([
@@ -11,14 +23,19 @@ export default function KandiChat() {
   ]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuggestions, setShowSuggestions] = useState(true);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    setMessages((msgs) => [...msgs, { from: "user", text: input }]);
+  const sendMessage = async (messageText?: string) => {
+    const textToSend = messageText || input;
+    if (!textToSend.trim()) return;
+    
+    setMessages((msgs) => [...msgs, { from: "user", text: textToSend }]);
     setLoading(true);
     setError(null);
+    setShowSuggestions(false);
+    
     try {
-      const reply = await callGeminiAI(input);
+      const reply = await callGeminiAI(textToSend);
       setMessages((msgs) => [...msgs, { from: "kandi", text: reply }]);
     } catch (err: any) {
       setError(err.message || "Error contacting Gemini AI");
@@ -26,6 +43,11 @@ export default function KandiChat() {
       setLoading(false);
       setInput("");
     }
+  };
+
+  const analyzeConversation = async () => {
+    const analysisPrompt = `I want you to analyze a conversation I'm having with someone and give me advice on how to better connect with them. Can you help me understand their interests, communication style, and suggest topics to discuss?`;
+    await sendMessage(analysisPrompt);
   };
 
   return (
@@ -37,6 +59,31 @@ export default function KandiChat() {
         <h2 className="text-3xl font-bold text-white mb-2">Chat with Kandi</h2>
         <p className="text-lg text-white/80 mb-2">Your friendly AI companion for cultural dating advice!</p>
       </div>
+
+      {/* Suggested Questions */}
+      {showSuggestions && (
+        <div className="w-full max-w-2xl mb-6">
+          <h3 className="text-white font-semibold mb-3">💡 Quick Questions:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {SUGGESTED_QUESTIONS.map((question, index) => (
+              <button
+                key={index}
+                onClick={() => sendMessage(question)}
+                className="p-3 bg-white/10 rounded-lg text-white text-sm hover:bg-white/20 transition text-left"
+              >
+                {question}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={analyzeConversation}
+            className="mt-3 p-3 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg text-white font-semibold hover:scale-105 transition"
+          >
+            🔍 Analyze My Conversation
+          </button>
+        </div>
+      )}
+
       <div className="w-full max-w-2xl bg-white/10 rounded-xl p-6 mb-4 border border-white/20">
         {messages.map((msg, i) => (
           <div
@@ -53,9 +100,10 @@ export default function KandiChat() {
             <div>{msg.text}</div>
           </div>
         ))}
-        {loading && <div className="text-white">Kandi is thinking...</div>}
+        {loading && <div className="text-white">🐕 Kandi is thinking...</div>}
         {error && <div className="text-red-500">{error}</div>}
       </div>
+
       <div className="w-full max-w-2xl flex">
         <input
           className="flex-1 border p-3 rounded-l-lg text-lg"
@@ -67,7 +115,7 @@ export default function KandiChat() {
         />
         <button
           className="bg-yellow-300 text-black px-6 py-3 rounded-r-lg font-bold"
-          onClick={sendMessage}
+          onClick={() => sendMessage()}
           disabled={loading}
         >
           Send
