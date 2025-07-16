@@ -1,5 +1,5 @@
-import { httpRouter } from "convex/server";
+import * as kandi from "./kandi";
 
-const http = httpRouter();
-
-export default http;
+export default {
+  kandi,
+};
