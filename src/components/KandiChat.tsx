@@ -29,7 +29,7 @@ export default function KandiChat() {
   };
 
   return (
-    <div className="min-h-[60vh] flex flex-col items-center justify-start bg-gradient-to-br from-purple-800 via-blue-700 to-pink-500 rounded-2xl p-8 shadow-lg">
+    <div className="flex flex-col items-center justify-start bg-gradient-to-br from-purple-800 via-blue-700 to-pink-500 rounded-2xl p-8 shadow-lg min-h-[60vh]">
       <div className="flex flex-col items-center mb-8">
         <div className="w-24 h-24 rounded-full bg-yellow-200 flex items-center justify-center mb-4 shadow-lg border-4 border-white">
           <span className="text-5xl">🐕</span>
