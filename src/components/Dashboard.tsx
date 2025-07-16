@@ -114,12 +114,12 @@ export function Dashboard() {
         </div>
       </header>
       {/* Mobile Top Toolbar and Sidebar */}
-      <div className="md:hidden fixed top-16 left-0 right-0 z-30 bg-white/10 backdrop-blur-md flex overflow-x-auto whitespace-nowrap scrollbar-hide py-3 px-2" style={{ WebkitOverflowScrolling: 'touch' }}>
+      <div className="md:hidden fixed top-16 left-0 right-0 z-30 bg-white/10 backdrop-blur-md flex overflow-x-auto whitespace-nowrap scrollbar-hide py-4 px-3" style={{ WebkitOverflowScrolling: 'touch' }}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`relative px-4 py-3 mx-1 rounded-xl font-medium transition-all flex items-center space-x-2 ${
+            className={`relative px-5 py-3 mx-2 rounded-xl font-medium transition-all flex items-center space-x-2 ${
               activeTab === tab.id
                 ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
                 : 'text-white/70 hover:text-white hover:bg-white/10'
@@ -131,7 +131,7 @@ export function Dashboard() {
         ))}
       </div>
       
-      <div className="flex flex-1 pt-20 md:pt-16 min-h-[calc(100vh-5rem)]" style={{ paddingTop: '5rem' }}>
+      <div className="flex flex-1 pt-24 md:pt-16 min-h-[calc(100vh-5rem)]" style={{ paddingTop: '6rem' }}>
         {/* Left Sidebar */}
         {/* Example sidebar layout for desktop (md+): */}
         <aside className="hidden md:flex flex-col w-64 h-full bg-gradient-to-b from-purple-900 via-blue-900 to-pink-800 p-6 text-white rounded-r-2xl shadow-xl">
@@ -245,12 +245,12 @@ export function Dashboard() {
         </aside>
 
         {/* Main Content Area - Full Screen */}
-        <main className="flex-1 p-4 md:p-6 overflow-y-auto w-full">
+        <main className="flex-1 p-6 md:p-6 overflow-y-auto w-full">
           {/* Top section with culture tags */}
-          <div className="mb-6 md:mb-8">
-            <div className="flex items-center space-x-3 md:space-x-4 mb-4">
-              <span className="px-3 py-2 bg-white/10 rounded-full text-white text-sm">Mediterranean</span>
-              <span className="px-3 py-2 bg-white/10 rounded-full text-white text-sm">Fusion • Mutual</span>
+          <div className="mb-8 md:mb-8">
+            <div className="flex items-center space-x-4 md:space-x-4 mb-6">
+              <span className="px-4 py-3 bg-white/10 rounded-full text-white text-sm">Mediterranean</span>
+              <span className="px-4 py-3 bg-white/10 rounded-full text-white text-sm">Fusion • Mutual</span>
             </div>
           </div>
           

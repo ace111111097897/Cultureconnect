@@ -77,13 +77,13 @@ export default function KandiChat() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-start bg-gradient-to-br from-purple-800 via-blue-700 to-pink-500 rounded-2xl p-4 md:p-8 shadow-lg min-h-[60vh]">
-      <div className="flex flex-col items-center mb-6 md:mb-8">
-        <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-yellow-200 flex items-center justify-center mb-4 shadow-lg border-4 border-white">
+    <div className="flex flex-col items-center justify-start bg-gradient-to-br from-purple-800 via-blue-700 to-pink-500 rounded-2xl p-6 md:p-8 shadow-lg min-h-[60vh]">
+      <div className="flex flex-col items-center mb-8 md:mb-8">
+        <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-yellow-200 flex items-center justify-center mb-6 shadow-lg border-4 border-white">
           <span className="text-4xl md:text-5xl">🐕</span>
         </div>
-        <h2 className="text-2xl md:text-3xl font-bold text-white mb-2">Chat with Kandi</h2>
-        <p className="text-base md:text-lg text-white/80 mb-2 text-center">Your friendly AI companion for cultural dating advice!</p>
+        <h2 className="text-2xl md:text-3xl font-bold text-white mb-3">Chat with Kandi</h2>
+        <p className="text-base md:text-lg text-white/80 mb-3 text-center">Your friendly AI companion for cultural dating advice!</p>
         {userData?.currentUser && (
           <p className="text-xs md:text-sm text-white/60 text-center">
             Connected as: {userData.currentUser.displayName || userData.currentUser.email}
@@ -91,7 +91,7 @@ export default function KandiChat() {
         )}
       </div>
 
-      <div className="w-full max-w-2xl bg-white/10 rounded-xl p-4 md:p-6 mb-4 border border-white/20">
+      <div className="w-full max-w-2xl bg-white/10 rounded-xl p-6 md:p-6 mb-6 border border-white/20">
         {messages.map((msg, i) => (
           <div
             key={i}
@@ -113,29 +113,29 @@ export default function KandiChat() {
 
       {/* Suggested Questions */}
       {showSuggestions && (
-        <div className="w-full max-w-2xl mb-4 md:mb-6">
-          <h3 className="text-white font-semibold mb-3">💡 Quick Questions:</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="w-full max-w-2xl mb-6 md:mb-6">
+          <h3 className="text-white font-semibold mb-4">💡 Quick Questions:</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {SUGGESTED_QUESTIONS.map((question, index) => (
               <button
                 key={index}
                 onClick={() => sendMessage(question)}
-                className="p-2 md:p-3 bg-white/10 rounded-lg text-white text-xs md:text-sm hover:bg-white/20 transition text-left"
+                className="p-3 md:p-3 bg-white/10 rounded-lg text-white text-xs md:text-sm hover:bg-white/20 transition text-left"
               >
                 {question}
               </button>
             ))}
           </div>
-          <div className="flex flex-col md:flex-row gap-2 mt-3">
+          <div className="flex flex-col md:flex-row gap-3 mt-4">
             <button
               onClick={analyzeConversation}
-              className="flex-1 p-2 md:p-3 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg text-white font-semibold hover:scale-105 transition text-sm md:text-base"
+              className="flex-1 p-3 md:p-3 bg-gradient-to-r from-green-400 to-blue-500 rounded-lg text-white font-semibold hover:scale-105 transition text-sm md:text-base"
             >
               🔍 Analyze My Conversation
             </button>
             <button
               onClick={askAboutUsers}
-              className="flex-1 p-2 md:p-3 bg-gradient-to-r from-purple-400 to-pink-500 rounded-lg text-white font-semibold hover:scale-105 transition text-sm md:text-base"
+              className="flex-1 p-3 md:p-3 bg-gradient-to-r from-purple-400 to-pink-500 rounded-lg text-white font-semibold hover:scale-105 transition text-sm md:text-base"
             >
               👥 Tell Me About Users
             </button>
@@ -145,7 +145,7 @@ export default function KandiChat() {
 
       <div className="w-full max-w-2xl flex">
         <input
-          className="flex-1 border p-2 md:p-3 rounded-l-lg text-base md:text-lg"
+          className="flex-1 border p-3 md:p-3 rounded-l-lg text-base md:text-lg"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
@@ -153,7 +153,7 @@ export default function KandiChat() {
           disabled={loading}
         />
         <button
-          className="bg-yellow-300 text-black px-4 md:px-6 py-2 md:py-3 rounded-r-lg font-bold text-sm md:text-base"
+          className="bg-yellow-300 text-black px-6 md:px-6 py-3 md:py-3 rounded-r-lg font-bold text-sm md:text-base"
           onClick={() => sendMessage()}
           disabled={loading}
         >

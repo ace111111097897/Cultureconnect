@@ -23,7 +23,7 @@ export default function App() {
           </div>
         </header>
 
-        <main className="w-full px-2 sm:px-4 py-4 sm:py-8">
+        <main className="w-full px-4 sm:px-4 py-6 sm:py-8">
           <Content />
         </main>
         

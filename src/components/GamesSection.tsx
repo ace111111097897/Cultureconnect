@@ -461,28 +461,28 @@ export function GamesSection() {
 
   if (view === "create") {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8 p-4 md:p-0">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white/20">
-          <h2 className="text-2xl font-bold text-white mb-6">Create UNO Lobby</h2>
+          <h2 className="text-2xl font-bold text-white mb-8">Create UNO Lobby</h2>
           
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <label className="block text-white font-medium mb-2">Lobby Name</label>
+              <label className="block text-white font-medium mb-3">Lobby Name</label>
               <input
                 type="text"
                 value={lobbyName}
                 onChange={(e) => setLobbyName(e.target.value)}
                 placeholder="Enter lobby name..."
-                className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-400"
               />
             </div>
             
             <div>
-              <label className="block text-white font-medium mb-2">Max Players</label>
+              <label className="block text-white font-medium mb-3">Max Players</label>
               <select
                 value={maxPlayers}
                 onChange={(e) => setMaxPlayers(Number(e.target.value))}
-                className="w-full px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
+                className="w-full px-4 py-3 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
               >
                 {[2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
                   <option key={num} value={num}>{num} players</option>
@@ -490,17 +490,17 @@ export function GamesSection() {
               </select>
             </div>
             
-            <div className="flex space-x-4">
+            <div className="flex space-x-4 pt-4">
               <button
                 onClick={handleCreateLobby}
                 disabled={!lobbyName.trim()}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg font-semibold hover:from-green-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-green-500 to-blue-500 text-white rounded-lg font-semibold hover:from-green-600 hover:to-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 Create Lobby
               </button>
               <button
                 onClick={() => setView("lobbies")}
-                className="px-6 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition-all"
+                className="px-6 py-4 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition-all"
               >
                 Cancel
               </button>
@@ -512,13 +512,13 @@ export function GamesSection() {
   }
 
   return (
-    <div className="space-y-6 md:space-y-8">
+    <div className="space-y-8 md:space-y-8 p-4 md:p-0">
       {/* Header */}
       <div className="flex justify-center">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/20">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 md:p-2 border border-white/20">
           <div className="flex space-x-2">
             <button
-              className="px-4 py-2 rounded-xl font-medium transition-all bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+              className="px-6 py-3 md:px-4 md:py-2 rounded-xl font-medium transition-all bg-gradient-to-r from-orange-500 to-pink-500 text-white"
             >
               🎮 UNO
             </button>
