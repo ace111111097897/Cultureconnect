@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
@@ -9,6 +9,8 @@ export function FriendsSection() {
   const [selectedFriend, setSelectedFriend] = useState<any>(null);
   const [messagePrompt, setMessagePrompt] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [showNewRequestNotification, setShowNewRequestNotification] = useState(false);
+  const [lastRequestCount, setLastRequestCount] = useState(0);
   
   const friends = useQuery(api.friends.getFriends);
   const friendRequests = useQuery(api.friends.getFriendRequests);
@@ -18,6 +20,34 @@ export function FriendsSection() {
   // Debug logging
   console.log("FriendsSection - Friends:", friends);
   console.log("FriendsSection - Friend Requests:", friendRequests);
+
+  // Check for new friend requests and show notification
+  useEffect(() => {
+    if (friendRequests && friendRequests.length > lastRequestCount && lastRequestCount > 0) {
+      setShowNewRequestNotification(true);
+      
+      // Play notification sound (if supported)
+      try {
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
+        audio.volume = 0.3;
+        audio.play().catch(() => {}); // Ignore errors if audio fails
+      } catch (e) {
+        // Ignore audio errors
+      }
+      
+      toast.success(`You have ${friendRequests.length - lastRequestCount} new friend request${friendRequests.length - lastRequestCount > 1 ? 's' : ''}!`, {
+        duration: 4000,
+        action: {
+          label: 'View',
+          onClick: () => setActiveTab("requests")
+        }
+      });
+      
+      // Auto-hide notification after 8 seconds
+      setTimeout(() => setShowNewRequestNotification(false), 8000);
+    }
+    setLastRequestCount(friendRequests?.length || 0);
+  }, [friendRequests, lastRequestCount]);
 
   // Filter friends based on search query
   const filteredFriends = friends?.filter(friend => 
@@ -79,6 +109,33 @@ export function FriendsSection() {
 
   return (
     <div className="space-y-6">
+      {/* Floating New Request Notification */}
+      {showNewRequestNotification && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
+          <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-6 py-3 rounded-full shadow-lg border border-white/20 backdrop-blur-md animate-pulse">
+            <div className="flex items-center space-x-2">
+              <span className="text-xl animate-pulse">📨</span>
+              <span className="font-semibold">New friend request!</span>
+              <button 
+                onClick={() => {
+                  setShowNewRequestNotification(false);
+                  setActiveTab("requests");
+                }}
+                className="ml-2 px-3 py-1 bg-white/20 rounded-full text-xs hover:bg-white/30 transition-all font-medium"
+              >
+                View
+              </button>
+              <button 
+                onClick={() => setShowNewRequestNotification(false)}
+                className="ml-1 px-2 py-1 bg-white/10 rounded-full text-xs hover:bg-white/20 transition-all"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex justify-center">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/20">

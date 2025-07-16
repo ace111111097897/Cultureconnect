@@ -18,6 +18,7 @@ export default function App() {
               <h1 className="text-2xl font-bold text-white">Culture</h1>
             </div>
             <Authenticated>
+              <HeaderNotifications />
               <SignOutButton />
             </Authenticated>
           </div>
@@ -99,6 +100,27 @@ function Content() {
           <Dashboard />
         )}
       </Authenticated>
+    </div>
+  );
+}
+
+function HeaderNotifications() {
+  const friendRequests = useQuery(api.friends.getFriendRequests);
+  
+  if (!friendRequests || friendRequests.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex items-center space-x-4 mr-4">
+      <div className="relative">
+        <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full flex items-center justify-center text-white text-sm font-semibold">
+          📨
+        </div>
+        <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+          <span className="text-white text-xs font-bold">{friendRequests.length}</span>
+        </div>
+      </div>
     </div>
   );
 }
