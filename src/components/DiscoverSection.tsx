@@ -1,6 +1,7 @@
-import { useQuery } from "convex/react";
+import { useState, useEffect, useRef } from "react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import React, { useState, useEffect, useRef } from "react";
+import { toast } from "sonner";
 
 // Add modal for 'View More'
 function ProfileModal({ profile, onClose }: { profile: any; onClose: () => void }) {
@@ -38,34 +39,34 @@ function ProfileModal({ profile, onClose }: { profile: any; onClose: () => void 
 }
 
 export function DiscoverSection() {
-  const profiles = useQuery(api.profiles.getDiscoverProfiles, { limit: 20 });
-  const [selectedProfile, setSelectedProfile] = useState<any>(null);
-  const [visibleProfiles, setVisibleProfiles] = useState<any[]>([]);
-  const [notifications, setNotifications] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [notifications, setNotifications] = useState<string[]>([]);
+  const [visibleProfiles, setVisibleProfiles] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<any>(null);
   const touchStartX = useRef<number | null>(null);
+  
+  const profiles = useQuery(api.profiles.getDiscoverProfiles, { limit: 20 });
+  const currentUser = useQuery(api.profiles.getCurrentUserProfile);
+  const sendFriendRequest = useMutation(api.friends.sendFriendRequest);
 
   // Simulate current user for mutual interests and completion
-  const currentUser = {
-    languages: ["English", "Spanish"],
-    values: ["Personal growth", "Environmental consciousness"],
-    foodPreferences: ["Latin American", "Fusion"],
-    profileCompletion: 80,
-  };
+  const currentUserProfile = currentUser;
+  const currentUserProfileCompletion = 80; // Default completion percentage
 
   // Sync visibleProfiles with profiles from backend
   useEffect(() => {
-    if (profiles) setVisibleProfiles(profiles);
-    setCurrentIndex(0);
+    if (profiles) {
+      setVisibleProfiles(profiles);
+      setCurrentIndex(0);
+    }
   }, [profiles]);
 
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1));
       if (e.key === 'ArrowLeft') setCurrentIndex(idx => Math.max(idx - 1, 0));
-      if (e.key === 'Enter') setShowModal(true);
+      else if (e.key === 'ArrowRight') setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1));
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -74,12 +75,21 @@ export function DiscoverSection() {
   const handlePass = () => {
     setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1));
   };
-  const handleAddFriend = (profile: any) => {
-    setNotifications(n => [
-      `Friend request sent to ${profile.displayName}.`,
-      ...n
-    ]);
-    // TODO: Call backend to add friend
+  
+  const handleAddFriend = async (profile: any) => {
+    try {
+      console.log("Sending friend request to:", profile);
+      console.log("Profile userId:", profile.userId);
+      await sendFriendRequest({ toUserId: profile.userId });
+      setNotifications(n => [
+        `Friend request sent to ${profile.displayName}.`,
+        ...n
+      ]);
+      toast.success(`Friend request sent to ${profile.displayName}!`);
+    } catch (error: any) {
+      console.error("Error sending friend request:", error);
+      toast.error(error.message || "Failed to send friend request.");
+    }
   };
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -154,9 +164,9 @@ export function DiscoverSection() {
         {/* Profile Completion Progress Bar */}
         <div className="w-full max-w-2xl mx-auto mb-4">
           <div className="w-full bg-white/10 rounded-full h-3">
-            <div className="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full transition-all duration-500" style={{ width: `${currentUser.profileCompletion}%` }}></div>
+            <div className="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full transition-all duration-500" style={{ width: `${currentUserProfileCompletion}%` }}></div>
           </div>
-          <div className="text-right text-xs text-white/60 mt-1">Profile Completion: {currentUser.profileCompletion}%</div>
+          <div className="text-right text-xs text-white/60 mt-1">Profile Completion: {currentUserProfileCompletion}%</div>
         </div>
         {/* Profile Counter */}
         <div className="mb-4 text-white/80 text-lg font-semibold select-none">
@@ -244,9 +254,11 @@ export function DiscoverSection() {
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="languages">🗣️</span> Languages</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.languages.map((l: string) => (
-                    <span key={l} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUser.languages.includes(l) ? 'bg-green-500/30 border-green-400 text-green-100' : 'bg-white/10 border-white/20 text-white'}`}>{l}{currentUser.languages.includes(l) && ' • Mutual'}</span>
+                    <span key={l} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUserProfile?.languages?.includes(l) ? 'bg-green-500/30 border-green-400 text-green-100' : 'bg-white/10 border-white/20 text-white'}`}>
+                      {l}{currentUserProfile?.languages?.includes(l) && ' • Mutual'}
+                    </span>
                   ))}
-            </div>
+                </div>
               </div>
             )}
             {/* Values (highlight mutuals) */}
@@ -255,9 +267,11 @@ export function DiscoverSection() {
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="values">💡</span> Values</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.values.map((v: string) => (
-                    <span key={v} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUser.values.includes(v) ? 'bg-blue-500/30 border-blue-400 text-blue-100' : 'bg-white/10 border-white/20 text-white'}`}>{v}{currentUser.values.includes(v) && ' • Mutual'}</span>
+                    <span key={v} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUserProfile?.values?.includes(v) ? 'bg-blue-500/30 border-blue-400 text-blue-100' : 'bg-white/10 border-white/20 text-white'}`}>
+                      {v}{currentUserProfile?.values?.includes(v) && ' • Mutual'}
+                    </span>
                   ))}
-          </div>
+                </div>
               </div>
             )}
             {/* Food Preferences (highlight mutuals) */}
@@ -266,9 +280,11 @@ export function DiscoverSection() {
                 <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="food">🍽️</span> Food Interests</div>
                 <div className="flex flex-wrap gap-2">
                   {profile.foodPreferences.map((f: string) => (
-                    <span key={f} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUser.foodPreferences.includes(f) ? 'bg-pink-500/30 border-pink-400 text-pink-100' : 'bg-white/10 border-white/20 text-white'}`}>{f}{currentUser.foodPreferences.includes(f) && ' • Mutual'}</span>
-              ))}
-            </div>
+                    <span key={f} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUserProfile?.foodPreferences?.includes(f) ? 'bg-pink-500/30 border-pink-400 text-pink-100' : 'bg-white/10 border-white/20 text-white'}`}>
+                      {f}{currentUserProfile?.foodPreferences?.includes(f) && ' • Mutual'}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
             {/* Action Buttons */}
@@ -300,7 +316,7 @@ export function DiscoverSection() {
         </div>
         {/* Modal for View More */}
         {showModal && <ProfileModal profile={profile} onClose={() => setShowModal(false)} />}
-        </div>
+      </div>
     </div>
   );
 }

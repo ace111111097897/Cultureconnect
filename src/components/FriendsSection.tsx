@@ -15,6 +15,10 @@ export function FriendsSection() {
   const respondToRequest = useMutation(api.friends.respondToFriendRequest);
   const sendMessage = useMutation(api.conversations.sendMessage);
 
+  // Debug logging
+  console.log("FriendsSection - Friends:", friends);
+  console.log("FriendsSection - Friend Requests:", friendRequests);
+
   // Filter friends based on search query
   const filteredFriends = friends?.filter(friend => 
     friend?.displayName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
