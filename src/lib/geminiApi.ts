@@ -9,14 +9,18 @@ export async function callGeminiAI(prompt: string) {
     throw new Error("Gemini API key is not configured. Please add VITE_GEMINI_API_KEY to your .env.local file.");
   }
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
   const body = {
     contents: [
       {
         role: "user",
         parts: [{ text: prompt }]
       }
-    ]
+    ],
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 800,
+    }
   };
   
   try {
@@ -29,6 +33,8 @@ export async function callGeminiAI(prompt: string) {
     });
     
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error("Gemini API response:", errorText);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
     
