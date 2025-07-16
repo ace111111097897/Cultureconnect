@@ -20,6 +20,24 @@ export function Dashboard() {
   const [darkMode, setDarkMode] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [isVerified, setIsVerified] = useState(false);
+  const [showEvents, setShowEvents] = useState(false);
+  const [showExplore, setShowExplore] = useState(false);
+  const [showIcebreakers, setShowIcebreakers] = useState(false);
+  const [showStories, setShowStories] = useState(false);
+  const [showCreateEvent, setShowCreateEvent] = useState(false);
+  const [showShareStory, setShowShareStory] = useState(false);
+  const [showExplorePrompt, setShowExplorePrompt] = useState(false);
+  const [icebreakerIndex, setIcebreakerIndex] = useState(0);
+  const [showActionConfirm, setShowActionConfirm] = useState<{ type: string; open: boolean }>({ type: '', open: false });
+
+  const icebreakerPrompts = [
+    "If you could travel anywhere, where would you go?",
+    "What’s your go-to karaoke song?",
+    "Describe your perfect weekend.",
+    "What's your favorite food to cook or eat?",
+    "If you could have dinner with anyone, who would it be?",
+    "What's a fun fact about you?"
+  ];
 
   const tabs = [
     { id: "discover", label: "Discover", icon: "🔍" },
@@ -30,6 +48,10 @@ export function Dashboard() {
     { id: "news", label: "News", icon: "📰" },
     { id: "kandi", label: "Kandi", icon: "🐕" },
     { id: "stories", label: "Stories", icon: "📖" },
+    { id: "events", label: "Events", icon: "📅", onClick: () => setShowEvents(true) },
+    { id: "explore", label: "Explore", icon: "🧭", onClick: () => setShowExplore(true) },
+    { id: "icebreakers", label: "Icebreakers", icon: "✨", onClick: () => setShowIcebreakers(true) },
+    { id: "success", label: "Success Stories", icon: "💖", onClick: () => setShowStories(true) },
     { id: "community", label: "Community", icon: "🌐" },
     { id: "favorites", label: "Favorites", icon: "⭐", onClick: () => setShowFavorites(true) },
     { id: "notifications", label: "Notifications", icon: "🔔", onClick: () => setShowNotifications(true) },
@@ -245,6 +267,101 @@ export function Dashboard() {
           </div>
         </div>
       )}
+      {showEvents && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full relative">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowEvents(false)}>✕</button>
+            <div className="text-2xl font-bold mb-4 flex items-center gap-2">📅 Events</div>
+            <div className="text-gray-700 mb-2">Find and join local meetups, speed dating, or virtual events!</div>
+            <ul className="list-disc list-inside text-gray-600 text-base space-y-2 mt-4">
+              <li>Speed Dating Night – Friday 7pm (NYC)</li>
+              <li>Virtual Game Night – Saturday 8pm (Online)</li>
+              <li>Singles Mixer – Next Week (LA)</li>
+            </ul>
+            <button className="mt-6 w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition" onClick={() => setShowCreateEvent(true)}>Create Event</button>
+          </div>
+        </div>
+      )}
+      {showCreateEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowCreateEvent(false)}>✕</button>
+            <div className="text-xl font-bold mb-4">Create Event</div>
+            <form className="space-y-4" onSubmit={e => { e.preventDefault(); setShowCreateEvent(false); setShowActionConfirm({ type: 'event', open: true }); }}>
+              <input className="w-full border rounded-lg p-2" placeholder="Event Name" required />
+              <input className="w-full border rounded-lg p-2" placeholder="Location" required />
+              <input className="w-full border rounded-lg p-2" placeholder="Date & Time" required />
+              <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition">Submit</button>
+            </form>
+          </div>
+        </div>
+      )}
+      {showExplore && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full relative">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowExplore(false)}>✕</button>
+            <div className="text-2xl font-bold mb-4 flex items-center gap-2">🧭 Explore</div>
+            <div className="text-gray-700 mb-2">Browse trending users, new members, and curated picks!</div>
+            <ul className="list-disc list-inside text-gray-600 text-base space-y-2 mt-4">
+              <li>Trending: Alex, Priya, Sam</li>
+              <li>New: Jamie, Taylor, Chris</li>
+              <li>Curated: “Most Compatible”</li>
+            </ul>
+            <button className="mt-6 w-full bg-purple-500 text-white py-2 rounded-lg font-semibold hover:bg-purple-600 transition" onClick={() => setShowExplorePrompt(true)}>See More</button>
+          </div>
+        </div>
+      )}
+      {showExplorePrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full relative text-center">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowExplorePrompt(false)}>✕</button>
+            <div className="text-xl font-bold mb-4">Explore More</div>
+            <div className="text-gray-700 mb-6">More trending and new users coming soon!</div>
+            <button className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition" onClick={() => setShowExplorePrompt(false)}>OK</button>
+          </div>
+        </div>
+      )}
+      {showIcebreakers && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full relative">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowIcebreakers(false)}>✕</button>
+            <div className="text-2xl font-bold mb-4 flex items-center gap-2">✨ Icebreakers</div>
+            <div className="text-gray-700 mb-2">Fun questions and games to start a conversation!</div>
+            <ul className="list-disc list-inside text-gray-600 text-base space-y-2 mt-4">
+              <li>{icebreakerPrompts[icebreakerIndex]}</li>
+            </ul>
+            <button className="mt-6 w-full bg-pink-500 text-white py-2 rounded-lg font-semibold hover:bg-pink-600 transition" onClick={() => setIcebreakerIndex(i => (i + 1) % icebreakerPrompts.length)}>Get Another</button>
+          </div>
+        </div>
+      )}
+      {showStories && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-lg w-full relative">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowStories(false)}>✕</button>
+            <div className="text-2xl font-bold mb-4 flex items-center gap-2">💖 Success Stories</div>
+            <div className="text-gray-700 mb-2">Read real stories from couples who met on CultureConnect!</div>
+            <ul className="list-disc list-inside text-gray-600 text-base space-y-2 mt-4">
+              <li>“We met at a virtual event and now we’re engaged!”</li>
+              <li>“Our first date was a cooking class—now we travel the world together.”</li>
+              <li>“We bonded over our love of music and food!”</li>
+            </ul>
+            <button className="mt-6 w-full bg-green-500 text-white py-2 rounded-lg font-semibold hover:bg-green-600 transition" onClick={() => setShowShareStory(true)}>Share Your Story</button>
+          </div>
+        </div>
+      )}
+      {showShareStory && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowShareStory(false)}>✕</button>
+            <div className="text-xl font-bold mb-4">Share Your Story</div>
+            <form className="space-y-4" onSubmit={e => { e.preventDefault(); setShowShareStory(false); setShowActionConfirm({ type: 'story', open: true }); }}>
+              <input className="w-full border rounded-lg p-2" placeholder="Your Name(s)" required />
+              <textarea className="w-full border rounded-lg p-2" placeholder="Your Story" rows={4} required />
+              <button type="submit" className="w-full bg-green-500 text-white py-2 rounded-lg font-semibold hover:bg-green-600 transition">Submit</button>
+            </form>
+          </div>
+        </div>
+      )}
       {/* Confirmation Modal */}
       {showConfirm.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -269,6 +386,24 @@ export function Dashboard() {
               <div className="text-xl font-bold mb-4 text-green-600">Verification Submitted</div>
               <div className="text-gray-700 mb-6">Your verification is under review. You'll get a badge when approved!</div>
               <button className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition" onClick={() => setShowConfirm({ type: '', open: false })}>OK</button>
+            </>}
+          </div>
+        </div>
+      )}
+      {/* Action Confirmation Modal for new features */}
+      {showActionConfirm.open && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full relative text-center">
+            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowActionConfirm({ type: '', open: false })}>✕</button>
+            {showActionConfirm.type === 'event' && <>
+              <div className="text-xl font-bold mb-4 text-blue-600">Event Created</div>
+              <div className="text-gray-700 mb-6">Your event has been submitted and will appear soon!</div>
+              <button className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition" onClick={() => setShowActionConfirm({ type: '', open: false })}>OK</button>
+            </>}
+            {showActionConfirm.type === 'story' && <>
+              <div className="text-xl font-bold mb-4 text-green-600">Story Submitted</div>
+              <div className="text-gray-700 mb-6">Thank you for sharing your story! It will inspire others.</div>
+              <button className="w-full bg-green-500 text-white py-2 rounded-lg font-semibold hover:bg-green-600 transition" onClick={() => setShowActionConfirm({ type: '', open: false })}>OK</button>
             </>}
           </div>
         </div>
