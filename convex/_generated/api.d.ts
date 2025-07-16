@@ -21,7 +21,6 @@ import type * as friends from "../friends.js";
 import type * as functions from "../functions.js";
 import type * as http from "../http.js";
 import type * as index from "../index.js";
-import type * as kandi from "../kandi.js";
 import type * as kandiActions from "../kandiActions.js";
 import type * as matches from "../matches.js";
 import type * as news from "../news.js";
@@ -50,7 +49,6 @@ declare const fullApi: ApiFromModules<{
   functions: typeof functions;
   http: typeof http;
   index: typeof index;
-  kandi: typeof kandi;
   kandiActions: typeof kandiActions;
   matches: typeof matches;
   news: typeof news;

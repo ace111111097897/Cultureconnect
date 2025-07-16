@@ -1,5 +1,4 @@
-import * as kandi from "./kandi";
-
+// Remove kandi from exports since kandi.ts is deleted
 export default {
-  kandi,
+  // other modules
 };

@@ -48,7 +48,10 @@ export const getUserNotifications = query({
         if (notification.relatedUserId) {
           const profile = await ctx.db
             .query("profiles")
-            .withIndex("by_user", (q) => q.eq("userId", notification.relatedUserId!))
+            .withIndex("by_user", (q) => {
+              if (!notification.relatedUserId) throw new Error("relatedUserId is undefined");
+              return q.eq("userId", notification.relatedUserId);
+            })
             .unique();
           if (profile) {
             const profileImageUrl = profile.profileImage 
