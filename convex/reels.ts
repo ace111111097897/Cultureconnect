@@ -84,7 +84,7 @@ export const likeReel = mutation({
       .withIndex("by_reel_and_user", (q) => q.eq("reelId", args.reelId).eq("userId", userId))
       .unique();
     if (existing) return; // Already liked
-    await ctx.db.insert("reelLikes", { reelId: args.reelId, userId });
+    await ctx.db.insert("reelLikes", { reelId: args.reelId, userId, timestamp: Date.now() });
   },
 });
 

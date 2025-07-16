@@ -48,7 +48,7 @@ export const getUserNotifications = query({
         if (notification.relatedUserId) {
           const profile = await ctx.db
             .query("profiles")
-            .withIndex("by_user", (q) => q.eq("userId", notification.relatedUserId))
+            .withIndex("by_user", (q) => q.eq("userId", notification.relatedUserId!))
             .unique();
           
           if (profile) {
