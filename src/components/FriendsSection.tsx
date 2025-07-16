@@ -20,7 +20,9 @@ export function FriendsSection({
   const friends = useQuery(api.friends.getFriends);
   const friendRequests = useQuery(api.friends.getFriendRequests);
   const conversations = useQuery(api.conversations.getUserConversations);
+  const currentUserProfile = useQuery(api.profiles.getCurrentUserProfile);
   const respondToRequest = useMutation(api.friends.respondToFriendRequest);
+  const createConversation = useMutation(api.conversations.createConversation);
 
   // Debug logging
   console.log("FriendsSection - Friends:", friends);
@@ -75,24 +77,78 @@ export function FriendsSection({
   };
 
   const handleMessage = async (friend: any) => {
+    console.log("handleMessage called with friend:", friend);
+    console.log("Available conversations:", conversations);
+    
     if (!conversations || !onNavigateToConversation || !onNavigateToTab) {
+      console.error("Missing required data:", { 
+        conversations: !!conversations, 
+        onNavigateToConversation: !!onNavigateToConversation, 
+        onNavigateToTab: !!onNavigateToTab 
+      });
       toast.error("Unable to open conversation");
       return;
     }
 
-    // Find the conversation with this friend
-    const conversation = conversations.find(conv => {
+    // Find the conversation with this friend - try multiple approaches
+    let conversation = null;
+    
+    // First try: match by otherProfile.userId
+    conversation = conversations.find(conv => {
       const otherProfile = (conv as any)?.otherProfile;
+      console.log("Checking conversation:", conv._id, "otherProfile:", otherProfile);
       return otherProfile && otherProfile.userId === friend.userId;
     });
 
+    // Second try: match by otherProfile._id (profile ID)
+    if (!conversation) {
+      conversation = conversations.find(conv => {
+        const otherProfile = (conv as any)?.otherProfile;
+        return otherProfile && otherProfile._id === friend._id;
+      });
+    }
+
+    // Third try: match by display name (fallback)
+    if (!conversation) {
+      conversation = conversations.find(conv => {
+        const otherProfile = (conv as any)?.otherProfile;
+        return otherProfile && otherProfile.displayName === friend.displayName;
+      });
+    }
+
+    console.log("Found conversation:", conversation);
+
     if (conversation) {
       // Navigate to conversations tab and open this conversation
+      console.log("Navigating to conversation:", conversation._id);
       onNavigateToConversation(conversation._id);
       onNavigateToTab("conversations");
       toast.success(`Opening conversation with ${friend.displayName}`);
     } else {
-      toast.error("No conversation found with this friend");
+      // No conversation found, try to create one
+      console.log("No conversation found, attempting to create one");
+      try {
+        if (!currentUserProfile) {
+          toast.error("Unable to get your profile information");
+          return;
+        }
+
+        // Create a new conversation
+        const newConversationId = await createConversation({
+          participantIds: [currentUserProfile.userId, friend.userId],
+          type: "direct"
+        });
+
+        console.log("Created new conversation:", newConversationId);
+        
+        // Navigate to the new conversation
+        onNavigateToConversation(newConversationId);
+        onNavigateToTab("conversations");
+        toast.success(`Created new conversation with ${friend.displayName}`);
+      } catch (error) {
+        console.error("Error creating conversation:", error);
+        toast.error("Failed to create conversation. Please try again.");
+      }
     }
   };
 
