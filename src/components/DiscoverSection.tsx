@@ -129,7 +129,7 @@ export function DiscoverSection() {
   const profile = visibleProfiles[currentIndex];
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800 flex flex-col items-center justify-center py-4 relative overflow-hidden">
+    <div className="w-full min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800 flex flex-col items-center justify-center py-6 md:py-4 relative overflow-hidden">
       {/* Animated background blobs */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-1/2 h-1/2 bg-purple-700 opacity-30 rounded-full blur-3xl animate-pulse" />
@@ -162,7 +162,7 @@ export function DiscoverSection() {
         <div className="mb-4 text-white/80 text-lg font-semibold select-none">
           Profile {currentIndex + 1} of {visibleProfiles.length}
         </div>
-        <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-8 py-12">
+        <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] min-h-[calc(100vh-10rem)] flex flex-col items-center justify-center px-4 md:px-8 py-8 md:py-12">
           {/* Floating Like/Heart Button */}
           <button
             className={`absolute top-8 right-8 z-30 w-16 h-16 flex items-center justify-center rounded-full bg-pink-500/80 shadow-xl text-4xl text-white transition-all duration-200 hover:scale-110 focus:outline-none ${liked ? 'animate-ping-fast' : ''}`}

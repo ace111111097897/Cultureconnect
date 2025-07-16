@@ -90,11 +90,11 @@ export function ConversationsSection() {
   };
 
   return (
-    <div className="grid lg:grid-cols-3 gap-6 h-[700px]">
+    <div className="grid lg:grid-cols-3 gap-4 md:gap-6 h-[600px] md:h-[700px]">
       {/* Conversations List */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden">
-        <div className="p-4 border-b border-white/20">
-          <h3 className="text-lg font-semibold text-white">Messages</h3>
+        <div className="p-3 md:p-4 border-b border-white/20">
+          <h3 className="text-base md:text-lg font-semibold text-white">Messages</h3>
         </div>
         
         <div className="overflow-y-auto h-full">
@@ -102,12 +102,12 @@ export function ConversationsSection() {
             <button
               key={conversation._id}
               onClick={() => handleSelectConversation(conversation._id)}
-              className={`w-full p-4 text-left hover:bg-white/10 transition-all border-b border-white/10 ${
+              className={`w-full p-3 md:p-4 text-left hover:bg-white/10 transition-all border-b border-white/10 ${
                 selectedConversation === conversation._id ? 'bg-white/15' : ''
               }`}
             >
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+              <div className="flex items-center space-x-2 md:space-x-3">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
                   {(conversation as any).otherProfile?.profileImageUrl ? (
                     <img
                       src={(conversation as any).otherProfile.profileImageUrl}
@@ -115,7 +115,7 @@ export function ConversationsSection() {
                       className="w-full h-full rounded-full object-cover"
                     />
                   ) : (
-                    <span className="text-white text-lg">👤</span>
+                    <span className="text-white text-base md:text-lg">👤</span>
                   )}
                 </div>
                 
@@ -152,13 +152,13 @@ export function ConversationsSection() {
             {/* Chat Container */}
             <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col flex-1">
               {/* Chat Header */}
-              <div className="p-4 border-b border-white/20 flex justify-between items-center">
+              <div className="p-3 md:p-4 border-b border-white/20 flex justify-between items-center">
                 {(() => {
                   const conversation = conversations.find(c => c._id === selectedConversation);
                   const otherProfile = (conversation as any)?.otherProfile;
                   return otherProfile ? (
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                    <div className="flex items-center space-x-2 md:space-x-3">
+                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
                         {otherProfile.profileImageUrl ? (
                           <img
                             src={otherProfile.profileImageUrl}
@@ -166,14 +166,14 @@ export function ConversationsSection() {
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (
-                          <span className="text-white">👤</span>
+                          <span className="text-white text-sm md:text-base">👤</span>
                         )}
                       </div>
                       <div>
-                        <h3 className="text-white font-semibold">
+                        <h3 className="text-white font-semibold text-sm md:text-base">
                           {otherProfile.displayName}
                         </h3>
-                        <p className="text-white/60 text-sm">
+                        <p className="text-white/60 text-xs md:text-sm">
                           {otherProfile.location}
                         </p>
                       </div>
@@ -183,7 +183,7 @@ export function ConversationsSection() {
                 
                 <button
                   onClick={() => setShowPrompts(!showPrompts)}
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all flex items-center space-x-2"
+                  className="px-3 md:px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs md:text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all flex items-center space-x-1 md:space-x-2"
                 >
                   <span>🐕</span>
                   <span>{showPrompts ? "Hide" : "Get"} Prompts</span>
@@ -191,7 +191,7 @@ export function ConversationsSection() {
               </div>
 
               {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4">
                 {messages?.map((message) => (
                   <div
                     key={message._id}
@@ -218,19 +218,19 @@ export function ConversationsSection() {
               </div>
 
               {/* Message Input */}
-              <form onSubmit={handleSendMessage} className="p-4 border-t border-white/20">
+              <form onSubmit={handleSendMessage} className="p-3 md:p-4 border-t border-white/20">
                 <div className="flex space-x-2">
                   <input
                     type="text"
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type a message..."
-                    className="flex-1 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    className="flex-1 px-3 md:px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm md:text-base"
                   />
                   <button
                     type="submit"
                     disabled={!newMessage.trim()}
-                    className="px-6 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="px-4 md:px-6 py-2 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all text-sm md:text-base"
                   >
                     Send
                   </button>

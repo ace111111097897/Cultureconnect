@@ -462,7 +462,7 @@ export function GamesSection() {
   if (view === "create") {
     return (
       <div className="space-y-6">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 md:p-8 border border-white/20">
           <h2 className="text-2xl font-bold text-white mb-6">Create UNO Lobby</h2>
           
           <div className="space-y-4">
@@ -512,10 +512,10 @@ export function GamesSection() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 md:space-y-8">
       {/* Header */}
       <div className="flex justify-center">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-2 border border-white/20">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 md:p-2 border border-white/20">
           <div className="flex space-x-2">
             <button
               className="px-4 py-2 rounded-xl font-medium transition-all bg-gradient-to-r from-orange-500 to-pink-500 text-white"
@@ -551,7 +551,7 @@ export function GamesSection() {
             <p className="text-white/70">Create a new lobby to start playing UNO!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {lobbies.map((lobby) => (
               <UnoLobby
                 key={lobby._id}

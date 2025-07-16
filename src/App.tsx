@@ -12,7 +12,7 @@ export default function App() {
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-800 to-orange-600">
       <div className="min-h-screen bg-black/20 backdrop-blur-sm">
         <header className="sticky top-0 z-50 bg-white/10 backdrop-blur-md border-b border-white/20">
-          <div className="w-full px-2 sm:px-4 h-16 flex justify-between items-center">
+          <div className="w-full px-4 sm:px-4 h-16 flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full"></div>
               <h1 className="text-2xl font-bold text-white">Culture</h1>
@@ -23,7 +23,7 @@ export default function App() {
           </div>
         </header>
 
-        <main className="w-full px-2 sm:px-4 py-4 sm:py-8">
+        <main className="w-full px-3 sm:px-4 py-6 sm:py-8">
           <Content />
         </main>
         

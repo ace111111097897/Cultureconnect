@@ -3,6 +3,14 @@ import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { api } from "./_generated/api";
 
+// Test function to verify Convex is working
+export const testFunction = query({
+  args: {},
+  handler: async (ctx) => {
+    return "Convex is working!";
+  },
+});
+
 // UNO Card definitions
 const UNO_CARDS = {
   // Number cards (0-9) for each color
