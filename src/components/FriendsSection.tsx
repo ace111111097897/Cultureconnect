@@ -3,19 +3,22 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
 
-export function FriendsSection() {
+export function FriendsSection({ 
+  onNavigateToConversation, 
+  onNavigateToTab 
+}: { 
+  onNavigateToConversation?: (conversationId: any) => void;
+  onNavigateToTab?: (tab: string) => void;
+}) {
   const [activeTab, setActiveTab] = useState<"friends" | "requests">("friends");
-  const [showMessagePrompt, setShowMessagePrompt] = useState(false);
-  const [selectedFriend, setSelectedFriend] = useState<any>(null);
-  const [messagePrompt, setMessagePrompt] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [showNewRequestNotification, setShowNewRequestNotification] = useState(false);
   const [lastRequestCount, setLastRequestCount] = useState(0);
   
   const friends = useQuery(api.friends.getFriends);
   const friendRequests = useQuery(api.friends.getFriendRequests);
+  const conversations = useQuery(api.conversations.getUserConversations);
   const respondToRequest = useMutation(api.friends.respondToFriendRequest);
-  const sendMessage = useMutation(api.conversations.sendMessage);
 
   // Debug logging
   console.log("FriendsSection - Friends:", friends);
@@ -70,34 +73,24 @@ export function FriendsSection() {
   };
 
   const handleMessage = async (friend: any) => {
-    // Check if there's already a conversation
-    // const existingConversation = getUserConversations?.find(conv => 
-    //   conv.participants.includes(friend.userId)
-    // );
+    if (!conversations || !onNavigateToConversation || !onNavigateToTab) {
+      toast.error("Unable to open conversation");
+      return;
+    }
 
-    // if (existingConversation) {
-    //   // Navigate to existing conversation
-    //   toast.info("Opening existing conversation...");
-    //   // You could add navigation logic here to switch to conversations tab
-    // } else {
-      // Show message prompt
-      setSelectedFriend(friend);
-      setShowMessagePrompt(true);
-    // }
-  };
+    // Find the conversation with this friend
+    const conversation = conversations.find(conv => {
+      const otherProfile = (conv as any)?.otherProfile;
+      return otherProfile && otherProfile.userId === friend.userId;
+    });
 
-  const handleSendMessage = async () => {
-    if (!selectedFriend || !messagePrompt.trim()) return;
-    
-    try {
-      // Create a new conversation and send message
-      // This would need to be implemented in the backend
-      toast.success("Message sent!");
-      setShowMessagePrompt(false);
-      setMessagePrompt("");
-      setSelectedFriend(null);
-    } catch (error) {
-      toast.error("Failed to send message");
+    if (conversation) {
+      // Navigate to conversations tab and open this conversation
+      onNavigateToConversation(conversation._id);
+      onNavigateToTab("conversations");
+      toast.success(`Opening conversation with ${friend.displayName}`);
+    } else {
+      toast.error("No conversation found with this friend");
     }
   };
 
@@ -337,37 +330,6 @@ export function FriendsSection() {
               ))}
             </div>
           )}
-        </div>
-      )}
-
-      {/* Message Prompt Modal */}
-      {showMessagePrompt && selectedFriend && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 max-w-md w-full border border-white/20">
-            <h3 className="text-xl font-bold text-white mb-4">
-              Message {selectedFriend.displayName}
-            </h3>
-            <textarea
-              value={messagePrompt}
-              onChange={(e) => setMessagePrompt(e.target.value)}
-              placeholder="Write your message..."
-              className="w-full h-32 p-3 rounded-lg bg-white/10 border border-white/20 text-white placeholder-white/50 resize-none"
-            />
-            <div className="flex space-x-3 mt-4">
-              <button
-                onClick={() => setShowMessagePrompt(false)}
-                className="flex-1 px-4 py-2 rounded-lg bg-white/10 text-white border border-white/20 hover:bg-white/20"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSendMessage}
-                className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold"
-                >
-                Send
-                </button>
-            </div>
-          </div>
         </div>
       )}
     </div>

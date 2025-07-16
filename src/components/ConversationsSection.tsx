@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
@@ -6,8 +6,8 @@ import { MessagingPrompts } from "./MessagingPrompts";
 import KandiBubble from "./KandiBubble";
 import { toast } from "sonner";
 
-export function ConversationsSection() {
-  const [selectedConversation, setSelectedConversation] = useState<Id<"conversations"> | null>(null);
+export function ConversationsSection({ initialConversationId }: { initialConversationId?: Id<"conversations"> }) {
+  const [selectedConversation, setSelectedConversation] = useState<Id<"conversations"> | null>(initialConversationId || null);
   const [newMessage, setNewMessage] = useState("");
   const [showPrompts, setShowPrompts] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -25,8 +25,19 @@ export function ConversationsSection() {
   // Debug logging
   console.log("ConversationsSection - Conversations:", conversations);
   console.log("ConversationsSection - Selected Conversation:", selectedConversation);
+  console.log("ConversationsSection - Initial Conversation ID:", initialConversationId);
   console.log("ConversationsSection - Messages:", messages);
   console.log("ConversationsSection - User Profile:", userProfile);
+
+  // Auto-select conversation when initialConversationId is provided and conversations are loaded
+  useEffect(() => {
+    if (initialConversationId && conversations && !selectedConversation) {
+      const conversationExists = conversations.find(c => c._id === initialConversationId);
+      if (conversationExists) {
+        setSelectedConversation(initialConversationId);
+      }
+    }
+  }, [initialConversationId, conversations, selectedConversation]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();

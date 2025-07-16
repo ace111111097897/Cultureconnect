@@ -13,6 +13,7 @@ import KandiChat from "./KandiChat";
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("discover");
+  const [initialConversationId, setInitialConversationId] = useState<any>(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
@@ -70,9 +71,9 @@ export function Dashboard() {
       case "matches":
         return <MatchesSection />;
       case "friends":
-        return <FriendsSection />;
+        return <FriendsSection onNavigateToConversation={setInitialConversationId} onNavigateToTab={setActiveTab} />;
       case "conversations":
-        return <ConversationsSection />;
+        return <ConversationsSection initialConversationId={initialConversationId} />;
       case "games":
         return <GamesSection />;
       case "news":
