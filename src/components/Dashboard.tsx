@@ -164,7 +164,25 @@ export function Dashboard() {
           <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
             <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowSettings(false)}>✕</button>
             <div className="text-xl font-bold mb-4">Settings</div>
-            <div className="text-gray-700">User preferences and account settings coming soon.</div>
+            <div className="space-y-6">
+              {/* Dark Mode Toggle */}
+              <div className="flex items-center justify-between">
+                <span className="text-gray-700 font-medium">Dark Mode</span>
+                <input type="checkbox" className="w-6 h-6" disabled title="Demo only" />
+              </div>
+              {/* Notification Preferences */}
+              <div className="flex items-center justify-between">
+                <span className="text-gray-700 font-medium">Enable Notifications</span>
+                <input type="checkbox" className="w-6 h-6" disabled title="Demo only" />
+              </div>
+              {/* Account Info */}
+              <div>
+                <div className="text-gray-700 font-medium mb-1">Account Info</div>
+                <div className="text-gray-500 text-sm">Email: user@email.com</div>
+                <div className="text-gray-500 text-sm">Username: demo_user</div>
+              </div>
+              <button className="w-full mt-4 bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition">Delete Account</button>
+            </div>
           </div>
         </div>
       )}
@@ -173,7 +191,19 @@ export function Dashboard() {
           <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
             <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowHelp(false)}>✕</button>
             <div className="text-xl font-bold mb-4">Help & Safety</div>
-            <div className="text-gray-700">Read our safety tips and get support if needed.</div>
+            <div className="space-y-4">
+              <div className="text-gray-700 font-medium">Safety Tips</div>
+              <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">
+                <li>Never share personal info too soon.</li>
+                <li>Meet in public places for first dates.</li>
+                <li>Report suspicious or inappropriate behavior.</li>
+                <li>Trust your instincts and stay safe.</li>
+              </ul>
+              <div className="mt-4">
+                <a href="mailto:support@cultureconnect.com" className="text-blue-600 hover:underline">Contact Support</a>
+              </div>
+              <button className="w-full mt-4 bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition">Report / Block User</button>
+            </div>
           </div>
         </div>
       )}
@@ -191,7 +221,21 @@ export function Dashboard() {
           <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
             <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowVerification(false)}>✕</button>
             <div className="text-xl font-bold mb-4">Profile Verification</div>
-            <div className="text-gray-700">Get verified for extra trust and features!</div>
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-green-500 text-2xl">✅</span>
+                <span className="text-gray-700 font-medium">Get Verified for Extra Trust</span>
+              </div>
+              <form className="space-y-4" onSubmit={e => { e.preventDefault(); alert('Verification submitted! (Demo)'); }}>
+                <label className="block text-gray-700 font-medium mb-1">Upload a selfie for verification:</label>
+                <input type="file" accept="image/*" className="w-full border rounded-lg p-2" disabled title="Demo only" />
+                <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition mt-2">Submit for Review</button>
+              </form>
+              <div className="flex items-center gap-2 mt-4">
+                <span className="text-green-500">✔️</span>
+                <span className="text-gray-600 text-sm">Verified users get a badge and more matches!</span>
+              </div>
+            </div>
           </div>
         </div>
       )}
