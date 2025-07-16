@@ -1,5 +1,3 @@
-import axios from "axios";
-
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
 if (!GEMINI_API_KEY) {
@@ -22,10 +20,20 @@ export async function callGeminiAI(prompt: string) {
   };
   
   try {
-    const response = await axios.post(endpoint, body, {
-      headers: { "Content-Type": "application/json" }
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json' 
+      },
+      body: JSON.stringify(body)
     });
-    return response.data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || "Sorry, I couldn't generate a response.";
   } catch (error) {
     console.error("Gemini API error:", error);
     throw new Error("Failed to get response from Gemini AI. Please try again.");
