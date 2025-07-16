@@ -200,6 +200,12 @@ export function ProfilePage() {
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/30 border-t-white"></div>
           <p className="text-white/70">Loading profile...</p>
           <p className="text-white/50 text-sm">If this takes too long, you may need to create a profile first.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-white/10 rounded-lg text-white hover:bg-white/20 transition"
+          >
+            Refresh Page
+          </button>
         </div>
       </div>
     );

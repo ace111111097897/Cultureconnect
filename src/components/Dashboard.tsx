@@ -263,6 +263,7 @@ export function Dashboard() {
             {activeTab === "explore" && <ExploreSection />}
             {activeTab === "games" && <GamesSection />}
             {activeTab === "stories" && <StoriesSection />}
+            {activeTab === "profile" && <ProfilePage />}
             {activeTab === "kandi" && (
               <div className="w-full">
                 <KandiChat />

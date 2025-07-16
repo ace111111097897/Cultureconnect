@@ -150,36 +150,51 @@ function getCardValue(card: string) {
 export const getActiveLobbies = query({
   args: {},
   handler: async (ctx) => {
-    const lobbies = await ctx.db
-      .query("unoLobbies")
-      .withIndex("by_active", (q) => q.eq("isActive", true))
-      .filter((q) => q.eq(q.field("status"), "waiting"))
-      .collect();
-    
-    // Get player profiles for each lobby
-    const lobbiesWithProfiles = await Promise.all(
-      lobbies.map(async (lobby) => {
-        const playerProfiles = await Promise.all(
-          lobby.players.map(async (playerId) => {
-            const profile = await ctx.db
-              .query("profiles")
-              .withIndex("by_user", (q) => q.eq("userId", playerId))
-              .unique();
-            return {
-              userId: playerId,
-              displayName: profile?.displayName || "Unknown Player",
-            };
-          })
-        );
-        
-        return {
-          ...lobby,
-          playerProfiles,
-        };
-      })
-    );
-    
-    return lobbiesWithProfiles;
+    try {
+      const lobbies = await ctx.db
+        .query("unoLobbies")
+        .withIndex("by_active", (q) => q.eq("isActive", true))
+        .collect();
+      
+      // Filter for waiting status in JavaScript
+      const waitingLobbies = lobbies.filter(lobby => lobby.status === "waiting");
+      
+      // Get player profiles for each lobby
+      const lobbiesWithProfiles = await Promise.all(
+        waitingLobbies.map(async (lobby) => {
+          const playerProfiles = await Promise.all(
+            lobby.players.map(async (playerId) => {
+              try {
+                const profile = await ctx.db
+                  .query("profiles")
+                  .withIndex("by_user", (q) => q.eq("userId", playerId))
+                  .unique();
+                return {
+                  userId: playerId,
+                  displayName: profile?.displayName || "Unknown Player",
+                };
+              } catch (error) {
+                console.error(`Error fetching profile for user ${playerId}:`, error);
+                return {
+                  userId: playerId,
+                  displayName: "Unknown Player",
+                };
+              }
+            })
+          );
+          
+          return {
+            ...lobby,
+            playerProfiles,
+          };
+        })
+      );
+      
+      return lobbiesWithProfiles;
+    } catch (error) {
+      console.error("Error in getActiveLobbies:", error);
+      return [];
+    }
   },
 });
 
