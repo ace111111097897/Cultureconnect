@@ -50,19 +50,16 @@ export const getUserNotifications = query({
             .query("profiles")
             .withIndex("by_user", (q) => q.eq("userId", notification.relatedUserId!))
             .unique();
-          
           if (profile) {
             const profileImageUrl = profile.profileImage 
               ? await ctx.storage.getUrl(profile.profileImage)
               : null;
-            
             relatedUserProfile = {
               ...profile,
               profileImageUrl,
             };
           }
         }
-
         return {
           ...notification,
           relatedUserProfile,
