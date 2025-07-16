@@ -242,8 +242,9 @@ export function Dashboard() {
             </button>
           </div>
         </aside>
-        {/* Main Content Area */}
-        <main className="flex-1 p-6 overflow-y-auto">
+        
+        {/* Main Content Area - Full Screen */}
+        <main className="flex-1 p-6 overflow-y-auto w-full">
           {/* Top section with culture tags */}
           <div className="mb-6">
             <div className="flex items-center space-x-4 mb-4">
@@ -252,8 +253,8 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* Content based on active tab */}
-          <div className="min-h-[calc(100vh-200px)]">
+          {/* Content based on active tab - Full Width */}
+          <div className="w-full">
             {activeTab === "discover" && <DiscoverSection />}
             {activeTab === "matches" && <MatchesSection />}
             {activeTab === "friends" && <FriendsSection />}
@@ -263,7 +264,7 @@ export function Dashboard() {
             {activeTab === "games" && <GamesSection />}
             {activeTab === "stories" && <StoriesSection />}
             {activeTab === "kandi" && (
-              <div className="max-w-4xl mx-auto">
+              <div className="w-full">
                 <KandiChat />
               </div>
             )}
