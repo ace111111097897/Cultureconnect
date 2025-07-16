@@ -132,32 +132,58 @@ export function Dashboard() {
       </div>
       <div className="flex flex-1 pt-16 md:pt-16 min-h-[calc(100vh-4rem)]" style={{ paddingTop: '4rem' }}>
         {/* Left Sidebar */}
-        <aside className="hidden md:flex flex-col w-56 bg-white/10 backdrop-blur-md border-r border-white/10 py-6 px-2 space-y-2 min-h-screen justify-between">
-          <div>
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={tab.onClick ? tab.onClick : () => setActiveTab(tab.id)}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all text-lg w-full text-left ${
-                  activeTab === tab.id
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                    : 'text-white/70 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                <span>{tab.icon}</span>
-                <span>{tab.label}</span>
-                {tab.id === 'verification' && isVerified && <span className="ml-2 text-green-500">✔️</span>}
+        {/* Example sidebar layout for desktop (md+): */}
+        <aside className="hidden md:flex flex-col w-64 h-full bg-gradient-to-b from-purple-900 via-blue-900 to-pink-800 p-6 text-white rounded-r-2xl shadow-xl">
+          {/* Top section: Profile and Settings */}
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-full bg-yellow-200 flex items-center justify-center border-2 border-white">
+                <span className="text-3xl">👤</span>
+              </div>
+              <div>
+                <div className="font-bold text-lg">Your Profile</div>
+                {/* Optionally, show username/email here */}
+              </div>
+            </div>
+            <button className="p-2 rounded-full hover:bg-white/20 transition" title="Settings">
+              <span className="text-2xl">⚙️</span>
             </button>
-          ))}
-        </div>
-          {/* Logout at the bottom */}
+          </div>
+          {/* Kandi under Profile */}
           <button
-            onClick={() => setShowConfirm({ type: 'logout', open: true })}
-            className="flex items-center space-x-3 px-4 py-3 rounded-lg font-medium transition-all text-lg w-full text-left text-red-400 hover:text-red-600 hover:bg-white/10 mt-8"
+            className="flex items-center space-x-2 py-2 px-3 rounded-lg bg-gradient-to-r from-yellow-300 to-pink-300 text-black font-semibold mb-6 hover:scale-105 transition"
+            onClick={() => setActiveTab("kandi")}
           >
-            <span>🚪</span>
-            <span>Logout</span>
+            <span className="text-2xl">🐕</span>
+            <span>Kandi AI</span>
           </button>
+          {/* Main navigation */}
+          <nav className="flex flex-col space-y-2 mt-2">
+            <button className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-white/10 transition">
+              <span className="text-xl">🔍</span>
+              <span>Discover</span>
+            </button>
+            <button className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-white/10 transition">
+              <span className="text-xl">💫</span>
+              <span>Matches</span>
+            </button>
+            <button className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-white/10 transition">
+              <span className="text-xl">👥</span>
+              <span>Friends</span>
+            </button>
+            <button className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-white/10 transition">
+              <span className="text-xl">💬</span>
+              <span>Messages</span>
+            </button>
+            <button className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-white/10 transition">
+              <span className="text-xl">🎮</span>
+              <span>Games</span>
+            </button>
+            <button className="flex items-center space-x-2 py-2 px-3 rounded-lg hover:bg-white/10 transition">
+              <span className="text-xl">📰</span>
+              <span>News</span>
+            </button>
+          </nav>
         </aside>
         {/* Main Content Area */}
         <main className="flex-1 p-2 sm:p-4 md:p-8 w-full min-h-[calc(100vh-4rem)]">
@@ -165,23 +191,6 @@ export function Dashboard() {
         </main>
       </div>
 
-      {/* Mobile Bottom Nav */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-gradient-to-r from-orange-500/60 to-pink-500/60 backdrop-blur-lg flex md:hidden justify-around items-center h-16 border-t border-white/10">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex flex-col items-center justify-center px-2 py-1 rounded-lg font-medium transition-all text-sm ${
-              activeTab === tab.id
-                ? 'text-white'
-                : 'text-white/70 hover:text-white'
-            }`}
-          >
-            <span className="text-xl">{tab.icon}</span>
-            <span>{tab.label}</span>
-          </button>
-        ))}
-      </nav>
       {/* Modals/Panels for new sidebar items */}
       {showNotifications && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
