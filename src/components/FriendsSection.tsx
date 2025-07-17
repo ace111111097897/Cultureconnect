@@ -27,6 +27,8 @@ export function FriendsSection({
   // Debug logging
   console.log("FriendsSection - Friends:", friends);
   console.log("FriendsSection - Friend Requests:", friendRequests);
+  console.log("FriendsSection - Conversations:", conversations);
+  console.log("FriendsSection - Current User Profile:", currentUserProfile);
 
   // Check for new friend requests and show notification
   useEffect(() => {
@@ -80,13 +82,18 @@ export function FriendsSection({
     console.log("handleMessage called with friend:", friend);
     console.log("Available conversations:", conversations);
     
-    if (!conversations || !onNavigateToConversation || !onNavigateToTab) {
-      console.error("Missing required data:", { 
-        conversations: !!conversations, 
+    if (!onNavigateToConversation || !onNavigateToTab) {
+      console.error("Missing navigation functions:", { 
         onNavigateToConversation: !!onNavigateToConversation, 
         onNavigateToTab: !!onNavigateToTab 
       });
-      toast.error("Unable to open conversation");
+      toast.error("Navigation not available");
+      return;
+    }
+
+    if (!conversations) {
+      console.log("Conversations still loading, will retry...");
+      toast.error("Loading conversations, please try again");
       return;
     }
 
@@ -141,10 +148,14 @@ export function FriendsSection({
 
         console.log("Created new conversation:", newConversationId);
         
-        // Navigate to the new conversation
-        onNavigateToConversation(newConversationId);
-        onNavigateToTab("conversations");
-        toast.success(`Created new conversation with ${friend.displayName}`);
+        if (newConversationId) {
+          // Navigate to the new conversation
+          onNavigateToConversation(newConversationId);
+          onNavigateToTab("conversations");
+          toast.success(`Created new conversation with ${friend.displayName}`);
+        } else {
+          toast.error("Failed to create conversation");
+        }
       } catch (error) {
         console.error("Error creating conversation:", error);
         toast.error("Failed to create conversation. Please try again.");
@@ -248,9 +259,19 @@ export function FriendsSection({
       {/* Friends Tab */}
       {activeTab === "friends" ? (
         <div>
-          {!friends ? (
+          {friends === undefined ? (
             <div className="flex justify-center items-center h-96">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/30 border-t-white"></div>
+            </div>
+          ) : friends === null ? (
+            <div className="text-center space-y-6">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
+                <div className="text-6xl mb-4">⚠️</div>
+                <h3 className="text-2xl font-bold text-white mb-4">Error loading friends</h3>
+                <p className="text-white/70">
+                  There was an issue loading your friends. Please refresh the page.
+                </p>
+              </div>
             </div>
           ) : friends.length === 0 ? (
             <div className="text-center space-y-6">
@@ -325,9 +346,19 @@ export function FriendsSection({
       ) : (
         /* Requests Tab */
         <div className="space-y-4">
-          {!friendRequests ? (
+          {friendRequests === undefined ? (
             <div className="flex justify-center items-center h-96">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/30 border-t-white"></div>
+            </div>
+          ) : friendRequests === null ? (
+            <div className="text-center space-y-6">
+              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
+                <div className="text-6xl mb-4">⚠️</div>
+                <h3 className="text-2xl font-bold text-white mb-4">Error loading requests</h3>
+                <p className="text-white/70">
+                  There was an issue loading friend requests. Please refresh the page.
+                </p>
+              </div>
             </div>
           ) : friendRequests.length === 0 ? (
             <div className="text-center space-y-6">

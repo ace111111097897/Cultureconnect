@@ -259,7 +259,7 @@ export function Dashboard() {
           <div className="w-full">
             {activeTab === "discover" && <DiscoverSection />}
             {activeTab === "matches" && <MatchesSection />}
-            {activeTab === "friends" && <FriendsSection />}
+            {activeTab === "friends" && <FriendsSection onNavigateToConversation={setInitialConversationId} onNavigateToTab={setActiveTab} />}
             {activeTab === "messages" && <ConversationsSection />}
             {activeTab === "community" && <CommunityPage />}
             {activeTab === "explore" && <ExploreSection />}
