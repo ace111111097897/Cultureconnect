@@ -1,40 +1,312 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Id } from "../../convex/_generated/dataModel";
+
+// UNO Card Component
+function UnoCard({ card, onClick, isPlayable, isSelected }: { 
+  card: string; 
+  onClick?: () => void; 
+  isPlayable?: boolean;
+  isSelected?: boolean;
+}) {
+  const getCardColor = (card: string) => {
+    if (card.startsWith("wild")) return "purple";
+    return card.split("_")[0];
+  };
+
+  const getCardValue = (card: string) => {
+    if (card.startsWith("wild")) return "WILD";
+    if (card.includes("skip")) return "SKIP";
+    if (card.includes("reverse")) return "REV";
+    if (card.includes("draw2")) return "+2";
+    if (card.includes("wildDraw4")) return "+4";
+    return card.split("_")[1];
+  };
+
+  const getCardSymbol = (card: string) => {
+    if (card.includes("skip")) return "⊘";
+    if (card.includes("reverse")) return "↻";
+    if (card.includes("draw2")) return "+2";
+    if (card.includes("wildDraw4")) return "+4";
+    if (card.startsWith("wild")) return "★";
+    return getCardValue(card);
+  };
+
+  const color = getCardColor(card);
+  const value = getCardValue(card);
+  const symbol = getCardSymbol(card);
+
+  const colorClasses = {
+    red: "bg-red-500 border-red-600",
+    blue: "bg-blue-500 border-blue-600", 
+    green: "bg-green-500 border-green-600",
+    yellow: "bg-yellow-400 border-yellow-500",
+    purple: "bg-gradient-to-br from-purple-500 to-pink-500 border-purple-600"
+  };
+
+  return (
+    <div
+      className={`
+        w-16 h-24 rounded-lg border-2 shadow-lg cursor-pointer transition-all duration-200
+        ${colorClasses[color as keyof typeof colorClasses] || "bg-gray-500"}
+        ${isPlayable ? "hover:scale-110 hover:shadow-xl" : "opacity-50 cursor-not-allowed"}
+        ${isSelected ? "ring-4 ring-yellow-300 scale-110" : ""}
+        text-white font-bold text-center flex flex-col justify-center
+      `}
+      onClick={isPlayable ? onClick : undefined}
+    >
+      <div className="text-lg font-bold">{symbol}</div>
+      {card.startsWith("wild") && (
+        <div className="text-xs mt-1">WILD</div>
+      )}
+    </div>
+  );
+}
+
+// UNO Game Logic
+function UnoGame({ onBack }: { onBack: () => void }) {
+  const [gameState, setGameState] = useState({
+    players: [
+      { id: 1, name: "You", hand: ["red_5", "blue_3", "green_7", "yellow_2", "wild"], isCurrentTurn: true },
+      { id: 2, name: "Player 2", hand: ["red_1", "blue_8", "green_4"], isCurrentTurn: false },
+      { id: 3, name: "Player 3", hand: ["yellow_9", "red_6", "blue_2"], isCurrentTurn: false }
+    ],
+    discardPile: ["green_5"],
+    currentColor: "green",
+    currentValue: "5",
+    direction: 1, // 1 for clockwise, -1 for counter-clockwise
+    gameStatus: "playing"
+  });
+
+  const [selectedCard, setSelectedCard] = useState<number | null>(null);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+
+  const currentPlayer = gameState.players.find(p => p.isCurrentTurn);
+  const isMyTurn = currentPlayer?.id === 1;
+
+  const canPlayCard = (card: string) => {
+    if (!isMyTurn) return false;
+    if (card.startsWith("wild")) return true;
+    const [color, value] = card.split("_");
+    return color === gameState.currentColor || value === gameState.currentValue;
+  };
+
+  const handlePlayCard = (cardIndex: number) => {
+    const card = currentPlayer?.hand[cardIndex];
+    if (!card || !canPlayCard(card)) return;
+
+    if (card.startsWith("wild")) {
+      setSelectedCard(cardIndex);
+      setShowColorPicker(true);
+      return;
+    }
+
+    // Play the card
+    const newHand = currentPlayer.hand.filter((_, index) => index !== cardIndex);
+    const newDiscardPile = [...gameState.discardPile, card];
+    
+    // Update game state
+    setGameState(prev => ({
+      ...prev,
+      players: prev.players.map(p => 
+        p.id === 1 ? { ...p, hand: newHand, isCurrentTurn: false } : p
+      ),
+      discardPile: newDiscardPile,
+      currentColor: card.split("_")[0],
+      currentValue: card.split("_")[1]
+    }));
+
+    // Simulate AI turn after a delay
+    setTimeout(() => {
+      simulateAITurn();
+    }, 1000);
+  };
+
+  const simulateAITurn = () => {
+    setGameState(prev => {
+      const nextPlayerIndex = (prev.players.findIndex(p => p.isCurrentTurn) + prev.direction + prev.players.length) % prev.players.length;
+      return {
+        ...prev,
+        players: prev.players.map((p, index) => ({
+          ...p,
+          isCurrentTurn: index === nextPlayerIndex
+        }))
+      };
+    });
+  };
+
+  const handleColorSelect = (color: string) => {
+    if (selectedCard === null) return;
+    
+    const card = currentPlayer?.hand[selectedCard];
+    if (!card) return;
+
+    const newHand = currentPlayer.hand.filter((_, index) => index !== selectedCard);
+    const newDiscardPile = [...gameState.discardPile, card];
+    
+    setGameState(prev => ({
+      ...prev,
+      players: prev.players.map(p => 
+        p.id === 1 ? { ...p, hand: newHand, isCurrentTurn: false } : p
+      ),
+      discardPile: newDiscardPile,
+      currentColor: color,
+      currentValue: "wild"
+    }));
+
+    setSelectedCard(null);
+    setShowColorPicker(false);
+
+    setTimeout(() => {
+      simulateAITurn();
+    }, 1000);
+  };
+
+  const handleDrawCard = () => {
+    if (!isMyTurn) return;
+    
+    const newCard = "red_" + Math.floor(Math.random() * 10);
+    setGameState(prev => ({
+      ...prev,
+      players: prev.players.map(p => 
+        p.id === 1 ? { ...p, hand: [...p.hand, newCard], isCurrentTurn: false } : p
+      )
+    }));
+
+    setTimeout(() => {
+      simulateAITurn();
+    }, 1000);
+  };
+
+  return (
+    <div className="space-y-6 p-4">
+      {/* Game Header */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-bold text-white">UNO Game</h2>
+            <p className="text-white/70">
+              Current Color: <span className="font-bold" style={{ color: gameState.currentColor }}>{gameState.currentColor.toUpperCase()}</span>
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-white/70">Current Turn:</p>
+            <p className="text-white font-semibold">{currentPlayer?.name || "Unknown"}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Top Card */}
+      <div className="flex justify-center">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+          <h3 className="text-white font-semibold mb-4 text-center">Top Card</h3>
+          <UnoCard card={gameState.discardPile[gameState.discardPile.length - 1]} />
+        </div>
+      </div>
+
+      {/* Other Players */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+        <h3 className="text-white font-semibold mb-4">Other Players</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {gameState.players.filter(p => p.id !== 1).map((player) => (
+            <div key={player.id} className="text-center">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-2">
+                <span className="text-white">👤</span>
+              </div>
+              <p className="text-white font-medium text-sm">{player.name}</p>
+              <p className="text-white/70 text-xs">{player.hand.length} cards</p>
+              {player.isCurrentTurn && (
+                <div className="text-yellow-400 text-sm mt-1">🎯 Current Turn</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* My Hand */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-white font-semibold">My Hand ({currentPlayer?.hand.length || 0} cards)</h3>
+          {isMyTurn && (
+            <div className="text-green-400 font-semibold">🎯 Your Turn!</div>
+          )}
+        </div>
+        
+        <div className="flex flex-wrap gap-2 mb-4">
+          {currentPlayer?.hand.map((card: string, index: number) => (
+            <UnoCard
+              key={index}
+              card={card}
+              isPlayable={canPlayCard(card)}
+              isSelected={selectedCard === index}
+              onClick={() => handlePlayCard(index)}
+            />
+          ))}
+        </div>
+
+        {isMyTurn && (
+          <div className="flex space-x-2">
+            <button
+              onClick={handleDrawCard}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-all"
+            >
+              Draw Card
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Color Picker Modal */}
+      {showColorPicker && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4">
+            <h3 className="text-xl font-bold mb-4 text-center">Choose Color</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {["red", "blue", "green", "yellow"].map((color) => (
+                <button
+                  key={color}
+                  onClick={() => handleColorSelect(color)}
+                  className={`p-4 rounded-lg font-bold text-white transition-all hover:scale-105 ${
+                    color === "red" ? "bg-red-500" :
+                    color === "blue" ? "bg-blue-500" :
+                    color === "green" ? "bg-green-500" :
+                    "bg-yellow-400"
+                  }`}
+                >
+                  {color.toUpperCase()}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => {
+                setShowColorPicker(false);
+                setSelectedCard(null);
+              }}
+              className="w-full mt-4 px-4 py-2 bg-gray-500 text-white rounded-lg font-medium hover:bg-gray-600 transition-all"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Back Button */}
+      <div className="flex justify-center">
+        <button
+          onClick={onBack}
+          className="px-6 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition-all"
+        >
+          ← Back to Menu
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export function GamesSection() {
   const [view, setView] = useState<"menu" | "game">("menu");
-  const [showGameModal, setShowGameModal] = useState(false);
-  const [selectedGame, setSelectedGame] = useState<string>("");
-
-  const openGame = (gameUrl: string) => {
-    setSelectedGame(gameUrl);
-    setShowGameModal(true);
-  };
 
   if (view === "game") {
-    return (
-      <div className="space-y-8 p-4 md:p-0">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-white">🎮 UNO Game</h2>
-            <button
-              onClick={() => setView("menu")}
-              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all"
-            >
-              ← Back to Menu
-            </button>
-          </div>
-          <iframe 
-            src="https://www.unocardgame.com/" 
-            width="100%" 
-            height="700px" 
-            frameBorder="0"
-            className="rounded-lg"
-            title="UNO Game">
-          </iframe>
-        </div>
-      </div>
-    );
+    return <UnoGame onBack={() => setView("menu")} />;
   }
 
   return (
@@ -81,78 +353,27 @@ export function GamesSection() {
         </button>
       </div>
 
-      {/* Game Options */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-        <h3 className="text-xl font-bold text-white mb-4">Choose Your Game</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button
-            onClick={() => openGame("https://www.unocardgame.com/")}
-            className="bg-gradient-to-r from-blue-500 to-purple-500 p-6 rounded-lg text-white text-center hover:from-blue-600 hover:to-purple-600 transition-all"
-          >
-            <div className="text-3xl mb-2">🌐</div>
-            <h4 className="font-semibold mb-2">Play Online</h4>
-            <p className="text-sm opacity-90">Classic UNO experience</p>
-          </button>
-          
-          <button
-            onClick={() => openGame("https://cardgames.io/uno/")}
-            className="bg-gradient-to-r from-green-500 to-teal-500 p-6 rounded-lg text-white text-center hover:from-green-600 hover:to-teal-600 transition-all"
-          >
-            <div className="text-3xl mb-2">🎮</div>
-            <h4 className="font-semibold mb-2">CardGames.io</h4>
-            <p className="text-sm opacity-90">Multiplayer UNO</p>
-          </button>
-        </div>
-      </div>
-
-      {/* Additional Info */}
+      {/* Game Features */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
         <h3 className="text-xl font-bold text-white mb-4">Game Features</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-white/80">
           <div className="text-center">
-            <div className="text-3xl mb-2">👥</div>
-            <h4 className="font-semibold text-white">Multiplayer</h4>
-            <p className="text-sm">Play with friends online</p>
+            <div className="text-3xl mb-2">🎴</div>
+            <h4 className="font-semibold text-white">Real Cards</h4>
+            <p className="text-sm">Beautiful card graphics</p>
           </div>
           <div className="text-center">
-            <div className="text-3xl mb-2">🎨</div>
-            <h4 className="font-semibold text-white">Beautiful UI</h4>
-            <p className="text-sm">Clean and intuitive interface</p>
+            <div className="text-3xl mb-2">🤖</div>
+            <h4 className="font-semibold text-white">AI Players</h4>
+            <p className="text-sm">Play against smart AI</p>
           </div>
           <div className="text-center">
             <div className="text-3xl mb-2">⚡</div>
-            <h4 className="font-semibold text-white">Fast Gameplay</h4>
-            <p className="text-sm">Quick and responsive</p>
+            <h4 className="font-semibold text-white">Instant Play</h4>
+            <p className="text-sm">No loading or external sites</p>
           </div>
         </div>
       </div>
-
-      {/* Game Modal */}
-      {showGameModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 w-full max-w-6xl h-[90vh] relative">
-            <div className="flex justify-between items-center p-6 border-b border-white/20">
-              <h2 className="text-2xl font-bold text-white">🎮 UNO Game</h2>
-              <button
-                onClick={() => setShowGameModal(false)}
-                className="text-white hover:text-gray-300 text-2xl font-bold"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="p-6 h-full">
-              <iframe 
-                src={selectedGame}
-                width="100%" 
-                height="100%" 
-                frameBorder="0"
-                className="rounded-lg"
-                title="UNO Game">
-              </iframe>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
