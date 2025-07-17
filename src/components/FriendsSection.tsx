@@ -156,7 +156,7 @@ export function FriendsSection({
         } else {
           toast.error("Failed to create conversation");
         }
-      } catch (error) {
+    } catch (error) {
         console.error("Error creating conversation:", error);
         toast.error("Failed to create conversation. Please try again.");
       }
@@ -597,7 +597,7 @@ export function FriendsSection({
 
               {/* Relationship Goals */}
               {selectedProfile.relationshipGoals && (
-                <div>
+              <div>
                   <h3 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
                     <span>💕</span> Relationship Goals
                   </h3>
@@ -606,25 +606,25 @@ export function FriendsSection({
                   </p>
                 </div>
               )}
-            </div>
+              </div>
 
             {/* Footer Actions */}
             <div className="p-6 border-t border-white/20 flex space-x-3">
-              <button
+                <button
                 onClick={() => {
                   setShowProfileModal(false);
                   handleMessage(selectedProfile);
                 }}
                 className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all"
-              >
+                >
                 Message
-              </button>
-              <button
+                </button>
+                <button
                 onClick={() => setShowProfileModal(false)}
                 className="px-6 py-3 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all"
-              >
+                >
                 Close
-              </button>
+                </button>
             </div>
           </div>
         </div>
