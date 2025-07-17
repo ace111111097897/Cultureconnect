@@ -90,20 +90,20 @@ export const sendMessage = mutation({
     }
 
     try {
-      const messageId = await ctx.db.insert("messages", {
-        conversationId: args.conversationId,
-        senderId: userId,
-        content: args.content,
-        messageType: "text",
-        timestamp: Date.now(),
-        isRead: false,
-      });
+    const messageId = await ctx.db.insert("messages", {
+      conversationId: args.conversationId,
+      senderId: userId,
+      content: args.content,
+      messageType: "text",
+      timestamp: Date.now(),
+      isRead: false,
+    });
 
-      // Update conversation with last message info
-      await ctx.db.patch(args.conversationId, {
-        lastMessage: args.content,
-        lastMessageTime: Date.now(),
-      });
+    // Update conversation with last message info
+    await ctx.db.patch(args.conversationId, {
+      lastMessage: args.content,
+      lastMessageTime: Date.now(),
+    });
 
       return messageId;
     } catch (error) {

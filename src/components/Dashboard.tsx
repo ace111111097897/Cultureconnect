@@ -116,20 +116,20 @@ export function Dashboard() {
       </header>
       {/* Mobile Top Toolbar and Sidebar */}
       <div className="md:hidden fixed top-16 left-0 right-0 z-30 bg-white/10 backdrop-blur-md flex overflow-x-auto whitespace-nowrap scrollbar-hide py-4 px-3" style={{ WebkitOverflowScrolling: 'touch' }}>
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
             className={`relative px-5 py-3 mx-2 rounded-xl font-medium transition-all flex items-center space-x-2 ${
-              activeTab === tab.id
+                activeTab === tab.id
                 ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                : 'text-white/70 hover:text-white hover:bg-white/10'
-            }`}
-          >
-            <span className="text-lg">{tab.icon}</span>
-            <span>{tab.label}</span>
-          </button>
-        ))}
+                  : 'text-white/70 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              <span className="text-lg">{tab.icon}</span>
+              <span>{tab.label}</span>
+            </button>
+          ))}
       </div>
       
       <div className="flex flex-1 pt-24 md:pt-16 min-h-[calc(100vh-5rem)]" style={{ paddingTop: '6rem' }}>
@@ -252,9 +252,9 @@ export function Dashboard() {
             <div className="flex items-center space-x-4 md:space-x-4 mb-6">
               <span className="px-4 py-3 bg-white/10 rounded-full text-white text-sm">Mediterranean</span>
               <span className="px-4 py-3 bg-white/10 rounded-full text-white text-sm">Fusion • Mutual</span>
-            </div>
-          </div>
-          
+        </div>
+      </div>
+
           {/* Content based on active tab - Full Width */}
           <div className="w-full">
             {activeTab === "discover" && <DiscoverSection />}

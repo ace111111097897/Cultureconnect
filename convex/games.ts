@@ -183,12 +183,12 @@ export const getActiveLobbies = query({
             })
           );
           
-          return {
+        return {
             ...lobby,
             playerProfiles,
-          };
-        })
-      );
+        };
+      })
+    );
       
       return lobbiesWithProfiles;
     } catch (error) {
@@ -207,7 +207,7 @@ export const createLobby = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
-    
+
     if (args.maxPlayers < 2 || args.maxPlayers > 10) {
       throw new Error("Max players must be between 2 and 10");
     }
@@ -221,7 +221,7 @@ export const createLobby = mutation({
       status: "waiting",
       createdAt: Date.now(),
     });
-    
+
     return lobbyId;
   },
 });
@@ -234,7 +234,7 @@ export const joinLobby = mutation({
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
-    
+
     const lobby = await ctx.db.get(args.lobbyId);
     if (!lobby) throw new Error("Lobby not found");
     
@@ -319,7 +319,7 @@ export const startGame = mutation({
         const profile = await ctx.db
           .query("profiles")
           .withIndex("by_user", (q) => q.eq("userId", playerId))
-          .unique();
+      .unique();
         return {
           userId: playerId,
           displayName: profile?.displayName || "Unknown Player",

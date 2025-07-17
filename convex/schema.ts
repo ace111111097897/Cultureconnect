@@ -189,7 +189,7 @@ const applicationTables = {
   unoGames: defineTable({
     lobbyId: v.id("unoLobbies"),
     players: v.array(v.object({
-      userId: v.id("users"),
+    userId: v.id("users"),
       displayName: v.string(),
       hand: v.array(v.string()), // Card strings like "red_5", "wild", "skip_blue"
       isCurrentTurn: v.boolean(),

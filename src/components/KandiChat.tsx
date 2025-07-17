@@ -109,7 +109,7 @@ export default function KandiChat() {
         ))}
         {loading && <div className="text-white">🐕 Kandi is thinking...</div>}
         {error && <div className="text-red-500">{error}</div>}
-      </div>
+              </div>
 
       {/* Suggested Questions */}
       {showSuggestions && (
@@ -125,7 +125,7 @@ export default function KandiChat() {
                 {question}
               </button>
             ))}
-          </div>
+                  </div>
           <div className="flex flex-col md:flex-row gap-3 mt-4">
             <button
               onClick={analyzeConversation}
@@ -162,4 +162,4 @@ export default function KandiChat() {
       </div>
     </div>
   );
-} 
+}

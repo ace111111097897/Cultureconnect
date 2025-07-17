@@ -75,7 +75,7 @@ export function DiscoverSection() {
   const handlePass = () => {
     setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1));
   };
-  
+
   const handleAddFriend = async (profile: any) => {
     try {
       console.log("Sending friend request to:", profile);
@@ -261,9 +261,9 @@ export function DiscoverSection() {
                   {profile.languages.map((l: string) => (
                     <span key={l} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUserProfile?.languages?.includes(l) ? 'bg-green-500/30 border-green-400 text-green-100' : 'bg-white/10 border-white/20 text-white'}`}>
                       {l}{currentUserProfile?.languages?.includes(l) && ' • Mutual'}
-                    </span>
+              </span>
                   ))}
-                </div>
+            </div>
               </div>
             )}
             {/* Values (highlight mutuals) */}
@@ -276,7 +276,7 @@ export function DiscoverSection() {
                       {v}{currentUserProfile?.values?.includes(v) && ' • Mutual'}
                     </span>
                   ))}
-                </div>
+          </div>
               </div>
             )}
             {/* Food Preferences (highlight mutuals) */}
@@ -287,9 +287,9 @@ export function DiscoverSection() {
                   {profile.foodPreferences.map((f: string) => (
                     <span key={f} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUserProfile?.foodPreferences?.includes(f) ? 'bg-pink-500/30 border-pink-400 text-pink-100' : 'bg-white/10 border-white/20 text-white'}`}>
                       {f}{currentUserProfile?.foodPreferences?.includes(f) && ' • Mutual'}
-                    </span>
-                  ))}
-                </div>
+                </span>
+              ))}
+            </div>
               </div>
             )}
             {/* Action Buttons */}
@@ -321,7 +321,7 @@ export function DiscoverSection() {
         </div>
         {/* Modal for View More */}
         {showModal && <ProfileModal profile={profile} onClose={() => setShowModal(false)} />}
-      </div>
+        </div>
     </div>
   );
 }
