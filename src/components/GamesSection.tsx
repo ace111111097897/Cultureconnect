@@ -3,6 +3,13 @@ import { Id } from "../../convex/_generated/dataModel";
 
 export function GamesSection() {
   const [view, setView] = useState<"menu" | "game">("menu");
+  const [showGameModal, setShowGameModal] = useState(false);
+  const [selectedGame, setSelectedGame] = useState<string>("");
+
+  const openGame = (gameUrl: string) => {
+    setSelectedGame(gameUrl);
+    setShowGameModal(true);
+  };
 
   if (view === "game") {
     return (
@@ -74,6 +81,30 @@ export function GamesSection() {
         </button>
       </div>
 
+      {/* Game Options */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+        <h3 className="text-xl font-bold text-white mb-4">Choose Your Game</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button
+            onClick={() => openGame("https://www.unocardgame.com/")}
+            className="bg-gradient-to-r from-blue-500 to-purple-500 p-6 rounded-lg text-white text-center hover:from-blue-600 hover:to-purple-600 transition-all"
+          >
+            <div className="text-3xl mb-2">🌐</div>
+            <h4 className="font-semibold mb-2">Play Online</h4>
+            <p className="text-sm opacity-90">Classic UNO experience</p>
+          </button>
+          
+          <button
+            onClick={() => openGame("https://cardgames.io/uno/")}
+            className="bg-gradient-to-r from-green-500 to-teal-500 p-6 rounded-lg text-white text-center hover:from-green-600 hover:to-teal-600 transition-all"
+          >
+            <div className="text-3xl mb-2">🎮</div>
+            <h4 className="font-semibold mb-2">CardGames.io</h4>
+            <p className="text-sm opacity-90">Multiplayer UNO</p>
+          </button>
+        </div>
+      </div>
+
       {/* Additional Info */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
         <h3 className="text-xl font-bold text-white mb-4">Game Features</h3>
@@ -96,47 +127,32 @@ export function GamesSection() {
         </div>
       </div>
 
-      <div className="space-y-6">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🎴</div>
-          <h3 className="text-2xl font-bold text-white mb-4">UNO Game</h3>
-          <p className="text-white/70 mb-6">Choose how you'd like to play UNO:</p>
+      {/* Game Modal */}
+      {showGameModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 w-full max-w-6xl h-[90vh] relative">
+            <div className="flex justify-between items-center p-6 border-b border-white/20">
+              <h2 className="text-2xl font-bold text-white">🎮 UNO Game</h2>
+              <button
+                onClick={() => setShowGameModal(false)}
+                className="text-white hover:text-gray-300 text-2xl font-bold"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-6 h-full">
+              <iframe 
+                src={selectedGame}
+                width="100%" 
+                height="100%" 
+                frameBorder="0"
+                className="rounded-lg"
+                title="UNO Game">
+              </iframe>
+            </div>
+          </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <a 
-            href="https://www.unocardgame.com/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="bg-gradient-to-r from-blue-500 to-purple-500 p-6 rounded-lg text-white text-center hover:from-blue-600 hover:to-purple-600 transition-all"
-          >
-            <div className="text-3xl mb-2">🌐</div>
-            <h4 className="font-semibold mb-2">Play Online</h4>
-            <p className="text-sm opacity-90">Open in new tab</p>
-          </a>
-          
-          <a 
-            href="https://cardgames.io/uno/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="bg-gradient-to-r from-green-500 to-teal-500 p-6 rounded-lg text-white text-center hover:from-green-600 hover:to-teal-600 transition-all"
-          >
-            <div className="text-3xl mb-2">🎮</div>
-            <h4 className="font-semibold mb-2">CardGames.io</h4>
-            <p className="text-sm opacity-90">Multiplayer UNO</p>
-          </a>
-        </div>
-        
-        <div className="bg-white/10 rounded-lg p-4">
-          <h4 className="font-semibold text-white mb-2">Quick Start:</h4>
-          <ol className="text-white/80 text-sm space-y-1">
-            <li>1. Click one of the game options above</li>
-            <li>2. The game will open in a new tab</li>
-            <li>3. Invite friends to join your game</li>
-            <li>4. Have fun playing UNO!</li>
-          </ol>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
