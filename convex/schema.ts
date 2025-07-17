@@ -34,6 +34,7 @@ const applicationTables = {
     lifeGoals: v.array(v.string()),
     values: v.array(v.string()),
     relationshipGoals: v.string(),
+    zodiacSign: v.string(),
     
     // Preferences
     ageRangeMin: v.number(),

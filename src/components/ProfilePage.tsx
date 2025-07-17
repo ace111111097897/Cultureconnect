@@ -30,6 +30,7 @@ export function ProfilePage() {
       tiktok: "",
       youtube: "",
     },
+    zodiacSign: "",
   });
 
   const profile = useQuery(api.profiles.getCurrentUserProfile);
@@ -72,7 +73,7 @@ export function ProfilePage() {
   const musicOptions = [
     "Pop", "Rock", "Hip Hop", "R&B", "Jazz", "Classical", "Country", "Electronic",
     "Folk", "Blues", "Reggae", "Salsa", "Flamenco", "K-Pop", "J-Pop", "Bollywood",
-    "Traditional Folk", "World Music", "Gospel", "Punk", "Metal", "Indie", "Other"
+    "Traditional Folk", "World Music", "Gospel", "Punk", "Metal", "Indie", "Reggaeton", "Other"
   ];
 
   const travelOptions = [
@@ -92,6 +93,10 @@ export function ProfilePage() {
     "Family", "Friendship", "Education", "Creativity", "Adventure", "Peace", "Justice",
     "Compassion", "Honesty", "Respect", "Diversity", "Equality", "Sustainability",
     "Tradition", "Innovation", "Community", "Independence", "Loyalty", "Courage", "Other"
+  ];
+
+  const zodiacOptions = [
+    "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
   ];
 
   const handleEdit = () => {
@@ -121,6 +126,7 @@ export function ProfilePage() {
           tiktok: (profile.socialLinks?.tiktok ?? "") as string,
           youtube: (profile.socialLinks?.youtube ?? "") as string,
         },
+        zodiacSign: profile.zodiacSign || "",
       });
       setIsEditing(true);
     }
@@ -316,8 +322,35 @@ export function ProfilePage() {
                 placeholder="Tell us about yourself..."
               />
             </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Zodiac Sign</label>
+              <select
+                className="w-full border rounded-lg p-2"
+                value={editData.zodiacSign}
+                onChange={e => setEditData(prev => ({ ...prev, zodiacSign: e.target.value }))}
+              >
+                <option value="">Select Zodiac</option>
+                {zodiacOptions.map(sign => (
+                  <option key={sign} value={sign}>{sign}</option>
+                ))}
+              </select>
+            </div>
           </div>
-        ) : null}
+        ) : (
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h3 className="text-white font-semibold mb-2">Basic Info</h3>
+              <p className="text-white/70">Display Name: {profile.displayName}</p>
+              <p className="text-white/70">Age: {profile.age} years</p>
+              <p className="text-white/70">Location: {profile.location}</p>
+              <p className="text-white/70">Bio: {profile.bio || "Not specified"}</p>
+            </div>
+            <div>
+              <h3 className="text-white font-semibold mb-2">Zodiac Sign</h3>
+              <p className="text-white/70">Zodiac Sign: {profile?.zodiacSign || "Not set"}</p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Cultural Identity Section */}
