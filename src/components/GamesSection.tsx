@@ -18,7 +18,7 @@ export function GamesSection() {
             </button>
           </div>
           <iframe 
-            src="https://cardgames.io/uno/" 
+            src="https://www.unocardgame.com/" 
             width="100%" 
             height="700px" 
             frameBorder="0"
@@ -93,6 +93,48 @@ export function GamesSection() {
             <h4 className="font-semibold text-white">Fast Gameplay</h4>
             <p className="text-sm">Quick and responsive</p>
           </div>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🎴</div>
+          <h3 className="text-2xl font-bold text-white mb-4">UNO Game</h3>
+          <p className="text-white/70 mb-6">Choose how you'd like to play UNO:</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <a 
+            href="https://www.unocardgame.com/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="bg-gradient-to-r from-blue-500 to-purple-500 p-6 rounded-lg text-white text-center hover:from-blue-600 hover:to-purple-600 transition-all"
+          >
+            <div className="text-3xl mb-2">🌐</div>
+            <h4 className="font-semibold mb-2">Play Online</h4>
+            <p className="text-sm opacity-90">Open in new tab</p>
+          </a>
+          
+          <a 
+            href="https://cardgames.io/uno/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="bg-gradient-to-r from-green-500 to-teal-500 p-6 rounded-lg text-white text-center hover:from-green-600 hover:to-teal-600 transition-all"
+          >
+            <div className="text-3xl mb-2">🎮</div>
+            <h4 className="font-semibold mb-2">CardGames.io</h4>
+            <p className="text-sm opacity-90">Multiplayer UNO</p>
+          </a>
+        </div>
+        
+        <div className="bg-white/10 rounded-lg p-4">
+          <h4 className="font-semibold text-white mb-2">Quick Start:</h4>
+          <ol className="text-white/80 text-sm space-y-1">
+            <li>1. Click one of the game options above</li>
+            <li>2. The game will open in a new tab</li>
+            <li>3. Invite friends to join your game</li>
+            <li>4. Have fun playing UNO!</li>
+          </ol>
         </div>
       </div>
     </div>
