@@ -56,6 +56,13 @@ export const getLobby = query({
   },
 });
 
+export const listLobbies = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("lobbies").collect();
+  },
+});
+
 export const startGame = mutation({
   args: { lobbyId: v.id("lobbies") },
   handler: async (ctx, { lobbyId }) => {
