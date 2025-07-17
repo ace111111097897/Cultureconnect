@@ -186,6 +186,7 @@ const applicationTables = {
     currentPlayerIndex: v.number(),
     direction: v.union(v.literal("clockwise"), v.literal("counter")),
     isStarted: v.boolean(),
+    winner: v.optional(v.string()),
   }),
 
   // NEW: News Feed system
