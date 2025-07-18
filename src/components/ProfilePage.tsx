@@ -40,7 +40,6 @@ export function ProfilePage() {
   const generateUploadUrl = useMutation(api.profiles.generateUploadUrl);
   const updateProfileImage = useMutation(api.profiles.updateProfileImage);
   const updateProfileVideo = useMutation(api.profiles.updateProfileVideo);
-  const users = useQuery(api.users.listUsers);
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
@@ -709,11 +708,6 @@ export function ProfilePage() {
           </div>
         </div>
       )}
-      </div>
-      {/* Debug: Show users in DB */}
-      <div className="bg-red-100 text-red-800 p-2 rounded mb-4">
-        <strong>Debug: Users in DB:</strong>
-        <pre>{JSON.stringify(users, null, 2)}</pre>
       </div>
     </div>
   );
