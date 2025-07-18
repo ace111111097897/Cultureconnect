@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "../../convex/_generated/api";
 import { DiscoverSection } from "./DiscoverSection";
 import { MatchesSection } from "./MatchesSection";
 import { ConversationsSection } from "./ConversationsSection";
@@ -12,56 +14,51 @@ import { ExploreSection } from "./ExploreSection";
 import KandiChat from "./KandiChat";
 
 // Notification component
-function NotificationDropdown({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
-  const [notifications] = useState([
-    {
-      id: 1,
-      type: "match",
-      title: "New Cultural Match! 🎉",
-      message: "You matched with Sarah from Mediterranean culture",
-      time: "2 minutes ago",
-      read: false,
-      icon: "💫"
-    },
-    {
-      id: 2,
-      type: "friend",
-      title: "Friend Request",
-      message: "Alex wants to connect with you",
-      time: "15 minutes ago",
-      read: false,
-      icon: "👥"
-    },
-    {
-      id: 3,
-      type: "event",
-      title: "Cultural Event Reminder",
-      message: "Mediterranean cooking class starts in 1 hour",
-      time: "1 hour ago",
-      read: true,
-      icon: "🍳"
-    },
-    {
-      id: 4,
-      type: "message",
-      title: "New Message",
-      message: "Maria sent you a cultural story",
-      time: "2 hours ago",
-      read: true,
-      icon: "💬"
-    },
-    {
-      id: 5,
-      type: "kandi",
-      title: "Kandi AI Update",
-      message: "Your AI companion has new cultural insights to share",
-      time: "3 hours ago",
-      read: true,
-      icon: "🐕"
-    }
-  ]);
+function NotificationDropdown({ isOpen, onClose, unreadCount }: { isOpen: boolean; onClose: () => void; unreadCount?: number }) {
+  const notifications = useQuery(api.notifications.getUserNotifications, { limit: 20 });
+  const markAsRead = useMutation(api.notifications.markNotificationAsRead);
+  const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead);
+  const createSampleNotifications = useMutation(api.notifications.createSampleNotifications);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const getNotificationIcon = (type: string) => {
+    switch (type) {
+      case "match": return "💫";
+      case "friend_request": return "👥";
+      case "message": return "💬";
+      case "profile_update": return "👤";
+      case "event": return "🍳";
+      case "kandi": return "🐕";
+      default: return "🔔";
+    }
+  };
+
+  const formatTime = (timestamp: number) => {
+    const now = Date.now();
+    const diff = now - timestamp;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return "Just now";
+    if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    return `${days} day${days > 1 ? 's' : ''} ago`;
+  };
+
+  const handleNotificationClick = (notification: any) => {
+    if (!notification.read) {
+      markAsRead({ notificationId: notification._id });
+    }
+    onClose();
+  };
+
+  const handleMarkAllAsRead = () => {
+    markAllAsRead({});
+  };
+
+  const handleCreateSampleNotifications = () => {
+    createSampleNotifications({});
+  };
 
   if (!isOpen) return null;
 
@@ -80,7 +77,7 @@ function NotificationDropdown({ isOpen, onClose }: { isOpen: boolean; onClose: (
           <div className="flex items-center space-x-2">
             <span className="text-2xl">🔔</span>
             <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
-            {unreadCount > 0 && (
+            {unreadCount && unreadCount > 0 && (
               <span className="px-2 py-1 bg-red-500 text-white text-xs rounded-full font-bold pulse-glow">
                 {unreadCount}
               </span>
@@ -96,7 +93,7 @@ function NotificationDropdown({ isOpen, onClose }: { isOpen: boolean; onClose: (
 
         {/* Notifications List */}
         <div className="max-h-96 overflow-y-auto">
-          {notifications.length === 0 ? (
+          {!notifications || notifications.length === 0 ? (
             <div className="p-6 text-center text-gray-500">
               <span className="text-4xl mb-2 block">🔕</span>
               <p>No notifications yet</p>
@@ -106,7 +103,8 @@ function NotificationDropdown({ isOpen, onClose }: { isOpen: boolean; onClose: (
             <div className="p-2">
               {notifications.map((notification) => (
                 <div
-                  key={notification.id}
+                  key={notification._id}
+                  onClick={() => handleNotificationClick(notification)}
                   className={`p-3 rounded-xl mb-2 transition-all hover-lift cursor-pointer ${
                     notification.read 
                       ? 'bg-white/50 hover:bg-white/70' 
@@ -115,7 +113,7 @@ function NotificationDropdown({ isOpen, onClose }: { isOpen: boolean; onClose: (
                 >
                   <div className="flex items-start space-x-3">
                     <div className={`text-2xl ${notification.read ? 'opacity-60' : 'pulse-glow'}`}>
-                      {notification.icon}
+                      {getNotificationIcon(notification.type)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
@@ -134,7 +132,7 @@ function NotificationDropdown({ isOpen, onClose }: { isOpen: boolean; onClose: (
                         {notification.message}
                       </p>
                       <p className="text-xs text-gray-400 mt-1">
-                        {notification.time}
+                        {formatTime(notification.createdAt)}
                       </p>
                     </div>
                   </div>
@@ -145,9 +143,18 @@ function NotificationDropdown({ isOpen, onClose }: { isOpen: boolean; onClose: (
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-white/20">
-          <button className="w-full py-2 px-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl text-sm font-medium hover:from-orange-600 hover:to-pink-600 transition-all hover-scale">
-            View All Notifications
+        <div className="p-3 border-t border-white/20 space-y-2">
+          <button 
+            onClick={handleMarkAllAsRead}
+            className="w-full py-2 px-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl text-sm font-medium hover:from-orange-600 hover:to-pink-600 transition-all hover-scale"
+          >
+            Mark All as Read
+          </button>
+          <button 
+            onClick={handleCreateSampleNotifications}
+            className="w-full py-2 px-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-all hover-scale"
+          >
+            Create Sample Notifications
           </button>
         </div>
       </div>
@@ -176,6 +183,9 @@ export function Dashboard() {
   const [showExplorePrompt, setShowExplorePrompt] = useState(false);
   const [icebreakerIndex, setIcebreakerIndex] = useState(0);
   const [showActionConfirm, setShowActionConfirm] = useState<{ type: string; open: boolean }>({ type: '', open: false });
+
+  // Live notifications
+  const unreadCount = useQuery(api.notifications.getUnreadNotificationCount);
 
   const icebreakerPrompts = [
     "If you could travel anywhere, where would you go?",
@@ -260,13 +270,16 @@ export function Dashboard() {
             >
               🔔
               {/* Notification Badge */}
-              <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold pulse-glow">
-                3
-              </span>
+              {unreadCount && unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold pulse-glow">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
             </button>
             <NotificationDropdown 
               isOpen={showNotifications} 
-              onClose={() => setShowNotifications(false)} 
+              onClose={() => setShowNotifications(false)}
+              unreadCount={unreadCount}
             />
           </div>
           <button className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition hover-scale" onClick={() => setActiveTab('profile')} title="Go to Profile">

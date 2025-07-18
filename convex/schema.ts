@@ -219,20 +219,26 @@ const applicationTables = {
 
   // NEW: Notifications system
   notifications: defineTable({
-    userId: v.id("users"),
-    type: v.string(), // "match", "message", "friend_request", "story_reaction"
+    targetUserId: v.string(),
+    type: v.union(
+      v.literal("match"),
+      v.literal("friend_request"),
+      v.literal("message"),
+      v.literal("profile_update"),
+      v.literal("event"),
+      v.literal("kandi")
+    ),
     title: v.string(),
     message: v.string(),
-    relatedUserId: v.optional(v.id("users")),
-    relatedStoryId: v.optional(v.id("culturalStories")),
-    relatedConversationId: v.optional(v.id("conversations")),
-    isRead: v.boolean(),
-    timestamp: v.number(),
+    relatedUserId: v.optional(v.string()),
+    relatedProfileId: v.optional(v.id("profiles")),
+    read: v.boolean(),
+    createdAt: v.number(),
   })
-    .index("by_user", ["userId"])
+    .index("by_target_user", ["targetUserId"])
     .index("by_type", ["type"])
-    .index("by_read", ["isRead"])
-    .index("by_timestamp", ["timestamp"]),
+    .index("by_read", ["read"])
+    .index("by_created", ["createdAt"]),
 
   reels: defineTable({
     userId: v.id("users"),
