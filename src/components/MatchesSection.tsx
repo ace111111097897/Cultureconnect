@@ -110,6 +110,9 @@ export function MatchesSection() {
                   {match!.compatibilityScore}%
                 </span>
               </div>
+
+              {/* Live status bubble */}
+              <div className="absolute top-2 right-2 w-4 h-4 rounded-full border-2 border-white" style={{ backgroundColor: status?.active ? '#22c55e' : '#a3a3a3' }} title={status?.active ? 'Active' : 'Inactive'}></div>
             </div>
 
             {/* Match Info */}

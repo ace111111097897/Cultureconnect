@@ -64,4 +64,17 @@ export const listUsers = query({
   handler: async (ctx) => {
     return await ctx.db.query("users").collect();
   },
+});
+
+// Query to get user active status
+export const getUserActiveStatus = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    if (!user) return { active: false };
+    // Consider active if lastActive is within 2 minutes
+    const now = Date.now();
+    const isActive = user.lastActive && now - user.lastActive < 2 * 60 * 1000;
+    return { active: !!isActive };
+  },
 }); 
