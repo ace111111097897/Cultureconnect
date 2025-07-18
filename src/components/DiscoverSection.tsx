@@ -172,33 +172,36 @@ export function DiscoverSection() {
         </div>
         {/* Replace the main profile display with a grid of cards: */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-6xl mx-auto mt-8">
-          {visibleProfiles.map((profile: any, idx: number) => (
-            <div
-              key={profile._id || idx}
-              className="relative bg-white/10 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center p-0 cursor-pointer hover:scale-105 transition-all hover-lift"
-              onClick={() => setSelectedProfile(profile)}
-            >
-              {/* Profile Image */}
-              {profile.profileImageUrl ? (
-                <img src={profile.profileImageUrl} alt={profile.displayName} className="w-full h-48 object-cover rounded-t-2xl" />
-              ) : (
-                <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 rounded-t-2xl">
-                  <span className="text-5xl text-white/60">👤</span>
-                </div>
-              )}
-              {/* Name, Age, Status */}
-              <div className="w-full flex flex-col items-start p-4">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg font-bold text-white">{profile.displayName}, {profile.age}</span>
-                  {profile.verified && <span className="text-blue-400 text-lg" title="Verified">✔️</span>}
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="w-3 h-3 rounded-full bg-green-400 inline-block"></span>
-                  <span className="text-xs text-white/80">Recently Active</span>
+          {visibleProfiles.map((profile: any, idx: number) => {
+            const status = useQuery(api.users.getUserActiveStatus, { userId: profile.userId });
+            return (
+              <div
+                key={profile._id || idx}
+                className="relative bg-white/10 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center p-0 cursor-pointer hover:scale-105 transition-all hover-lift"
+                onClick={() => setSelectedProfile(profile)}
+              >
+                {/* Profile Image */}
+                {profile.profileImageUrl ? (
+                  <img src={profile.profileImageUrl} alt={profile.displayName} className="w-full h-48 object-cover rounded-t-2xl" />
+                ) : (
+                  <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 rounded-t-2xl">
+                    <span className="text-5xl text-white/60">👤</span>
+                  </div>
+                )}
+                {/* Name, Age, Status */}
+                <div className="w-full flex flex-col items-start p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg font-bold text-white">{profile.displayName}, {profile.age}</span>
+                    {profile.verified && <span className="text-blue-400 text-lg" title="Verified">✔️</span>}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: status?.active ? '#22c55e' : '#a3a3a3' }}></span>
+                    <span className="text-xs text-white/80">Recently Active</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         {/* Profile Modal Popup */}
         {selectedProfile && (
