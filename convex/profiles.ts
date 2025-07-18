@@ -1,8 +1,11 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
-// Default user ID for demo purposes
-const DEFAULT_USER_ID = "demo_user_123" as any;
+// Helper to get the first user in the users table
+async function getFirstUserId(ctx: any) {
+  const user = await ctx.db.query("users").first();
+  return user?._id;
+}
 
 export const upsertProfile = mutation({
   args: {
@@ -33,7 +36,8 @@ export const upsertProfile = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const userId = DEFAULT_USER_ID;
+    const userId = await getFirstUserId(ctx);
+    if (!userId) throw new Error("No user found in users table");
 
     const existingProfile = await ctx.db
       .query("profiles")
@@ -77,7 +81,8 @@ export const upsertProfile = mutation({
 export const getCurrentUserProfile = query({
   args: {},
   handler: async (ctx) => {
-    const userId = DEFAULT_USER_ID;
+    const userId = await getFirstUserId(ctx);
+    if (!userId) return null;
 
     const profile = await ctx.db
       .query("profiles")
@@ -107,7 +112,8 @@ export const getDiscoverProfiles = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = DEFAULT_USER_ID;
+    const userId = await getFirstUserId(ctx);
+    if (!userId) return [];
 
     const userProfile = await ctx.db
       .query("profiles")
@@ -180,7 +186,8 @@ export const updateProfileImage = mutation({
     storageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
-    const userId = DEFAULT_USER_ID;
+    const userId = await getFirstUserId(ctx);
+    if (!userId) throw new Error("No user found in users table");
 
     const profile = await ctx.db
       .query("profiles")
@@ -200,7 +207,8 @@ export const updateProfileVideo = mutation({
     storageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
-    const userId = DEFAULT_USER_ID;
+    const userId = await getFirstUserId(ctx);
+    if (!userId) throw new Error("No user found in users table");
 
     const profile = await ctx.db
       .query("profiles")
