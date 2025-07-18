@@ -48,26 +48,19 @@ export function Dashboard() {
     "What's a fun fact about you?"
   ];
 
+  // 1. Reorder the tabs array as requested
   const tabs = [
     { id: "discover", label: "Discover", icon: "🔍" },
     { id: "matches", label: "Matches", icon: "💫" },
     { id: "friends", label: "Friends", icon: "👥" },
     { id: "conversations", label: "Messages", icon: "💬" },
     { id: "games", label: "Games", icon: "🎮" },
+    { id: "kandi", label: "Kandi AI", icon: "🐶" },
     { id: "news", label: "News", icon: "📰" },
     { id: "stories", label: "Stories", icon: "📖" },
     { id: "events", label: "Events", icon: "📅", onClick: () => setShowEvents(true) },
     { id: "explore", label: "Explore", icon: "🧭" },
-    { id: "icebreakers", label: "Icebreakers", icon: "✨", onClick: () => setShowIcebreakers(true) },
-    { id: "success", label: "Success Stories", icon: "💖", onClick: () => setShowStories(true) },
     { id: "community", label: "Community", icon: "🌐" },
-    { id: "favorites", label: "Favorites", icon: "⭐", onClick: () => setShowFavorites(true) },
-    { id: "notifications", label: "Notifications", icon: "🔔", onClick: () => setShowNotifications(true) },
-    { id: "settings", label: "Settings", icon: "⚙️", onClick: () => setShowSettings(true) },
-    { id: "help", label: "Help & Safety", icon: "🛡️", onClick: () => setShowHelp(true) },
-    { id: "verification", label: "Verification", icon: "✅", onClick: () => setShowVerification(true) },
-    { id: "profile", label: "Profile", icon: "👤" },
-    { id: "kandi", label: "Kandi AI", icon: "🐶" },
   ];
 
   const renderContent = () => {
@@ -87,7 +80,7 @@ export function Dashboard() {
       case "stories":
         return <StoriesSection />;
       case "community":
-        return <CommunityPage />;
+        return <div className="p-8"><h2 className="text-3xl font-bold mb-4 text-white">Community</h2><div className="bg-white/10 rounded-2xl p-8 text-white/80">Community features coming soon! (Placeholder for improved layout)</div></div>;
       case "profile":
         return <ProfilePage />;
       case "explore":
@@ -124,7 +117,13 @@ export function Dashboard() {
               {/* Notification Badge */}
               {/* Notification Badge */}
             </button>
-            {/* Notification Dropdown */}
+            {showNotifications && (
+              <div className="absolute right-0 mt-2 w-72 bg-white/95 rounded-2xl shadow-2xl border border-white/20 z-50 p-4">
+                <div className="text-lg font-bold mb-2">Notifications</div>
+                <div className="text-gray-600">No notifications yet.</div>
+                <button className="mt-4 w-full py-2 rounded-lg bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all" onClick={() => setShowNotifications(false)}>Close</button>
+              </div>
+            )}
           </div>
           <button className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition hover-scale" onClick={() => setActiveTab('profile')} title="Go to Profile">
             <span className="text-2xl">👤</span>
@@ -156,7 +155,7 @@ export function Dashboard() {
         <aside className="hidden md:flex flex-col w-64 h-full bg-gradient-to-b from-purple-900 via-blue-900 to-pink-800 p-6 text-white rounded-r-2xl shadow-xl slide-in-left">
           {/* Top section: Profile and Settings */}
           <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab("profile")}> 
               <div className="w-12 h-12 rounded-full bg-yellow-200 flex items-center justify-center border-2 border-white float-animation">
                 <span className="text-3xl">👤</span>
               </div>
