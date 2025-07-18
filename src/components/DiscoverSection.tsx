@@ -170,151 +170,45 @@ export function DiscoverSection() {
         <div className="mb-4 text-white/80 text-lg font-semibold select-none">
           Profile {currentIndex + 1} of {visibleProfiles.length}
         </div>
-        <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border-2 border-purple-400/40 bg-gradient-to-br from-[#0a0a0a] via-[#1a1a2e] to-[#16213e] min-h-[calc(100vh-10rem)] flex flex-col items-center justify-center px-8 py-12">
-          {/* Floating Like/Heart Button */}
-          <button
-            className={`absolute top-8 right-8 z-30 w-16 h-16 flex items-center justify-center rounded-full bg-pink-500/80 shadow-xl text-4xl text-white transition-all duration-200 hover:scale-110 focus:outline-none ${liked ? 'animate-ping-fast' : ''}`}
-            onClick={handleLike}
-            aria-label="Like Profile"
-            title="Like (L)"
-            style={{ boxShadow: liked ? '0 0 0 12px rgba(236,72,153,0.25)' : undefined }}
-          >
-            <span className={`transition-all duration-200 ${liked ? 'scale-125 text-pink-300' : ''}`}>❤️</span>
-          </button>
-          {/* Match Animation/Modal */}
-          {showMatch && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 animate-fadeIn">
-              <div className="bg-gradient-to-br from-pink-500 via-purple-500 to-blue-500 rounded-3xl shadow-2xl p-12 flex flex-col items-center animate-bounceIn">
-                <div className="text-6xl mb-4">🎉</div>
-                <div className="text-3xl font-bold text-white mb-2">It's a Match!</div>
-                <div className="text-white/80 mb-4">You and {profile.displayName} like each other!</div>
-              </div>
-            </div>
-          )}
-          {/* Left Arrow */}
-            <button
-            className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 w-20 h-20 flex items-center justify-center text-5xl rounded-full transition-all duration-200
-              ${currentIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 hover:bg-purple-700/30 opacity-90'}
-            `}
-            onClick={() => setCurrentIndex(idx => Math.max(idx - 1, 0))}
-            aria-label="Previous Profile"
-            disabled={currentIndex === 0}
-            title="Left Arrow (←)"
-          >
-            &#8592;
-            </button>
-          {/* Right Arrow */}
-            <button
-            className={`absolute right-0 top-1/2 -translate-y-1/2 z-20 w-20 h-20 flex items-center justify-center text-5xl rounded-full transition-all duration-200
-              ${currentIndex === visibleProfiles.length - 1 ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 hover:bg-pink-700/30 opacity-90'}
-            `}
-            onClick={() => setCurrentIndex(idx => Math.min(idx + 1, visibleProfiles.length - 1))}
-            aria-label="Next Profile"
-            disabled={currentIndex === visibleProfiles.length - 1}
-            title="Right Arrow (→)"
-          >
-            &#8594;
-            </button>
-          {/* Top Gradient Section with large avatar */}
-          <div className="relative flex flex-col items-center justify-center mb-8">
-            {/* Glowing animated border */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-56 h-56 rounded-full bg-gradient-to-tr from-purple-500 via-blue-500 to-pink-500 blur-2xl opacity-40 animate-pulse" />
-            </div>
-            <div className="relative z-10">
+        {/* Replace the main profile display with a grid of cards: */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-6xl mx-auto mt-8">
+          {visibleProfiles.map((profile: any, idx: number) => (
+            <div
+              key={profile._id || idx}
+              className="relative bg-white/10 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center p-0 cursor-pointer hover:scale-105 transition-all hover-lift"
+              onClick={() => setSelectedProfile(profile)}
+            >
+              {/* Profile Image */}
               {profile.profileImageUrl ? (
-                <img src={profile.profileImageUrl} alt={profile.displayName} className="w-48 h-48 rounded-full object-cover border-8 border-purple-400/60 shadow-2xl" />
+                <img src={profile.profileImageUrl} alt={profile.displayName} className="w-full h-48 object-cover rounded-t-2xl" />
               ) : (
-                <div className="w-48 h-48 rounded-full bg-white/20 flex items-center justify-center text-8xl text-white/60 border-8 border-purple-400/60 shadow-2xl">👤</div>
+                <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 rounded-t-2xl">
+                  <span className="text-5xl text-white/60">👤</span>
+                </div>
               )}
+              {/* Name, Age, Status */}
+              <div className="w-full flex flex-col items-start p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg font-bold text-white">{profile.displayName}, {profile.age}</span>
+                  {profile.verified && <span className="text-blue-400 text-lg" title="Verified">✔️</span>}
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-3 h-3 rounded-full bg-green-400 inline-block"></span>
+                  <span className="text-xs text-white/80">Recently Active</span>
+                </div>
+              </div>
             </div>
-          </div>
-          {/* Info Section */}
-          <div className="w-full max-w-2xl mx-auto bg-gradient-to-br from-[#1a1a2e]/90 via-[#16213e]/90 to-[#0f3460]/90 p-10 rounded-2xl shadow-xl flex flex-col gap-6 items-center justify-center backdrop-blur-xl">
-            <div className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
-              {profile.displayName && <span>{profile.displayName}</span>}
-              {profile.age && <span className="text-white/70 text-2xl font-normal">, {profile.age}</span>}
+          ))}
         </div>
-            {/* Cultural Background */}
-            {profile.culturalBackground && profile.culturalBackground.length > 0 && (
-              <div className="w-full">
-                <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="globe">🌍</span> Cultural Background</div>
-                <div className="flex flex-wrap gap-2">
-                  {profile.culturalBackground.map((c: string) => (
-                    <span key={c} className="bg-white/10 text-white px-4 py-2 rounded-full text-base font-semibold shadow-inner border border-white/20">{c}</span>
-                  ))}
+        {/* Profile Modal Popup */}
+        {selectedProfile && (
+          <ProfileModal profile={selectedProfile} onClose={() => setSelectedProfile(null)} />
+        )}
+        {/* Swipe/arrow hint for desktop */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-base select-none pointer-events-none hidden md:block">
+          <span className="mr-2">←</span> Use arrows or swipe to browse <span className="ml-2">→</span>
+        </div>
       </div>
-              </div>
-            )}
-            {/* Languages (highlight mutuals) */}
-            {profile.languages && profile.languages.length > 0 && (
-              <div className="w-full">
-                <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="languages">🗣️</span> Languages</div>
-                <div className="flex flex-wrap gap-2">
-                  {profile.languages.map((l: string) => (
-                    <span key={l} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUserProfile?.languages?.includes(l) ? 'bg-green-500/30 border-green-400 text-green-100' : 'bg-white/10 border-white/20 text-white'}`}>
-                      {l}{currentUserProfile?.languages?.includes(l) && ' • Mutual'}
-              </span>
-                  ))}
-            </div>
-              </div>
-            )}
-            {/* Values (highlight mutuals) */}
-            {profile.values && profile.values.length > 0 && (
-              <div className="w-full">
-                <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="values">💡</span> Values</div>
-                <div className="flex flex-wrap gap-2">
-                  {profile.values.map((v: string) => (
-                    <span key={v} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUserProfile?.values?.includes(v) ? 'bg-blue-500/30 border-blue-400 text-blue-100' : 'bg-white/10 border-white/20 text-white'}`}>
-                      {v}{currentUserProfile?.values?.includes(v) && ' • Mutual'}
-                    </span>
-                  ))}
-          </div>
-              </div>
-            )}
-            {/* Food Preferences (highlight mutuals) */}
-            {profile.foodPreferences && profile.foodPreferences.length > 0 && (
-              <div className="w-full">
-                <div className="font-bold text-white flex items-center gap-2 mb-1"><span role="img" aria-label="food">🍽️</span> Food Interests</div>
-                <div className="flex flex-wrap gap-2">
-                  {profile.foodPreferences.map((f: string) => (
-                    <span key={f} className={`px-4 py-2 rounded-full text-base font-semibold shadow-inner border ${currentUserProfile?.foodPreferences?.includes(f) ? 'bg-pink-500/30 border-pink-400 text-pink-100' : 'bg-white/10 border-white/20 text-white'}`}>
-                      {f}{currentUserProfile?.foodPreferences?.includes(f) && ' • Mutual'}
-                </span>
-              ))}
-            </div>
-              </div>
-            )}
-            {/* Action Buttons */}
-            <div className="flex gap-6 mt-8 w-full justify-center">
-              <button
-                className="flex-1 bg-white/10 text-white rounded-xl px-8 py-4 font-semibold hover:bg-purple-500/80 hover:text-white transition shadow-md border border-white/20 text-xl"
-                onClick={handlePass}
-              >
-                Pass
-              </button>
-              <button
-                className="flex-1 bg-gradient-to-r from-[#4e54c8] to-[#8f94fb] text-white rounded-xl px-8 py-4 font-semibold hover:from-[#3d43a8] hover:to-[#7e84db] transition shadow-md border border-white/20 text-xl"
-                onClick={() => handleAddFriend(profile)}
-              >
-                Add Friend
-              </button>
-              <button
-                className="flex-1 bg-white/10 text-white rounded-xl px-8 py-4 font-semibold hover:bg-pink-500/80 hover:text-white transition shadow-md border border-white/20 text-xl"
-                onClick={() => setShowModal(true)}
-              >
-                View More
-              </button>
-            </div>
-          </div>
-          {/* Swipe/arrow hint for desktop */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-base select-none pointer-events-none hidden md:block">
-            <span className="mr-2">←</span> Use arrows or swipe to browse <span className="ml-2">→</span>
-          </div>
-        </div>
-        {/* Modal for View More */}
-        {showModal && <ProfileModal profile={profile} onClose={() => setShowModal(false)} />}
-        </div>
     </div>
   );
 }
