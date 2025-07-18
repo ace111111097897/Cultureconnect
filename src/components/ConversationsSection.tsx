@@ -20,6 +20,8 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   const userProfile = useQuery(api.profiles.getCurrentUserProfile);
   const matches = useQuery(api.matches.getUserMatches);
   const friends = useQuery(api.friends.getFriends);
+  const sendMessage = useMutation(api.conversations.sendMessage);
+  const markAsRead = useMutation(api.conversations.markAsRead);
 
   // Debug logging
   console.log("ConversationsSection - Conversations:", conversations);
@@ -30,7 +32,11 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
 
   // Auto-select conversation when initialConversationId is provided and conversations are loaded
   useEffect(() => {
-    if (initialConversationId && conversations && !selectedConversation) {
+    if (
+      initialConversationId &&
+      conversations &&
+      initialConversationId !== selectedConversation
+    ) {
       const conversationExists = conversations.find(c => c._id === initialConversationId);
       if (conversationExists) {
         setSelectedConversation(initialConversationId);
@@ -82,6 +88,17 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
     return conversations.find(c => c._id === selectedConversation);
   };
 
+  // Helper to get conversationId for a friend
+  function getFriendConversationId(friend: any, conversations: any[]) {
+    if (!friend || !conversations) return null;
+    const conv = conversations.find((c: any) =>
+      c.type === "direct" &&
+      c.otherProfile &&
+      c.otherProfile.userId === friend.userId
+    );
+    return conv ? conv._id : null;
+  }
+
   if (!conversations) {
     return (
       <div className="flex justify-center items-center h-96">
@@ -129,18 +146,38 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
           <div className="mb-6">
             <h3 className="text-lg font-bold text-white mb-2">Your Matches & Friends</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {[...(matches || []), ...(friends || [])].map((user, i) => (
-                <div key={user._id || i} className="bg-white/10 rounded-xl p-4 flex flex-col items-center cursor-pointer hover:scale-105 transition-all" onClick={() => handleSelectConversation(user.conversationId)}>
-                  {user.otherProfile?.profileImageUrl ? (
-                    <img src={user.otherProfile.profileImageUrl} alt={user.otherProfile.displayName} className="w-16 h-16 rounded-full object-cover mb-2" />
-                  ) : (
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-2">
-                      <span className="text-2xl text-white/60">👤</span>
-                    </div>
-                  )}
-                  <div className="text-white font-semibold">{user.otherProfile?.displayName || user.displayName}</div>
-                </div>
+              {/* Matches */}
+              {(matches || []).map((match, i) => (
+                match && match._id && match.otherProfile ? (
+                  <div key={"match-" + match._id} className="bg-white/10 rounded-xl p-4 flex flex-col items-center cursor-pointer hover:scale-105 transition-all" onClick={() => handleSelectConversation(match._id)}>
+                    {match.otherProfile.profileImageUrl ? (
+                      <img src={match.otherProfile.profileImageUrl} alt={match.otherProfile.displayName} className="w-16 h-16 rounded-full object-cover mb-2" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-2">
+                        <span className="text-2xl text-white/60">👤</span>
+                      </div>
+                    )}
+                    <div className="text-white font-semibold">{match.otherProfile.displayName}</div>
+                  </div>
+                ) : null
               ))}
+              {/* Friends */}
+              {(friends || []).map((friend, i) => {
+                const conversationId = getFriendConversationId(friend, conversations || []);
+                if (!friend || !conversationId) return null;
+                return (
+                  <div key={"friend-" + friend._id} className="bg-white/10 rounded-xl p-4 flex flex-col items-center cursor-pointer hover:scale-105 transition-all" onClick={() => handleSelectConversation(conversationId)}>
+                    {friend.profileImageUrl ? (
+                      <img src={friend.profileImageUrl} alt={friend.displayName} className="w-16 h-16 rounded-full object-cover mb-2" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-2">
+                        <span className="text-2xl text-white/60">👤</span>
+                      </div>
+                    )}
+                    <div className="text-white font-semibold">{friend.displayName}</div>
+                  </div>
+                );
+              })}
             </div>
           </div>
           {conversations.map((conversation) => (
