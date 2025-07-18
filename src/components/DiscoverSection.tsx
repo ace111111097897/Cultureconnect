@@ -119,6 +119,10 @@ export function DiscoverSection() {
     setTimeout(() => setShowMatch(false), 2500);
   };
 
+  // Batch fetch all user statuses for visibleProfiles
+  const userIds = visibleProfiles.map((profile: any) => profile.userId);
+  const statuses = useQuery(api.users.getManyUserActiveStatuses, { userIds });
+
   if (!profiles) {
     return (
       <div className="flex justify-center items-center h-96">
@@ -173,7 +177,7 @@ export function DiscoverSection() {
         {/* Replace the main profile display with a grid of cards: */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-6xl mx-auto mt-8">
           {visibleProfiles.map((profile: any, idx: number) => {
-            const status = useQuery(api.users.getUserActiveStatus, { userId: profile.userId });
+            const status = statuses?.[profile.userId];
             return (
               <div
                 key={profile._id || idx}

@@ -77,4 +77,19 @@ export const getUserActiveStatus = query({
     const isActive = user.lastActive && now - user.lastActive < 2 * 60 * 1000;
     return { active: !!isActive };
   },
+});
+
+// Batch query to get active status for many users
+export const getManyUserActiveStatuses = query({
+  args: { userIds: v.array(v.id("users")) },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    const result: Record<string, { active: boolean }> = {};
+    for (const userId of args.userIds) {
+      const user = await ctx.db.get(userId);
+      const isActive = user?.lastActive && now - user.lastActive < 2 * 60 * 1000;
+      result[userId] = { active: !!isActive };
+    }
+    return result;
+  },
 }); 
