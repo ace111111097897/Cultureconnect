@@ -217,7 +217,7 @@ export function Dashboard() {
                 {userProfile?.profileImageUrl ? (
                   <img src={userProfile.profileImageUrl} alt="Profile" className="w-full h-full object-cover rounded-full" />
                 ) : (
-                  <span className="text-3xl">👤</span>
+                <span className="text-3xl">👤</span>
                 )}
               </div>
               <div>
@@ -236,17 +236,17 @@ export function Dashboard() {
           {/* Main navigation - match mobile toolbar */}
           <nav className="flex flex-col space-y-2 flex-1">
             {tabs.map((tab) => (
-              <button
+            <button 
                 key={tab.id}
                 className={`flex items-center space-x-3 py-3 px-4 rounded-xl transition text-left hover-lift ${activeTab === tab.id ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg pulse-glow' : 'text-white/70 hover:text-white hover:bg-white/10 hover-scale'}`}
                 onClick={() => {
                   setActiveTab(tab.id);
                   if (tab.onClick) tab.onClick();
                 }}
-              >
+            >
                 <span className="text-xl">{tab.icon}</span>
                 <span>{tab.label}</span>
-              </button>
+            </button>
             ))}
           </nav>
           {/* Bottom section (optional: logout, verification, etc.) */}

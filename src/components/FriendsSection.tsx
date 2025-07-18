@@ -100,7 +100,7 @@ export function FriendsSection({
           onNavigateToTab("conversations");
         }
         return;
-      } catch (error) {
+    } catch (error) {
         toast.error("Failed to create conversation");
         return;
       }

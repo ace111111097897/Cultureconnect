@@ -110,7 +110,7 @@ export default function KandiChat() {
         ))}
         {loading && <div className="text-white">🐕 Kandi is thinking...</div>}
         {error && <div className="text-red-500">{error}</div>}
-      </div>
+              </div>
 
       {/* Suggested Questions */}
       {showSuggestions && (

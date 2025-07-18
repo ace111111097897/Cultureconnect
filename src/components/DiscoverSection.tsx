@@ -176,7 +176,7 @@ export function DiscoverSection() {
             <div
               key={profile._id || idx}
               className="relative bg-white/10 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center p-0 hover:scale-105 transition-all hover-lift"
-            >
+          >
               {/* Profile Image - only this opens the modal */}
               {profile.profileImageUrl ? (
                 <img
@@ -198,24 +198,24 @@ export function DiscoverSection() {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg font-bold text-white cursor-pointer hover:underline" onClick={() => setSelectedProfile(profile)}>{profile.displayName}, {profile.age}</span>
                   {profile.verified && <span className="text-blue-400 text-lg" title="Verified">✔️</span>}
-                </div>
+            </div>
                 <div className="flex items-center gap-2">
                   <span className="w-3 h-3 rounded-full bg-green-400 inline-block"></span>
                   <span className="text-xs text-white/80">Recently Active</span>
-                </div>
+      </div>
               </div>
             </div>
-          ))}
-        </div>
+                  ))}
+          </div>
         {/* Profile Modal Popup */}
         {selectedProfile && (
           <ProfileModal profile={selectedProfile} onClose={() => setSelectedProfile(null)} />
         )}
-        {/* Swipe/arrow hint for desktop */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-base select-none pointer-events-none hidden md:block">
-          <span className="mr-2">←</span> Use arrows or swipe to browse <span className="ml-2">→</span>
+          {/* Swipe/arrow hint for desktop */}
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-base select-none pointer-events-none hidden md:block">
+            <span className="mr-2">←</span> Use arrows or swipe to browse <span className="ml-2">→</span>
+          </div>
         </div>
-      </div>
     </div>
   );
 }
