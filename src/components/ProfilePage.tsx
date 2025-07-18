@@ -5,6 +5,8 @@ import { toast } from "sonner";
 
 export function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [editData, setEditData] = useState({
     displayName: "",
     age: 25,
@@ -134,12 +136,24 @@ export function ProfilePage() {
 
   const handleSave = async () => {
     try {
+      setIsSaving(true);
       await updateProfile(editData);
-      toast.success("Profile updated successfully!");
-      setIsEditing(false);
+      
+      // Show success animation
+      setShowSuccess(true);
+      toast.success("Profile updated successfully! 🎉");
+      
+      // Hide success animation after 2 seconds
+      setTimeout(() => {
+        setShowSuccess(false);
+        setIsEditing(false);
+      }, 2000);
+      
     } catch (error) {
       toast.error("Failed to update profile");
       console.error(error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -166,7 +180,7 @@ export function ProfilePage() {
       });
       const { storageId } = await result.json();
       await updateProfileImage({ storageId });
-      toast.success("Profile picture updated!");
+      toast.success("Profile picture updated! ✨");
     } catch (error) {
       toast.error("Failed to upload image");
       console.error(error);
@@ -189,7 +203,7 @@ export function ProfilePage() {
       });
       const { storageId } = await result.json();
       await updateProfileVideo({ storageId });
-      toast.success("Profile video updated!");
+      toast.success("Profile video updated! 🎬");
     } catch (error) {
       toast.error("Failed to upload video");
       console.error(error);
@@ -203,12 +217,12 @@ export function ProfilePage() {
     return (
       <div className="flex justify-center items-center h-96">
         <div className="text-center space-y-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/30 border-t-white"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/30 border-t-white spin-smooth"></div>
           <p className="text-white/70">Loading profile...</p>
           <p className="text-white/50 text-sm">If this takes too long, you may need to create a profile first.</p>
           <button 
             onClick={() => window.location.reload()} 
-            className="px-4 py-2 bg-white/10 rounded-lg text-white hover:bg-white/20 transition"
+            className="px-4 py-2 bg-white/10 rounded-lg text-white hover:bg-white/20 transition hover-scale"
           >
             Refresh Page
           </button>
@@ -220,13 +234,13 @@ export function ProfilePage() {
   console.log("ProfilePage: Profile data loaded:", profile);
 
   return (
-    <div className="w-full max-w-3xl mx-auto p-2 sm:p-6 overflow-y-auto max-h-screen">
+    <div className="w-full max-w-3xl mx-auto p-2 sm:p-6 overflow-y-auto max-h-screen fade-in">
       {/* Profile Header */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover-lift">
         <div className="flex flex-col sm:flex-row items-start justify-between mb-6 space-y-4 sm:space-y-0">
           <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
             <div className="relative">
-              <div className="w-24 h-24 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden">
+              <div className="w-24 h-24 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden float-animation">
                 {profile.profileImageUrl ? (
                   <img
                     src={profile.profileImageUrl}
@@ -239,9 +253,9 @@ export function ProfilePage() {
               </div>
               
               {/* Image Upload Button */}
-              <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center cursor-pointer hover:from-orange-600 hover:to-pink-600 transition-all border-2 border-white">
+              <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center cursor-pointer hover:from-orange-600 hover:to-pink-600 transition-all border-2 border-white hover-scale">
                 {isUploadingImage ? (
-                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full spin-smooth"></div>
                 ) : (
                   <span className="text-white text-sm">📷</span>
                 )}
@@ -264,14 +278,26 @@ export function ProfilePage() {
           <div className="flex space-x-3 w-full sm:w-auto">
           <button
             onClick={isEditing ? handleSave : handleEdit}
-              className="flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all text-sm md:text-base"
+            disabled={isSaving}
+            className={`flex-1 sm:flex-none px-4 md:px-6 py-2 md:py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all text-sm md:text-base hover-scale ${
+              showSuccess ? 'success-bounce' : ''
+            } ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-              {isEditing ? "💾 Save Changes" : "✏️ Edit Profile"}
+              {isSaving ? (
+                <span className="flex items-center space-x-2">
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full spin-smooth"></div>
+                  <span>Saving...</span>
+                </span>
+              ) : isEditing ? (
+                "💾 Save Changes"
+              ) : (
+                "✏️ Edit Profile"
+              )}
             </button>
             {isEditing && (
               <button
                 onClick={() => setIsEditing(false)}
-                className="px-4 py-2 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all"
+                className="px-4 py-2 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all hover-scale"
               >
                 ✕ Cancel
           </button>
@@ -281,14 +307,14 @@ export function ProfilePage() {
 
         {/* Basic Info Section */}
         {isEditing ? (
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-2 gap-6 slide-in-bottom">
               <div>
                 <label className="block text-white/80 mb-2">Display Name</label>
                 <input
                   type="text"
                   value={editData.displayName}
                   onChange={(e) => setEditData(prev => ({ ...prev, displayName: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
                 placeholder="Your display name"
                 />
               </div>
@@ -298,7 +324,7 @@ export function ProfilePage() {
                 type="number"
                 value={editData.age}
                 onChange={(e) => setEditData(prev => ({ ...prev, age: parseInt(e.target.value) || 18 }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
                 min="18"
                 max="100"
               />
@@ -309,7 +335,7 @@ export function ProfilePage() {
                   type="text"
                 value={editData.location}
                 onChange={(e) => setEditData(prev => ({ ...prev, location: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
                 placeholder="City, Country"
                 />
             </div>
@@ -318,14 +344,14 @@ export function ProfilePage() {
               <textarea
                 value={editData.bio}
                 onChange={(e) => setEditData(prev => ({ ...prev, bio: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 h-32 resize-none"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 h-32 resize-none hover-glow"
                 placeholder="Tell us about yourself..."
               />
             </div>
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">Zodiac Sign</label>
               <select
-                className="w-full border rounded-lg p-2"
+                className="w-full border rounded-lg p-2 hover-glow"
                 value={editData.zodiacSign}
                 onChange={e => setEditData(prev => ({ ...prev, zodiacSign: e.target.value }))}
               >
@@ -337,7 +363,7 @@ export function ProfilePage() {
             </div>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6 fade-in">
             <div>
               <h3 className="text-white font-semibold mb-2">Basic Info</h3>
               <p className="text-white/70">Display Name: {profile.displayName}</p>
@@ -622,7 +648,7 @@ export function ProfilePage() {
                 type="number"
                 value={editData.ageRangeMin}
                 onChange={(e) => setEditData(prev => ({ ...prev, ageRangeMin: parseInt(e.target.value) || 18 }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
                 min="18"
                 max="100"
               />
@@ -633,7 +659,7 @@ export function ProfilePage() {
                 type="number"
                 value={editData.ageRangeMax}
                 onChange={(e) => setEditData(prev => ({ ...prev, ageRangeMax: parseInt(e.target.value) || 50 }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
                 min="18"
                 max="100"
               />
@@ -644,7 +670,7 @@ export function ProfilePage() {
                 type="number"
                 value={editData.maxDistance}
                 onChange={(e) => setEditData(prev => ({ ...prev, maxDistance: parseInt(e.target.value) || 50 }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
                 min="1"
                 max="500"
               />
@@ -654,7 +680,7 @@ export function ProfilePage() {
               <select
                 value={editData.relationshipGoals}
                 onChange={(e) => setEditData(prev => ({ ...prev, relationshipGoals: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
               >
                 <option value="">Select relationship goals</option>
                 <option value="friendship">Friendship</option>
@@ -667,7 +693,7 @@ export function ProfilePage() {
             </div>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-6 fade-in">
             <div>
               <h3 className="text-white font-semibold mb-2">Age Range</h3>
               <p className="text-white/70">{profile.ageRangeMin} - {profile.ageRangeMax} years old</p>

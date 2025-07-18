@@ -9,7 +9,7 @@ export function SignInForm() {
   const [submitting, setSubmitting] = useState(false);
 
   return (
-    <div className="w-full">
+    <div className="w-full fade-in">
       <form
         className="flex flex-col gap-form-field"
         onSubmit={(e) => {
@@ -33,21 +33,32 @@ export function SignInForm() {
         }}
       >
         <input
-          className="auth-input-field"
+          className="auth-input-field hover-glow"
           type="email"
           name="email"
           placeholder="Email"
           required
         />
         <input
-          className="auth-input-field"
+          className="auth-input-field hover-glow"
           type="password"
           name="password"
           placeholder="Password"
           required
         />
-        <button className="auth-button" type="submit" disabled={submitting}>
-          {flow === "signIn" ? "Sign in" : "Sign up"}
+        <button 
+          className={`auth-button hover-scale ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`} 
+          type="submit" 
+          disabled={submitting}
+        >
+          {submitting ? (
+            <span className="flex items-center justify-center space-x-2">
+              <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full spin-smooth"></div>
+              <span>{flow === "signIn" ? "Signing in..." : "Signing up..."}</span>
+            </span>
+          ) : (
+            flow === "signIn" ? "Sign in" : "Sign up"
+          )}
         </button>
         <div className="text-center text-sm text-secondary">
           <span>
@@ -57,7 +68,7 @@ export function SignInForm() {
           </span>
           <button
             type="button"
-            className="text-primary hover:text-primary-hover hover:underline font-medium cursor-pointer"
+            className="text-primary hover:text-primary-hover hover:underline font-medium cursor-pointer hover-scale"
             onClick={() => setFlow(flow === "signIn" ? "signUp" : "signIn")}
           >
             {flow === "signIn" ? "Sign up instead" : "Sign in instead"}
@@ -69,7 +80,10 @@ export function SignInForm() {
         <span className="mx-4 text-secondary">or</span>
         <hr className="my-4 grow border-gray-200" />
       </div>
-      <button className="auth-button" onClick={() => void signIn("anonymous")}>
+      <button 
+        className="auth-button hover-scale" 
+        onClick={() => void signIn("anonymous")}
+      >
         Sign in anonymously
       </button>
     </div>

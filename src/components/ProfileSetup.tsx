@@ -35,11 +35,21 @@ export function ProfileSetup() {
     ageRangeMin: 18,
     ageRangeMax: 50,
     maxDistance: 50,
+    zodiacSign: "",
+    socialLinks: {
+      instagram: "",
+      twitter: "",
+      facebook: "",
+      linkedin: "",
+      tiktok: "",
+      youtube: "",
+    },
   });
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const upsertProfile = useMutation(api.profiles.upsertProfile);
   const generateUploadUrl = useMutation(api.profiles.generateUploadUrl);
@@ -82,7 +92,15 @@ export function ProfileSetup() {
         await updateProfileImage({ storageId });
       }
       
+      // Show success animation
+      setShowSuccess(true);
       toast.success("Profile created successfully! 🎉");
+      
+      // Hide success animation after 2 seconds
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 2000);
+      
     } catch (error) {
       toast.error("Failed to create profile");
       console.error(error);
@@ -95,12 +113,12 @@ export function ProfileSetup() {
     switch (step) {
       case 1:
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 slide-in-bottom">
             <h2 className="text-2xl font-bold text-white mb-6">Basic Information</h2>
             
             {/* Profile Picture Upload */}
             <div className="flex flex-col items-center space-y-4">
-              <div className="w-32 h-32 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center border-4 border-white/20 overflow-hidden">
+              <div className="w-32 h-32 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center border-4 border-white/20 overflow-hidden float-animation">
                 {imagePreview ? (
                   <img src={imagePreview} alt="Profile preview" className="w-full h-full object-cover" />
                 ) : (
@@ -108,7 +126,7 @@ export function ProfileSetup() {
                 )}
               </div>
               <div className="text-center">
-                <label className="cursor-pointer px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium hover:from-orange-600 hover:to-pink-600 transition-all">
+                <label className="cursor-pointer px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-pink-500 text-white font-medium hover:from-orange-600 hover:to-pink-600 transition-all hover-scale">
                   {selectedImage ? "Change Photo" : "Add Profile Photo"}
                   <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
                 </label>
@@ -122,7 +140,7 @@ export function ProfileSetup() {
                 type="text"
                 value={formData.displayName}
                 onChange={(e) => setFormData(prev => ({ ...prev, displayName: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
                 placeholder="How should others see your name?"
               />
             </div>
@@ -133,7 +151,7 @@ export function ProfileSetup() {
                 type="number"
                 value={formData.age}
                 onChange={(e) => setFormData(prev => ({ ...prev, age: parseInt(e.target.value) }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
                 min="18"
                 max="100"
               />
@@ -145,7 +163,7 @@ export function ProfileSetup() {
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
                 placeholder="City, State/Country"
               />
             </div>
@@ -156,7 +174,7 @@ export function ProfileSetup() {
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
                 placeholder="your.email@example.com"
               />
               <p className="text-white/60 text-sm mt-1">
@@ -169,7 +187,7 @@ export function ProfileSetup() {
               <textarea
                 value={formData.bio}
                 onChange={(e) => setFormData(prev => ({ ...prev, bio: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 h-24"
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 h-24 hover-glow"
                 placeholder="Tell others about yourself and what makes you unique..."
               />
             </div>
@@ -178,21 +196,22 @@ export function ProfileSetup() {
 
       case 2:
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 slide-in-bottom">
             <h2 className="text-2xl font-bold text-white mb-6">Cultural Identity</h2>
             
             <div>
               <label className="block text-white/80 mb-3">Languages You Speak</label>
               <div className="grid grid-cols-2 gap-2">
-                {CULTURAL_OPTIONS.languages.map(lang => (
+                {CULTURAL_OPTIONS.languages.map((lang, index) => (
                   <button
                     key={lang}
                     onClick={() => handleArrayChange('languages', lang)}
-                    className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                    className={`px-3 py-2 rounded-lg text-sm transition-all hover-scale stagger-item ${
                       formData.languages.includes(lang)
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-orange-500 text-white pulse-glow'
                         : 'bg-white/10 text-white/80 hover:bg-white/20'
                     }`}
+                    style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     {lang}
                   </button>
@@ -203,15 +222,16 @@ export function ProfileSetup() {
             <div>
               <label className="block text-white/80 mb-3">Cultural Background</label>
               <div className="grid grid-cols-2 gap-2">
-                {CULTURAL_OPTIONS.culturalBackground.map(bg => (
+                {CULTURAL_OPTIONS.culturalBackground.map((bg, index) => (
                   <button
                     key={bg}
                     onClick={() => handleArrayChange('culturalBackground', bg)}
-                    className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                    className={`px-3 py-2 rounded-lg text-sm transition-all hover-scale stagger-item ${
                       formData.culturalBackground.includes(bg)
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-orange-500 text-white pulse-glow'
                         : 'bg-white/10 text-white/80 hover:bg-white/20'
                     }`}
+                    style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     {bg}
                   </button>
@@ -222,15 +242,16 @@ export function ProfileSetup() {
             <div>
               <label className="block text-white/80 mb-3">Important Traditions</label>
               <div className="grid grid-cols-2 gap-2">
-                {CULTURAL_OPTIONS.traditions.map(tradition => (
+                {CULTURAL_OPTIONS.traditions.map((tradition, index) => (
                   <button
                     key={tradition}
                     onClick={() => handleArrayChange('traditions', tradition)}
-                    className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                    className={`px-3 py-2 rounded-lg text-sm transition-all hover-scale stagger-item ${
                       formData.traditions.includes(tradition)
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-orange-500 text-white pulse-glow'
                         : 'bg-white/10 text-white/80 hover:bg-white/20'
                     }`}
+                    style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     {tradition}
                   </button>
@@ -242,21 +263,22 @@ export function ProfileSetup() {
 
       case 3:
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 slide-in-bottom">
             <h2 className="text-2xl font-bold text-white mb-6">Interests & Values</h2>
             
             <div>
               <label className="block text-white/80 mb-3">Food Preferences</label>
               <div className="grid grid-cols-2 gap-2">
-                {CULTURAL_OPTIONS.foodPreferences.map(food => (
+                {CULTURAL_OPTIONS.foodPreferences.map((food, index) => (
                   <button
                     key={food}
                     onClick={() => handleArrayChange('foodPreferences', food)}
-                    className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                    className={`px-3 py-2 rounded-lg text-sm transition-all hover-scale stagger-item ${
                       formData.foodPreferences.includes(food)
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-orange-500 text-white pulse-glow'
                         : 'bg-white/10 text-white/80 hover:bg-white/20'
                     }`}
+                    style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     {food}
                   </button>
@@ -267,15 +289,16 @@ export function ProfileSetup() {
             <div>
               <label className="block text-white/80 mb-3">Music You Love</label>
               <div className="grid grid-cols-2 gap-2">
-                {CULTURAL_OPTIONS.musicGenres.map(genre => (
+                {CULTURAL_OPTIONS.musicGenres.map((genre, index) => (
                   <button
                     key={genre}
                     onClick={() => handleArrayChange('musicGenres', genre)}
-                    className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                    className={`px-3 py-2 rounded-lg text-sm transition-all hover-scale stagger-item ${
                       formData.musicGenres.includes(genre)
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-orange-500 text-white pulse-glow'
                         : 'bg-white/10 text-white/80 hover:bg-white/20'
                     }`}
+                    style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     {genre}
                   </button>
@@ -286,15 +309,16 @@ export function ProfileSetup() {
             <div>
               <label className="block text-white/80 mb-3">Core Values</label>
               <div className="grid grid-cols-2 gap-2">
-                {CULTURAL_OPTIONS.values.map(value => (
+                {CULTURAL_OPTIONS.values.map((value, index) => (
                   <button
                     key={value}
                     onClick={() => handleArrayChange('values', value)}
-                    className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                    className={`px-3 py-2 rounded-lg text-sm transition-all hover-scale stagger-item ${
                       formData.values.includes(value)
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-orange-500 text-white pulse-glow'
                         : 'bg-white/10 text-white/80 hover:bg-white/20'
                     }`}
+                    style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     {value}
                   </button>
@@ -306,21 +330,22 @@ export function ProfileSetup() {
 
       case 4:
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 slide-in-bottom">
             <h2 className="text-2xl font-bold text-white mb-6">Goals & Preferences</h2>
             
             <div>
               <label className="block text-white/80 mb-3">Life Goals</label>
               <div className="grid grid-cols-2 gap-2">
-                {CULTURAL_OPTIONS.lifeGoals.map(goal => (
+                {CULTURAL_OPTIONS.lifeGoals.map((goal, index) => (
                   <button
                     key={goal}
                     onClick={() => handleArrayChange('lifeGoals', goal)}
-                    className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                    className={`px-3 py-2 rounded-lg text-sm transition-all hover-scale stagger-item ${
                       formData.lifeGoals.includes(goal)
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-orange-500 text-white pulse-glow'
                         : 'bg-white/10 text-white/80 hover:bg-white/20'
                     }`}
+                    style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     {goal}
                   </button>
@@ -331,15 +356,16 @@ export function ProfileSetup() {
             <div>
               <label className="block text-white/80 mb-3">What are you looking for?</label>
               <div className="grid grid-cols-2 gap-2">
-                {CULTURAL_OPTIONS.relationshipGoals.map(goal => (
+                {CULTURAL_OPTIONS.relationshipGoals.map((goal, index) => (
                   <button
                     key={goal}
                     onClick={() => setFormData(prev => ({ ...prev, relationshipGoals: goal }))}
-                    className={`px-3 py-2 rounded-lg text-sm transition-all ${
+                    className={`px-3 py-2 rounded-lg text-sm transition-all hover-scale stagger-item ${
                       formData.relationshipGoals === goal
-                        ? 'bg-orange-500 text-white'
+                        ? 'bg-orange-500 text-white pulse-glow'
                         : 'bg-white/10 text-white/80 hover:bg-white/20'
                     }`}
+                    style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     {goal}
                   </button>
@@ -355,7 +381,7 @@ export function ProfileSetup() {
                     type="number"
                     value={formData.ageRangeMin}
                     onChange={(e) => setFormData(prev => ({ ...prev, ageRangeMin: parseInt(e.target.value) }))}
-                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
                     min="18"
                   />
                   <span className="text-white/80 self-center">to</span>
@@ -363,7 +389,7 @@ export function ProfileSetup() {
                     type="number"
                     value={formData.ageRangeMax}
                     onChange={(e) => setFormData(prev => ({ ...prev, ageRangeMax: parseInt(e.target.value) }))}
-                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
                     max="100"
                   />
                 </div>
@@ -375,7 +401,7 @@ export function ProfileSetup() {
                   type="number"
                   value={formData.maxDistance}
                   onChange={(e) => setFormData(prev => ({ ...prev, maxDistance: parseInt(e.target.value) }))}
-                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-2 focus:ring-orange-400 hover-glow"
                   min="1"
                   max="500"
                 />
@@ -390,8 +416,8 @@ export function ProfileSetup() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
+    <div className="max-w-2xl mx-auto fade-in">
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 hover-lift">
         <div className="mb-8">
           <div className="flex justify-between items-center mb-4">
             <span className="text-white/60">Step {step} of 4</span>
@@ -411,7 +437,7 @@ export function ProfileSetup() {
           <button
             onClick={() => setStep(Math.max(1, step - 1))}
             disabled={step === 1}
-            className="px-6 py-3 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            className="px-6 py-3 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover-scale"
           >
             Previous
           </button>
@@ -419,7 +445,7 @@ export function ProfileSetup() {
           {step < 4 ? (
             <button
               onClick={() => setStep(step + 1)}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all hover-scale"
             >
               Next
             </button>
@@ -427,9 +453,18 @@ export function ProfileSetup() {
             <button
               onClick={handleSubmit}
               disabled={isUploading}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 disabled:opacity-50 transition-all"
+              className={`px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 disabled:opacity-50 transition-all hover-scale ${
+                showSuccess ? 'success-bounce' : ''
+              }`}
             >
-              {isUploading ? "Creating Profile..." : "Complete Profile"}
+              {isUploading ? (
+                <span className="flex items-center space-x-2">
+                  <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full spin-smooth"></div>
+                  <span>Creating Profile...</span>
+                </span>
+              ) : (
+                "Complete Profile"
+              )}
             </button>
           )}
         </div>
