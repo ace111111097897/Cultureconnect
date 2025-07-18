@@ -82,87 +82,33 @@ export function FriendsSection({
   };
 
   const handleMessage = async (friend: any) => {
-    console.log("handleMessage called with friend:", friend);
-    console.log("Available conversations:", conversations);
-    
-    if (!onNavigateToConversation || !onNavigateToTab) {
-      console.error("Missing navigation functions:", { 
-        onNavigateToConversation: !!onNavigateToConversation, 
-        onNavigateToTab: !!onNavigateToTab 
-      });
-      toast.error("Navigation not available");
-      return;
-    }
-
-    if (!conversations) {
-      console.log("Conversations still loading, will retry...");
-      toast.error("Loading conversations, please try again");
-      return;
-    }
-
-    // Find the conversation with this friend - try multiple approaches
-    let conversation = null;
-    
-    // First try: match by otherProfile.userId
-    conversation = conversations.find(conv => {
-      const otherProfile = (conv as any)?.otherProfile;
-      console.log("Checking conversation:", conv._id, "otherProfile:", otherProfile);
-      return otherProfile && otherProfile.userId === friend.userId;
+    if (!conversations || !currentUserProfile) return;
+    // Try to find an existing conversation
+    let conversation = conversations.find((conv: any) => {
+      const otherProfile = conv.otherProfile;
+      return otherProfile && (otherProfile.userId === friend.userId || otherProfile._id === friend._id);
     });
-
-    // Second try: match by otherProfile._id (profile ID)
     if (!conversation) {
-      conversation = conversations.find(conv => {
-        const otherProfile = (conv as any)?.otherProfile;
-        return otherProfile && otherProfile._id === friend._id;
-      });
-    }
-
-    // Third try: match by display name (fallback)
-    if (!conversation) {
-      conversation = conversations.find(conv => {
-        const otherProfile = (conv as any)?.otherProfile;
-        return otherProfile && otherProfile.displayName === friend.displayName;
-      });
-    }
-
-    console.log("Found conversation:", conversation);
-
-    if (conversation) {
-      // Navigate to conversations tab and open this conversation
-      console.log("Navigating to conversation:", conversation._id);
-      onNavigateToConversation(conversation._id);
-      onNavigateToTab("conversations");
-      toast.success(`Opening conversation with ${friend.displayName}`);
-    } else {
-      // No conversation found, try to create one
-      console.log("No conversation found, attempting to create one");
+      // Create a new conversation
       try {
-        if (!currentUserProfile) {
-          toast.error("Unable to get your profile information");
-          return;
-        }
-
-        // Create a new conversation
         const newConversationId = await createConversation({
           participantIds: [currentUserProfile.userId, friend.userId],
           type: "direct"
         });
-
-        console.log("Created new conversation:", newConversationId);
-        
-        if (newConversationId) {
-          // Navigate to the new conversation
+        if (onNavigateToConversation && onNavigateToTab) {
           onNavigateToConversation(newConversationId);
           onNavigateToTab("conversations");
-          toast.success(`Created new conversation with ${friend.displayName}`);
-        } else {
-          toast.error("Failed to create conversation");
         }
-    } catch (error) {
-        console.error("Error creating conversation:", error);
-        toast.error("Failed to create conversation. Please try again.");
+        return;
+      } catch (error) {
+        toast.error("Failed to create conversation");
+        return;
       }
+    }
+    // Open the existing conversation
+    if (onNavigateToConversation && onNavigateToTab) {
+      onNavigateToConversation(conversation._id);
+      onNavigateToTab("conversations");
     }
   };
 
@@ -330,7 +276,7 @@ export function FriendsSection({
                   <div className="flex space-x-2">
                     <button 
                       className="px-3 py-1 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-medium hover:from-blue-600 hover:to-cyan-600 transition-all"
-                      onClick={() => { setSelectedFriend(friend); setShowMessagePrompt(true); }}
+                      onClick={() => handleMessage(friend)}
                     >
                       Message
                     </button>
