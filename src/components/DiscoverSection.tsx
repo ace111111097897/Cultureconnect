@@ -166,13 +166,6 @@ export function DiscoverSection() {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Profile Completion Progress Bar */}
-        <div className="w-full max-w-2xl mx-auto mb-4">
-          <div className="w-full bg-white/10 rounded-full h-3">
-            <div className="bg-gradient-to-r from-green-400 to-blue-500 h-3 rounded-full transition-all duration-500" style={{ width: `${currentUserProfileCompletion}%` }}></div>
-          </div>
-          <div className="text-right text-xs text-white/60 mt-1">Profile Completion: {currentUserProfileCompletion}%</div>
-        </div>
         {/* Profile Counter */}
         <div className="mb-4 text-white/80 text-lg font-semibold select-none">
           Profile {currentIndex + 1} of {visibleProfiles.length}
