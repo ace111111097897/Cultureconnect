@@ -24,7 +24,6 @@ import type * as http from "../http.js";
 import type * as index from "../index.js";
 import type * as matches from "../matches.js";
 import type * as news from "../news.js";
-import type * as notifications from "../notifications.js";
 import type * as profiles from "../profiles.js";
 import type * as prompts from "../prompts.js";
 import type * as reels from "../reels.js";
@@ -52,7 +51,6 @@ declare const fullApi: ApiFromModules<{
   index: typeof index;
   matches: typeof matches;
   news: typeof news;
-  notifications: typeof notifications;
   profiles: typeof profiles;
   prompts: typeof prompts;
   reels: typeof reels;

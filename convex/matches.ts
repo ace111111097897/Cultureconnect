@@ -64,13 +64,7 @@ export const createMatch = mutation({
             isActive: true,
           });
 
-          // Create match notifications for both users
-          await ctx.runMutation(api.notifications.createMatchNotifications, {
-            user1Id: userId,
-            user2Id: args.targetUserId,
-            user1Name: userProfile.displayName,
-            user2Name: targetProfile.displayName,
-          });
+          // Match created successfully
 
           return { matched: true, matchId };
         }
