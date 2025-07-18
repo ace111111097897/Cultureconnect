@@ -177,14 +177,21 @@ export function DiscoverSection() {
             return (
               <div
                 key={profile._id || idx}
-                className="relative bg-white/10 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center p-0 cursor-pointer hover:scale-105 transition-all hover-lift"
-                onClick={() => setSelectedProfile(profile)}
+                className="relative bg-white/10 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center p-0 hover:scale-105 transition-all hover-lift"
               >
-                {/* Profile Image */}
+                {/* Profile Image - only this opens the modal */}
                 {profile.profileImageUrl ? (
-                  <img src={profile.profileImageUrl} alt={profile.displayName} className="w-full h-48 object-cover rounded-t-2xl" />
+                  <img
+                    src={profile.profileImageUrl}
+                    alt={profile.displayName}
+                    className="w-full h-48 object-cover rounded-t-2xl cursor-pointer"
+                    onClick={() => setSelectedProfile(profile)}
+                  />
                 ) : (
-                  <div className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 rounded-t-2xl">
+                  <div
+                    className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 rounded-t-2xl cursor-pointer"
+                    onClick={() => setSelectedProfile(profile)}
+                  >
                     <span className="text-5xl text-white/60">👤</span>
                   </div>
                 )}
