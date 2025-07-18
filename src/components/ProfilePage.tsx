@@ -593,7 +593,7 @@ export function ProfilePage() {
               <h3 className="text-white font-semibold mb-2">Music Genres</h3>
               <div className="flex flex-wrap gap-2">
                 {profile.musicGenres.map((music, index) => (
-                  <span key={index} className="px-3 py-1 bg-pink-500/20 text-pink-200 rounded-full text-sm">
+                  <span key={index} className="px-3 py-1 bg-pink-500/20 text-pink-200 rounded-full text-sm min-w-[80px] whitespace-normal">
                     {music}
                   </span>
                 ))}
