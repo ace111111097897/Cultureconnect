@@ -17,7 +17,7 @@ export function SignInForm() {
           </div>
           <h2 className="text-2xl font-bold text-white mb-2 text-center">Welcome to CultureConnect!</h2>
           <p className="text-base text-white/80 text-center max-w-md mb-2">
-            Hi, I'm <span className="font-semibold">Kandi</span> 🐕, your friendly AI guide! I'll help you connect with amazing people through shared culture, values, and experiences. Sign up or log in to start your journey!
+            Hi, I'm <span className="font-semibold">Kandi</span> 🐕, your friendly cultural guide! I'll help you connect with amazing people through shared culture, values, and experiences. Sign up or log in to start your journey!
           </p>
         </div>
       </div>
