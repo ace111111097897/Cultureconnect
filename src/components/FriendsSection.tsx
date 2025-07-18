@@ -16,6 +16,9 @@ export function FriendsSection({
   const [lastRequestCount, setLastRequestCount] = useState(0);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
+  // Add state for message prompt/modal
+  const [showMessagePrompt, setShowMessagePrompt] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState(null);
   
   const friends = useQuery(api.friends.getFriends);
   const friendRequests = useQuery(api.friends.getFriendRequests);
@@ -326,8 +329,8 @@ export function FriendsSection({
                   
                   <div className="flex space-x-2">
                     <button 
-                      onClick={() => handleMessage(friend)}
-                      className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-medium hover:from-blue-600 hover:to-cyan-600 transition-all"
+                      className="px-3 py-1 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-medium hover:from-blue-600 hover:to-cyan-600 transition-all"
+                      onClick={() => { setSelectedFriend(friend); setShowMessagePrompt(true); }}
                     >
                       Message
                     </button>
@@ -625,6 +628,49 @@ export function FriendsSection({
                 >
                 Close
                 </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Message Prompt Modal */}
+      {showMessagePrompt && selectedFriend && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 max-w-md w-full">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-2xl font-bold text-white">Send Message</h3>
+              <button
+                onClick={() => setShowMessagePrompt(false)}
+                className="text-white/70 hover:text-white text-2xl"
+              >✕</button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                  {selectedFriend.profileImageUrl ? (
+                    <img src={selectedFriend.profileImageUrl} alt={selectedFriend.displayName} className="w-full h-full rounded-full object-cover" />
+                  ) : (
+                    <span className="text-white text-sm">👤</span>
+                  )}
+                </div>
+                <div>
+                  <p className="text-white font-medium">{selectedFriend.displayName}</p>
+                  <p className="text-white/60 text-sm">{selectedFriend.location}</p>
+                </div>
+              </div>
+              <textarea
+                className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 h-32"
+                placeholder="Write a message to start a conversation..."
+              />
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setShowMessagePrompt(false)}
+                  className="flex-1 px-4 py-3 rounded-xl bg-white/10 text-white border border-white/20 hover:bg-white/20 transition-all"
+                >Cancel</button>
+                <button
+                  className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all"
+                >Send Message</button>
+              </div>
             </div>
           </div>
         </div>
