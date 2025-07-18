@@ -78,7 +78,30 @@ export function Dashboard() {
       case "games":
         return <GamesSection />;
       case "news":
-        return <CultureFeed />;
+        // Live news headlines for the US
+        const [news, setNews] = useState([]);
+        useEffect(() => {
+          fetch("https://api.currentsapi.services/v1/latest-news?country=US&apiKey=demo")
+            .then(res => res.json())
+            .then(data => setNews(data.news || []));
+        }, []);
+        return (
+          <div className="p-8">
+            <h2 className="text-3xl font-bold mb-6 text-white">Live US News</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {news.length === 0 ? (
+                <div className="text-white/70">Loading news...</div>
+              ) : news.map((item, i) => (
+                <div key={i} className="bg-white/10 rounded-2xl p-6 border border-white/20 shadow-lg flex flex-col">
+                  <div className="text-xl font-bold text-white mb-2">{item.title}</div>
+                  <div className="text-white/80 mb-1">{item.published}</div>
+                  <div className="text-white/70 mb-2">{item.description}</div>
+                  <a href={item.url} target="_blank" rel="noopener noreferrer" className="mt-auto px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all text-center">Read More</a>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
       case "stories":
         return <StoriesSection />;
       case "community":

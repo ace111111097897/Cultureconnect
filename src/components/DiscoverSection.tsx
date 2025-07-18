@@ -196,7 +196,7 @@ export function DiscoverSection() {
               {/* Name, Age, Status */}
               <div className="w-full flex flex-col items-start p-4">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg font-bold text-white">{profile.displayName}, {profile.age}</span>
+                  <span className="text-lg font-bold text-white cursor-pointer hover:underline" onClick={() => setSelectedProfile(profile)}>{profile.displayName}, {profile.age}</span>
                   {profile.verified && <span className="text-blue-400 text-lg" title="Verified">✔️</span>}
                 </div>
                 <div className="flex items-center gap-2">

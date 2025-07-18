@@ -18,9 +18,8 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
     selectedConversation ? { conversationId: selectedConversation } : "skip"
   );
   const userProfile = useQuery(api.profiles.getCurrentUserProfile);
-  
-  const sendMessage = useMutation(api.conversations.sendMessage);
-  const markAsRead = useMutation(api.conversations.markMessagesAsRead);
+  const matches = useQuery(api.matches.getUserMatches);
+  const friends = useQuery(api.friends.getFriends);
 
   // Debug logging
   console.log("ConversationsSection - Conversations:", conversations);
@@ -126,6 +125,24 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
         </div>
         
         <div className="overflow-y-auto h-full">
+          {/* At the top of the Messages tab, show a list of matched and friended users: */}
+          <div className="mb-6">
+            <h3 className="text-lg font-bold text-white mb-2">Your Matches & Friends</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {[...(matches || []), ...(friends || [])].map((user, i) => (
+                <div key={user._id || i} className="bg-white/10 rounded-xl p-4 flex flex-col items-center cursor-pointer hover:scale-105 transition-all" onClick={() => handleSelectConversation(user.conversationId)}>
+                  {user.otherProfile?.profileImageUrl ? (
+                    <img src={user.otherProfile.profileImageUrl} alt={user.otherProfile.displayName} className="w-16 h-16 rounded-full object-cover mb-2" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-2">
+                      <span className="text-2xl text-white/60">👤</span>
+                    </div>
+                  )}
+                  <div className="text-white font-semibold">{user.otherProfile?.displayName || user.displayName}</div>
+                </div>
+              ))}
+            </div>
+          </div>
           {conversations.map((conversation) => (
             <button
               key={conversation._id}
