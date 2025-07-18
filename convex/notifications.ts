@@ -2,6 +2,7 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 
+// Simple notification system that works without complex internal calls
 export const createNotification = mutation({
   args: {
     type: v.union(
@@ -118,8 +119,44 @@ export const getUnreadNotificationCount = query({
   },
 });
 
-// Generate notifications for profile updates
-export const generateProfileUpdateNotification = mutation({
+// Simple function to create match notifications - called directly from matches.ts
+export const createMatchNotifications = mutation({
+  args: {
+    user1Id: v.string(),
+    user2Id: v.string(),
+    user1Name: v.string(),
+    user2Name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    // Create notification for user 1
+    await ctx.db.insert("notifications", {
+      type: "match",
+      title: "New Match! 🎉",
+      message: `You matched with ${args.user2Name}! Start a conversation to learn more about their cultural background.`,
+      targetUserId: args.user1Id,
+      relatedUserId: args.user2Id,
+      read: false,
+      createdAt: Date.now(),
+    });
+
+    // Create notification for user 2
+    await ctx.db.insert("notifications", {
+      type: "match",
+      title: "New Match! 🎉",
+      message: `You matched with ${args.user1Name}! Start a conversation to learn more about their cultural background.`,
+      targetUserId: args.user2Id,
+      relatedUserId: args.user1Id,
+      read: false,
+      createdAt: Date.now(),
+    });
+  },
+});
+
+// Simple function to create profile update notifications
+export const createProfileUpdateNotification = mutation({
   args: {
     profileId: v.id("profiles"),
     updateType: v.union(
@@ -175,100 +212,7 @@ export const generateProfileUpdateNotification = mutation({
       });
     }
   },
-});
-
-// Generate match notifications
-export const generateMatchNotification = mutation({
-  args: {
-    matchedUserId: v.string(),
-    matchedProfileId: v.id("profiles"),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const matchedProfile = await ctx.db.get(args.matchedProfileId);
-    if (!matchedProfile) return;
-
-    // Create notification for the current user
-    await ctx.db.insert("notifications", {
-      type: "match",
-      title: "New Cultural Match! 🎉",
-      message: `You matched with ${matchedProfile.displayName} from ${matchedProfile.culturalBackground[0] || 'a similar culture'}`,
-      targetUserId: userId,
-      relatedUserId: args.matchedUserId,
-      relatedProfileId: args.matchedProfileId,
-      read: false,
-      createdAt: Date.now(),
-    });
-
-    // Create notification for the matched user
-    const currentUserProfile = await ctx.db
-      .query("profiles")
-      .withIndex("by_user", (q) => q.eq("userId", userId))
-      .unique();
-
-    if (currentUserProfile) {
-      await ctx.db.insert("notifications", {
-        type: "match",
-        title: "New Cultural Match! 🎉",
-        message: `You matched with ${currentUserProfile.displayName} from ${currentUserProfile.culturalBackground[0] || 'a similar culture'}`,
-        targetUserId: args.matchedUserId,
-        relatedUserId: userId,
-        relatedProfileId: currentUserProfile._id,
-        read: false,
-        createdAt: Date.now(),
-      });
-    }
-  },
-});
-
-// Generate friend request notifications
-export const generateFriendRequestNotification = mutation({
-  args: {
-    targetUserId: v.string(),
-    requesterProfileId: v.id("profiles"),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    const requesterProfile = await ctx.db.get(args.requesterProfileId);
-    if (!requesterProfile) return;
-
-    await ctx.db.insert("notifications", {
-      type: "friend_request",
-      title: "Friend Request",
-      message: `${requesterProfile.displayName} wants to connect with you`,
-      targetUserId: args.targetUserId,
-      relatedUserId: userId,
-      relatedProfileId: args.requesterProfileId,
-      read: false,
-      createdAt: Date.now(),
-    });
-  },
-});
-
-// Generate Kandi AI notifications
-export const generateKandiNotification = mutation({
-  args: {
-    title: v.string(),
-    message: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
-    await ctx.db.insert("notifications", {
-      type: "kandi",
-      title: args.title,
-      message: args.message,
-      targetUserId: userId,
-      read: false,
-      createdAt: Date.now(),
-    });
-  },
-});
+}); 
 
 // Create sample notifications for testing
 export const createSampleNotifications = mutation({
