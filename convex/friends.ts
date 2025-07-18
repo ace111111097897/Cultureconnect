@@ -62,17 +62,17 @@ export const sendFriendRequest = mutation({
     });
 
     // Send email notification to recipient
-    if (senderProfile && recipientProfile) {
-      // Get recipient's email from auth system
-      const recipientUser = await ctx.db.get(args.toUserId);
-      if (recipientUser?.email) {
-        await ctx.scheduler.runAfter(0, internal.emailActions.sendFriendRequestNotificationEmail, {
-          email: recipientUser.email,
-          recipientName: recipientProfile.displayName,
-          senderName: senderProfile.displayName,
-        });
-      }
-    }
+    // (Removed problematic internal email notification call)
+    // if (senderProfile && recipientProfile) {
+    //   const recipientUser = await ctx.db.get(args.toUserId);
+    //   if (recipientUser?.email) {
+    //     await ctx.scheduler.runAfter(0, internal.emailActions.sendFriendRequestNotificationEmail, {
+    //       email: recipientUser.email,
+    //       recipientName: recipientProfile.displayName,
+    //       senderName: senderProfile.displayName,
+    //     });
+    //   }
+    // }
 
     return requestId;
   },
