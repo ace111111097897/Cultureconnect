@@ -91,7 +91,8 @@ export default function KandiChat() {
         )}
       </div>
 
-      <div className="w-full max-w-2xl bg-white/10 rounded-xl p-6 md:p-6 mb-6 border border-white/20">
+      {/* Scrollable message area with fixed height */}
+      <div className="w-full max-w-2xl bg-white/10 rounded-xl p-6 md:p-6 mb-6 border border-white/20 flex flex-col max-h-80 overflow-y-auto">
         {messages.map((msg, i) => (
           <div
             key={i}
@@ -109,7 +110,7 @@ export default function KandiChat() {
         ))}
         {loading && <div className="text-white">🐕 Kandi is thinking...</div>}
         {error && <div className="text-red-500">{error}</div>}
-              </div>
+      </div>
 
       {/* Suggested Questions */}
       {showSuggestions && (
@@ -143,7 +144,7 @@ export default function KandiChat() {
         </div>
       )}
 
-      <div className="w-full max-w-2xl flex">
+      <div className="w-full max-w-2xl flex mt-auto">
         <input
           className="flex-1 border p-3 md:p-3 rounded-l-lg text-base md:text-lg"
           value={input}

@@ -574,9 +574,28 @@ function LiveUnoGame({ onBack, gameMode }: { onBack: () => void; gameMode: "ai" 
   );
 }
 
+// Modal component for UNO game
+function UnoModal({ open, onClose, children }: { open: boolean; onClose: () => void; children: React.ReactNode }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-3xl w-full relative">
+        <button
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold"
+          onClick={onClose}
+        >
+          ×
+        </button>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export function GamesSection() {
   const [view, setView] = useState<"menu" | "game">("menu");
   const [gameMode, setGameMode] = useState<"ai" | "multiplayer">("ai");
+  const [showUnoModal, setShowUnoModal] = useState(false);
 
   if (view === "game") {
     return <LiveUnoGame onBack={() => setView("menu")} gameMode={gameMode} />;
@@ -588,12 +607,26 @@ export function GamesSection() {
       <div className="flex justify-center">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 md:p-2 border border-white/20">
           <div className="flex space-x-2">
-            <button className="px-6 py-3 md:px-4 md:py-2 rounded-xl font-medium transition-all bg-gradient-to-r from-orange-500 to-pink-500 text-white">
-              🎮 UNO
+            <button
+              className="px-6 py-3 md:px-4 md:py-2 rounded-xl font-medium transition-all bg-gradient-to-r from-orange-500 to-pink-500 text-white"
+              onClick={() => setShowUnoModal(true)}
+            >
+              🎮 Play UNO
             </button>
           </div>
         </div>
       </div>
+
+      {/* UNO Modal Popup */}
+      <UnoModal open={showUnoModal} onClose={() => setShowUnoModal(false)}>
+        <div className="flex flex-col items-center">
+          <h2 className="text-2xl font-bold mb-4">UNO Game</h2>
+          {/* Render the UNO game here. For now, show a placeholder. Replace with actual UNO game logic/component. */}
+          <div className="w-full h-96 flex items-center justify-center bg-gray-100 rounded-xl">
+            <span className="text-lg text-gray-500">UNO game goes here</span>
+          </div>
+        </div>
+      </UnoModal>
 
       {/* Game Mode Selection */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
