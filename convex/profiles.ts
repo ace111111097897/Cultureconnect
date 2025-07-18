@@ -2,7 +2,6 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import { internal } from "./_generated/api";
-import { generateProfileUpdateNotification } from "./notifications";
 
 export const upsertProfile = mutation({
   args: {
@@ -67,23 +66,9 @@ export const upsertProfile = mutation({
 
     if (existingProfile) {
       await ctx.db.patch(existingProfile._id, profileData);
-      
-      // Generate notification for profile update
-      await ctx.scheduler.runAfter(0, internal.notifications.generateProfileUpdateNotification, {
-        profileId: existingProfile._id,
-        updateType: "interests"
-      });
-      
       return existingProfile._id;
     } else {
       const newProfileId = await ctx.db.insert("profiles", profileData);
-      
-      // Generate notification for new profile
-      await ctx.scheduler.runAfter(0, internal.notifications.generateProfileUpdateNotification, {
-        profileId: newProfileId,
-        updateType: "bio"
-      });
-      
       return newProfileId;
     }
   },

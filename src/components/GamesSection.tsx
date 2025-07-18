@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Id } from "../../convex/_generated/dataModel";
 
 // Confetti Component
@@ -37,7 +37,7 @@ function Confetti() {
 }
 
 // UNO! Popup Component
-function UnoPopup({ show, onClose }: { show: boolean; onClose: () => void }) {
+function UnoPopup({ show, onClose, playerName }: { show: boolean; onClose: () => void; playerName: string }) {
   useEffect(() => {
     if (show) {
       const timer = setTimeout(() => {
@@ -57,7 +57,7 @@ function UnoPopup({ show, onClose }: { show: boolean; onClose: () => void }) {
           <div className="text-center">
             <div className="text-8xl mb-4 animate-bounce">🎉</div>
             <h1 className="text-6xl font-bold text-white mb-2 glitch">UNO!</h1>
-            <p className="text-xl text-white/90">Last card played!</p>
+            <p className="text-xl text-white/90">{playerName} has 1 card left!</p>
           </div>
         </div>
       </div>
@@ -66,11 +66,12 @@ function UnoPopup({ show, onClose }: { show: boolean; onClose: () => void }) {
 }
 
 // UNO Card Component
-function UnoCard({ card, onClick, isPlayable, isSelected }: { 
+function UnoCard({ card, onClick, isPlayable, isSelected, isFaceDown = false }: { 
   card: string; 
   onClick?: () => void; 
   isPlayable?: boolean;
   isSelected?: boolean;
+  isFaceDown?: boolean;
 }) {
   const getCardColor = (card: string) => {
     if (card.startsWith("wild")) return "purple";
@@ -94,6 +95,15 @@ function UnoCard({ card, onClick, isPlayable, isSelected }: {
     if (card.startsWith("wild")) return "★";
     return getCardValue(card);
   };
+
+  if (isFaceDown) {
+    return (
+      <div className="w-16 h-24 rounded-lg border-2 shadow-lg bg-gradient-to-br from-blue-600 to-blue-800 border-blue-700 text-white font-bold text-center flex flex-col justify-center">
+        <div className="text-lg font-bold">UNO</div>
+        <div className="text-xs mt-1">CARD</div>
+      </div>
+    );
+  }
 
   const color = getCardColor(card);
   const value = getCardValue(card);
@@ -126,108 +136,131 @@ function UnoCard({ card, onClick, isPlayable, isSelected }: {
   );
 }
 
-// Kandi AI Player Component
-function KandiAIPlayer({ hand, isCurrentTurn, onPlayCard }: {
-  hand: string[];
+// Player Component
+function Player({ player, isCurrentTurn, isAI = false, onCardPlayed }: {
+  player: { id: number; name: string; hand: string[]; isCurrentTurn: boolean };
   isCurrentTurn: boolean;
-  onPlayCard: (card: string, color?: string) => void;
+  isAI?: boolean;
+  onCardPlayed?: (card: string, color?: string) => void;
 }) {
   const [isThinking, setIsThinking] = useState(false);
 
+  // AI thinking and playing logic
   useEffect(() => {
-    if (isCurrentTurn && !isThinking) {
+    if (isAI && isCurrentTurn && !isThinking) {
       setIsThinking(true);
-      // Kandi AI thinking time
+      
+      // Simulate AI thinking time
+      const thinkingTime = 1500 + Math.random() * 1000;
+      
       setTimeout(() => {
-        const playableCards = hand.filter(card => {
-          // Simple AI logic - play first playable card
-          return true; // For now, play any card
-        });
-        
-        if (playableCards.length > 0) {
-          const cardToPlay = playableCards[0];
-          if (cardToPlay.startsWith("wild")) {
-            // Kandi AI chooses a random color
-            const colors = ["red", "blue", "green", "yellow"];
-            const chosenColor = colors[Math.floor(Math.random() * colors.length)];
-            onPlayCard(cardToPlay, chosenColor);
+        if (onCardPlayed) {
+          // Simple AI logic - play first playable card or draw
+          const playableCards = player.hand.filter(card => {
+            // For now, play any card (simplified logic)
+            return true;
+          });
+          
+          if (playableCards.length > 0) {
+            const cardToPlay = playableCards[0];
+            if (cardToPlay.startsWith("wild")) {
+              const colors = ["red", "blue", "green", "yellow"];
+              const chosenColor = colors[Math.floor(Math.random() * colors.length)];
+              onCardPlayed(cardToPlay, chosenColor);
+            } else {
+              onCardPlayed(cardToPlay);
+            }
           } else {
-            onPlayCard(cardToPlay);
+            onCardPlayed("draw");
           }
-        } else {
-          // Draw a card if no playable cards
-          onPlayCard("draw");
         }
         setIsThinking(false);
-      }, 1500 + Math.random() * 1000); // Random thinking time
+      }, thinkingTime);
     }
-  }, [isCurrentTurn, hand, onPlayCard, isThinking]);
+  }, [isAI, isCurrentTurn, player.hand, onCardPlayed, isThinking]);
 
   return (
     <div className="text-center">
-      <div className="w-12 h-12 rounded-full bg-gradient-to-r from-yellow-300 to-pink-300 flex items-center justify-center mx-auto mb-2">
-        <span className="text-black text-xl">🐕</span>
+      <div className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2 ${
+        isAI ? "bg-gradient-to-r from-yellow-300 to-pink-300" : "bg-gradient-to-r from-purple-500 to-pink-500"
+      }`}>
+        <span className={`text-xl ${isAI ? "text-black" : "text-white"}`}>
+          {isAI ? "🐕" : "👤"}
+        </span>
       </div>
-      <p className="text-white font-medium text-sm">Kandi AI</p>
-      <p className="text-white/70 text-xs">{hand.length} cards</p>
+      <p className="text-white font-medium text-sm">{player.name}</p>
+      <p className="text-white/70 text-xs">{player.hand.length} cards</p>
       {isCurrentTurn && (
         <div className="text-yellow-400 text-sm mt-1">
-          {isThinking ? "🤔 Thinking..." : "🎯 Kandi's Turn"}
+          {isThinking ? "🤔 Thinking..." : "🎯 Current Turn"}
         </div>
       )}
     </div>
   );
 }
 
-// UNO Game Logic
-function UnoGame({ onBack, gameMode }: { onBack: () => void; gameMode: "ai" | "multiplayer" }) {
+// Live UNO Game Component
+function LiveUnoGame({ onBack, gameMode }: { onBack: () => void; gameMode: "ai" | "multiplayer" }) {
   const [gameState, setGameState] = useState({
     players: [
-      { id: 1, name: "You", hand: ["red_5", "blue_3", "green_7", "yellow_2", "wild"], isCurrentTurn: true },
-      { id: 2, name: gameMode === "ai" ? "Kandi AI" : "Player 2", hand: ["red_1", "blue_8", "green_4"], isCurrentTurn: false },
-      { id: 3, name: "Player 3", hand: ["yellow_9", "red_6", "blue_2"], isCurrentTurn: false }
+      { id: 1, name: "You", hand: [] as string[], isCurrentTurn: true },
+      { id: 2, name: gameMode === "ai" ? "Kandi AI" : "Player 2", hand: [] as string[], isCurrentTurn: false },
+      { id: 3, name: "Player 3", hand: [] as string[], isCurrentTurn: false }
     ],
-    discardPile: ["green_5"],
-    currentColor: "green",
+    discardPile: [] as string[],
+    currentColor: "red",
     currentValue: "5",
     direction: 1, // 1 for clockwise, -1 for counter-clockwise
-    gameStatus: "playing",
-    deck: [] as string[]
+    gameStatus: "playing" as "playing" | "finished",
+    deck: [] as string[],
+    lastPlayedCard: null as string | null
   });
 
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showUnoPopup, setShowUnoPopup] = useState(false);
   const [unoPlayer, setUnoPlayer] = useState<string | null>(null);
+  const [gameHistory, setGameHistory] = useState<string[]>([]);
 
   const currentPlayer = gameState.players.find(p => p.isCurrentTurn);
   const isMyTurn = currentPlayer?.id === 1;
 
-  // Initialize deck
+  // Initialize game
   useEffect(() => {
+    initializeGame();
+  }, []);
+
+  const initializeGame = () => {
+    // Create deck
     const colors = ["red", "blue", "green", "yellow"];
     const numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"];
     const specials = ["skip", "reverse", "draw2"];
     
     let deck: string[] = [];
     
-    // Add number cards
+    // Add number cards (2 of each except 0)
     colors.forEach(color => {
       numbers.forEach(number => {
-        deck.push(`${color}_${number}`);
+        const count = number === "0" ? 1 : 2;
+        for (let i = 0; i < count; i++) {
+          deck.push(`${color}_${number}`);
+        }
       });
     });
     
-    // Add special cards
+    // Add special cards (2 of each)
     colors.forEach(color => {
       specials.forEach(special => {
+        deck.push(`${color}_${special}`);
         deck.push(`${color}_${special}`);
       });
     });
     
-    // Add wild cards
-    deck.push("wild");
-    deck.push("wildDraw4");
+    // Add wild cards (4 of each)
+    for (let i = 0; i < 4; i++) {
+      deck.push("wild");
+      deck.push("wildDraw4");
+    }
     
     // Shuffle deck
     for (let i = deck.length - 1; i > 0; i--) {
@@ -235,25 +268,69 @@ function UnoGame({ onBack, gameMode }: { onBack: () => void; gameMode: "ai" | "m
       [deck[i], deck[j]] = [deck[j], deck[i]];
     }
     
-    setGameState(prev => ({ ...prev, deck }));
-  }, []);
+    // Deal cards
+    const players = gameState.players.map(player => ({
+      ...player,
+      hand: deck.splice(0, 7)
+    }));
+    
+    // Set first card
+    const firstCard = deck.splice(0, 1)[0];
+    
+    setGameState({
+      players,
+      discardPile: [firstCard],
+      currentColor: firstCard.split("_")[0],
+      currentValue: firstCard.split("_")[1],
+      direction: 1,
+      gameStatus: "playing",
+      deck,
+      lastPlayedCard: firstCard
+    });
 
-  const canPlayCard = (card: string) => {
+    addToHistory(`Game started! First card: ${firstCard}`);
+  };
+
+  const addToHistory = (message: string) => {
+    setGameHistory(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+  };
+
+  const canPlayCard = useCallback((card: string) => {
     if (!isMyTurn) return false;
     if (card.startsWith("wild")) return true;
     const [color, value] = card.split("_");
     return color === gameState.currentColor || value === gameState.currentValue;
-  };
+  }, [isMyTurn, gameState.currentColor, gameState.currentValue]);
 
-  const checkUno = (playerId: number) => {
+  const checkUno = useCallback((playerId: number) => {
     const player = gameState.players.find(p => p.id === playerId);
     if (player && player.hand.length === 1) {
       setUnoPlayer(player.name);
       setShowUnoPopup(true);
+      addToHistory(`${player.name} has UNO!`);
     }
-  };
+  }, [gameState.players]);
 
-  const handlePlayCard = (cardIndex: number) => {
+  const getNextPlayerIndex = useCallback(() => {
+    const currentIndex = gameState.players.findIndex(p => p.isCurrentTurn);
+    return (currentIndex + gameState.direction + gameState.players.length) % gameState.players.length;
+  }, [gameState.players, gameState.direction]);
+
+  const moveToNextTurn = useCallback(() => {
+    const nextIndex = getNextPlayerIndex();
+    setGameState(prev => ({
+      ...prev,
+      players: prev.players.map((p, index) => ({
+        ...p,
+        isCurrentTurn: index === nextIndex
+      }))
+    }));
+    
+    const nextPlayer = gameState.players[nextIndex];
+    addToHistory(`${nextPlayer.name}'s turn`);
+  }, [getNextPlayerIndex, gameState.players]);
+
+  const handlePlayCard = useCallback((cardIndex: number) => {
     const card = currentPlayer?.hand[cardIndex];
     if (!card || !canPlayCard(card)) return;
 
@@ -263,9 +340,30 @@ function UnoGame({ onBack, gameMode }: { onBack: () => void; gameMode: "ai" | "m
       return;
     }
 
-    // Play the card
-    const newHand = currentPlayer.hand.filter((_, index) => index !== cardIndex);
+    playCard(card);
+  }, [currentPlayer, canPlayCard]);
+
+  const playCard = useCallback((card: string, chosenColor?: string) => {
+    if (!currentPlayer) return;
+
+    const newHand = currentPlayer.hand.filter(c => c !== card);
     const newDiscardPile = [...gameState.discardPile, card];
+    
+    let newCurrentColor = chosenColor || card.split("_")[0];
+    let newCurrentValue = card.split("_")[1];
+    
+    // Handle special cards
+    if (card.includes("skip")) {
+      addToHistory(`${currentPlayer.name} played SKIP - skipping next player`);
+    } else if (card.includes("reverse")) {
+      setGameState(prev => ({ ...prev, direction: -prev.direction }));
+      addToHistory(`${currentPlayer.name} played REVERSE - direction changed`);
+    } else if (card.includes("draw2")) {
+      addToHistory(`${currentPlayer.name} played +2 - next player draws 2 cards`);
+    } else if (card.startsWith("wild")) {
+      addToHistory(`${currentPlayer.name} played WILD and chose ${newCurrentColor}`);
+      newCurrentValue = "wild";
+    }
     
     // Check for UNO
     checkUno(currentPlayer.id);
@@ -274,147 +372,70 @@ function UnoGame({ onBack, gameMode }: { onBack: () => void; gameMode: "ai" | "m
     setGameState(prev => ({
       ...prev,
       players: prev.players.map(p => 
-        p.id === 1 ? { ...p, hand: newHand, isCurrentTurn: false } : p
+        p.id === currentPlayer.id ? { ...p, hand: newHand, isCurrentTurn: false } : p
       ),
       discardPile: newDiscardPile,
-      currentColor: card.split("_")[0],
-      currentValue: card.split("_")[1]
+      currentColor: newCurrentColor,
+      currentValue: newCurrentValue,
+      lastPlayedCard: card
     }));
+
+    addToHistory(`${currentPlayer.name} played ${card}`);
 
     // Check for game end
     if (newHand.length === 0) {
       setTimeout(() => {
-        alert("🎉 Congratulations! You won!");
+        setGameState(prev => ({ ...prev, gameStatus: "finished" }));
+        addToHistory(`🎉 ${currentPlayer.name} won the game!`);
+        alert(`🎉 Congratulations! ${currentPlayer.name} won!`);
         onBack();
       }, 1000);
       return;
     }
 
-    // Simulate AI turn after a delay
+    // Move to next turn
     setTimeout(() => {
-      simulateAITurn();
+      moveToNextTurn();
     }, 1000);
-  };
+  }, [currentPlayer, gameState.discardPile, gameState.direction, checkUno, moveToNextTurn, addToHistory, onBack]);
 
-  const simulateAITurn = () => {
-    setGameState(prev => {
-      const nextPlayerIndex = (prev.players.findIndex(p => p.isCurrentTurn) + prev.direction + prev.players.length) % prev.players.length;
-      const nextPlayer = prev.players[nextPlayerIndex];
-      
-      // Simple AI logic - play first playable card or draw
-      const playableCards = nextPlayer.hand.filter(card => {
-        if (card.startsWith("wild")) return true;
-        const [color, value] = card.split("_");
-        return color === prev.currentColor || value === prev.currentValue;
-      });
-      
-      let newHand = [...nextPlayer.hand];
-      let newDiscardPile = [...prev.discardPile];
-      let newCurrentColor = prev.currentColor;
-      let newCurrentValue = prev.currentValue;
-      
-      if (playableCards.length > 0) {
-        const cardToPlay = playableCards[0];
-        newHand = newHand.filter(card => card !== cardToPlay);
-        newDiscardPile.push(cardToPlay);
-        
-        if (cardToPlay.startsWith("wild")) {
-          const colors = ["red", "blue", "green", "yellow"];
-          newCurrentColor = colors[Math.floor(Math.random() * colors.length)];
-          newCurrentValue = "wild";
-        } else {
-          newCurrentColor = cardToPlay.split("_")[0];
-          newCurrentValue = cardToPlay.split("_")[1];
-        }
-        
-        // Check for UNO
-        if (newHand.length === 1) {
-          setUnoPlayer(nextPlayer.name);
-          setShowUnoPopup(true);
-        }
-        
-        // Check for game end
-        if (newHand.length === 0) {
-          setTimeout(() => {
-            alert(`🎉 ${nextPlayer.name} won the game!`);
-            onBack();
-          }, 1000);
-          return prev;
-        }
-      } else {
-        // Draw a card
-        if (prev.deck.length > 0) {
-          const drawnCard = prev.deck[0];
-          newHand.push(drawnCard);
-          setGameState(current => ({
-            ...current,
-            deck: current.deck.slice(1)
-          }));
-        }
-      }
-      
-      return {
-        ...prev,
-        players: prev.players.map((p, index) => ({
-          ...p,
-          hand: index === nextPlayerIndex ? newHand : p.hand,
-          isCurrentTurn: index === nextPlayerIndex
-        })),
-        discardPile: newDiscardPile,
-        currentColor: newCurrentColor,
-        currentValue: newCurrentValue
-      };
-    });
-  };
-
-  const handleColorSelect = (color: string) => {
-    if (selectedCard === null) return;
+  const handleColorSelect = useCallback((color: string) => {
+    if (selectedCard === null || !currentPlayer) return;
     
-    const card = currentPlayer?.hand[selectedCard];
+    const card = currentPlayer.hand[selectedCard];
     if (!card) return;
 
-    const newHand = currentPlayer.hand.filter((_, index) => index !== selectedCard);
-    const newDiscardPile = [...gameState.discardPile, card];
-    
-    // Check for UNO
-    checkUno(currentPlayer.id);
-    
-    setGameState(prev => ({
-      ...prev,
-      players: prev.players.map(p => 
-        p.id === 1 ? { ...p, hand: newHand, isCurrentTurn: false } : p
-      ),
-      discardPile: newDiscardPile,
-      currentColor: color,
-      currentValue: "wild"
-    }));
-
+    playCard(card, color);
     setSelectedCard(null);
     setShowColorPicker(false);
+  }, [selectedCard, currentPlayer, playCard]);
 
-    setTimeout(() => {
-      simulateAITurn();
-    }, 1000);
-  };
-
-  const handleDrawCard = () => {
-    if (!isMyTurn) return;
+  const handleDrawCard = useCallback(() => {
+    if (!isMyTurn || !currentPlayer) return;
     
     if (gameState.deck.length > 0) {
       const drawnCard = gameState.deck[0];
+      const newHand = [...currentPlayer.hand, drawnCard];
+      
       setGameState(prev => ({
         ...prev,
         players: prev.players.map(p => 
-          p.id === 1 ? { ...p, hand: [...p.hand, drawnCard], isCurrentTurn: false } : p
+          p.id === 1 ? { ...p, hand: newHand, isCurrentTurn: false } : p
         ),
         deck: prev.deck.slice(1)
       }));
 
+      addToHistory(`${currentPlayer.name} drew a card`);
+      
       setTimeout(() => {
-        simulateAITurn();
+        moveToNextTurn();
       }, 1000);
     }
-  };
+  }, [isMyTurn, currentPlayer, gameState.deck, moveToNextTurn, addToHistory]);
+
+  const handleAICardPlayed = useCallback((card: string, color?: string) => {
+    playCard(card, color);
+  }, [playCard]);
 
   return (
     <div className="space-y-6 p-4">
@@ -422,15 +443,16 @@ function UnoGame({ onBack, gameMode }: { onBack: () => void; gameMode: "ai" | "m
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
         <div className="flex justify-between items-center">
           <div>
-            <h2 className="text-xl font-bold text-white">UNO Game vs {gameMode === "ai" ? "Kandi AI" : "Players"}</h2>
+            <h2 className="text-xl font-bold text-white">Live UNO vs {gameMode === "ai" ? "Kandi AI" : "Players"}</h2>
             <p className="text-white/70">
               Current Color: <span className="font-bold" style={{ color: gameState.currentColor }}>{gameState.currentColor.toUpperCase()}</span>
             </p>
+            <p className="text-white/50 text-sm">Cards in deck: {gameState.deck.length}</p>
           </div>
           <div className="text-right">
             <p className="text-white/70">Current Turn:</p>
             <p className="text-white font-semibold">{currentPlayer?.name || "Unknown"}</p>
-            <p className="text-white/50 text-sm">Cards in deck: {gameState.deck.length}</p>
+            <p className="text-white/50 text-sm">Direction: {gameState.direction === 1 ? "↻" : "↺"}</p>
           </div>
         </div>
       </div>
@@ -448,50 +470,13 @@ function UnoGame({ onBack, gameMode }: { onBack: () => void; gameMode: "ai" | "m
         <h3 className="text-white font-semibold mb-4">Other Players</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {gameState.players.filter(p => p.id !== 1).map((player) => (
-            gameMode === "ai" && player.id === 2 ? (
-              <KandiAIPlayer
-                key={player.id}
-                hand={player.hand}
-                isCurrentTurn={player.isCurrentTurn}
-                onPlayCard={(card, color) => {
-                  // Handle Kandi AI card play
-                  const newHand = player.hand.filter(c => c !== card);
-                  const newDiscardPile = [...gameState.discardPile, card];
-                  
-                  setGameState(prev => ({
-                    ...prev,
-                    players: prev.players.map(p => 
-                      p.id === player.id ? { ...p, hand: newHand, isCurrentTurn: false } : p
-                    ),
-                    discardPile: newDiscardPile,
-                    currentColor: color || card.split("_")[0],
-                    currentValue: card.startsWith("wild") ? "wild" : card.split("_")[1]
-                  }));
-                  
-                  // Check for UNO
-                  if (newHand.length === 1) {
-                    setUnoPlayer(player.name);
-                    setShowUnoPopup(true);
-                  }
-                  
-                  // Continue game
-                  setTimeout(() => {
-                    simulateAITurn();
-                  }, 1000);
-                }}
-              />
-            ) : (
-              <div key={player.id} className="text-center">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center mx-auto mb-2">
-                  <span className="text-white">👤</span>
-                </div>
-                <p className="text-white font-medium text-sm">{player.name}</p>
-                <p className="text-white/70 text-xs">{player.hand.length} cards</p>
-                {player.isCurrentTurn && (
-                  <div className="text-yellow-400 text-sm mt-1">🎯 Current Turn</div>
-                )}
-              </div>
-            )
+            <Player
+              key={player.id}
+              player={player}
+              isCurrentTurn={player.isCurrentTurn}
+              isAI={gameMode === "ai" && player.id === 2}
+              onCardPlayed={handleAICardPlayed}
+            />
           ))}
         </div>
       </div>
@@ -501,7 +486,7 @@ function UnoGame({ onBack, gameMode }: { onBack: () => void; gameMode: "ai" | "m
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-white font-semibold">My Hand ({currentPlayer?.hand.length || 0} cards)</h3>
           {isMyTurn && (
-            <div className="text-green-400 font-semibold">🎯 Your Turn!</div>
+            <div className="text-green-400 font-semibold animate-pulse">🎯 Your Turn!</div>
           )}
         </div>
         
@@ -527,6 +512,16 @@ function UnoGame({ onBack, gameMode }: { onBack: () => void; gameMode: "ai" | "m
             </button>
           </div>
         )}
+      </div>
+
+      {/* Game History */}
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+        <h3 className="text-white font-semibold mb-2">Game History</h3>
+        <div className="max-h-32 overflow-y-auto text-white/70 text-sm space-y-1">
+          {gameHistory.slice(-10).map((entry, index) => (
+            <div key={index} className="text-xs">{entry}</div>
+          ))}
+        </div>
       </div>
 
       {/* Color Picker Modal */}
@@ -564,7 +559,7 @@ function UnoGame({ onBack, gameMode }: { onBack: () => void; gameMode: "ai" | "m
       )}
 
       {/* UNO! Popup */}
-      <UnoPopup show={showUnoPopup} onClose={() => setShowUnoPopup(false)} />
+      <UnoPopup show={showUnoPopup} onClose={() => setShowUnoPopup(false)} playerName={unoPlayer || ""} />
 
       {/* Back Button */}
       <div className="flex justify-center">
@@ -584,7 +579,7 @@ export function GamesSection() {
   const [gameMode, setGameMode] = useState<"ai" | "multiplayer">("ai");
 
   if (view === "game") {
-    return <UnoGame onBack={() => setView("menu")} gameMode={gameMode} />;
+    return <LiveUnoGame onBack={() => setView("menu")} gameMode={gameMode} />;
   }
 
   return (
