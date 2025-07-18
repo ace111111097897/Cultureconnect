@@ -10,14 +10,16 @@ export function SignInForm() {
 
   return (
     <div className="w-full fade-in">
-      <div className="w-full flex flex-col items-center mb-8 fade-in">
-        <div className="w-20 h-20 rounded-full bg-yellow-200 flex items-center justify-center mb-4 shadow-lg border-4 border-white">
-          <span className="text-4xl">🐕</span>
+      <div className="w-full max-w-md mx-auto mb-8">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 flex flex-col items-center shadow-lg border border-white/20 hover-lift">
+          <div className="w-20 h-20 rounded-full bg-yellow-200 flex items-center justify-center mb-4 shadow-lg border-4 border-white">
+            <span className="text-4xl">🐕</span>
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2 text-center">Welcome to CultureConnect!</h2>
+          <p className="text-base text-white/80 text-center max-w-md mb-2">
+            Hi, I'm <span className="font-semibold">Kandi</span> 🐕, your friendly AI guide! I'll help you connect with amazing people through shared culture, values, and experiences. Sign up or log in to start your journey!
+          </p>
         </div>
-        <h2 className="text-2xl font-bold text-white mb-2">Welcome to CultureConnect!</h2>
-        <p className="text-base text-white/80 text-center max-w-md mb-2">
-          Hi, I'm <span className="font-semibold">Kandi</span> 🐕, your friendly AI guide! I'll help you connect with amazing people through shared culture, values, and experiences. Sign up or log in to start your journey!
-        </p>
       </div>
       <form
         className="flex flex-col gap-form-field"
