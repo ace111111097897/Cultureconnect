@@ -185,7 +185,6 @@ export function Dashboard() {
   const [showActionConfirm, setShowActionConfirm] = useState<{ type: string; open: boolean }>({ type: '', open: false });
 
   // Live notifications
-  const unreadCount = useQuery(api.notifications.getUnreadNotificationCount);
 
   const icebreakerPrompts = [
     "If you could travel anywhere, where would you go?",
@@ -270,16 +269,12 @@ export function Dashboard() {
             >
               🔔
               {/* Notification Badge */}
-              {unreadCount && unreadCount > 0 && (
-                <span className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold pulse-glow">
-                  {unreadCount > 99 ? '99+' : unreadCount}
-                </span>
-              )}
+              {/* Notification Badge */}
             </button>
             <NotificationDropdown 
               isOpen={showNotifications} 
               onClose={() => setShowNotifications(false)}
-              unreadCount={unreadCount}
+              unreadCount={undefined}
             />
           </div>
           <button className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition hover-scale" onClick={() => setActiveTab('profile')} title="Go to Profile">
