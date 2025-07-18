@@ -56,4 +56,12 @@ export const getOrCreateDefaultUser = query({
     const defaultUserId = "demo_user_123" as any;
     return defaultUserId;
   },
+});
+
+// List all users (for debugging/demo)
+export const listUsers = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("users").collect();
+  },
 }); 

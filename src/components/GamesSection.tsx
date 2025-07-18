@@ -488,7 +488,7 @@ function LiveUnoGame({ onBack, gameMode }: { onBack: () => void; gameMode: "ai" 
               key={player.id}
               player={player}
               isCurrentTurn={player.isCurrentTurn}
-              isAI={gameMode === "ai" && player.id === 2}
+              isAI={gameMode === "ai" && (player.id === 2 || player.id === 3)}
               onCardPlayed={handleAICardPlayed}
             />
           ))}

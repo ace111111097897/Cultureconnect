@@ -40,7 +40,7 @@ export function MatchesSection() {
       toast.success("Message sent!");
       setShowMessagePrompt(false);
       setMessagePrompt("");
-      setSelectedMatch(null);
+      // Do NOT setSelectedMatch(null) here, so the match remains in the list
     } catch (error) {
       toast.error("Failed to send message");
     }
