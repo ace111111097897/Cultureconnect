@@ -73,6 +73,16 @@ function UnoCard({ card, onClick, isPlayable, isSelected, isFaceDown = false }: 
   isSelected?: boolean;
   isFaceDown?: boolean;
 }) {
+  // Defensive: if card is not a string, render face down
+  if (typeof card !== 'string') {
+    return (
+      <div className="w-16 h-24 rounded-lg border-2 shadow-lg bg-gradient-to-br from-blue-600 to-blue-800 border-blue-700 text-white font-bold text-center flex flex-col justify-center">
+        <div className="text-lg font-bold">UNO</div>
+        <div className="text-xs mt-1">CARD</div>
+      </div>
+    );
+  }
+
   const getCardColor = (card: string) => {
     if (card.startsWith("wild")) return "purple";
     return card.split("_")[0];
@@ -461,7 +471,11 @@ function LiveUnoGame({ onBack, gameMode }: { onBack: () => void; gameMode: "ai" 
       <div className="flex justify-center">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
           <h3 className="text-white font-semibold mb-4 text-center">Top Card</h3>
-          <UnoCard card={gameState.discardPile[gameState.discardPile.length - 1]} />
+          {gameState.discardPile.length > 0 && typeof gameState.discardPile[gameState.discardPile.length - 1] === 'string' ? (
+            <UnoCard card={gameState.discardPile[gameState.discardPile.length - 1]} />
+          ) : (
+            <UnoCard card={"face_down"} isFaceDown />
+          )}
         </div>
       </div>
 
