@@ -13,117 +13,7 @@ import CommunityPage from "./CommunityPage";
 import { ExploreSection } from "./ExploreSection";
 import KandiChat from "./KandiChat";
 
-// Notification component
-function NotificationDropdown({ isOpen, onClose, unreadCount }: { isOpen: boolean; onClose: () => void; unreadCount?: number }) {
-  const markAsRead = useMutation(api.notifications.markNotificationAsRead);
-  const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead);
-  const createSampleNotifications = useMutation(api.notifications.createSampleNotifications);
-
-  const getNotificationIcon = (type: string) => {
-    switch (type) {
-      case "match": return "💫";
-      case "friend_request": return "👥";
-      case "message": return "💬";
-      case "profile_update": return "👤";
-      case "event": return "🍳";
-      case "kandi": return "🐕";
-      default: return "🔔";
-    }
-  };
-
-  const formatTime = (timestamp: number) => {
-    const now = Date.now();
-    const diff = now - timestamp;
-    const minutes = Math.floor(diff / 60000);
-    const hours = Math.floor(diff / 3600000);
-    const days = Math.floor(diff / 86400000);
-
-    if (minutes < 1) return "Just now";
-    if (minutes < 60) return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
-    if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
-    return `${days} day${days > 1 ? 's' : ''} ago`;
-  };
-
-  const handleNotificationClick = (notification: any) => {
-    if (!notification.read) {
-      markAsRead({ notificationId: notification._id });
-    }
-    onClose();
-  };
-
-  const handleMarkAllAsRead = () => {
-    markAllAsRead({});
-  };
-
-  const handleCreateSampleNotifications = () => {
-    createSampleNotifications({});
-  };
-
-  if (!isOpen) return null;
-
-  return (
-    <>
-      {/* Backdrop */}
-      <div 
-        className="fixed inset-0 z-40" 
-        onClick={onClose}
-      />
-      
-      {/* Notification Dropdown */}
-      <div className="absolute top-16 right-4 z-50 w-80 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 slide-in-top">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-white/20">
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl">🔔</span>
-            <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
-            {unreadCount && unreadCount > 0 && (
-              <span className="px-2 py-1 bg-red-500 text-white text-xs rounded-full font-bold pulse-glow">
-                {unreadCount}
-              </span>
-            )}
-          </div>
-          <button 
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 hover-scale"
-          >
-            ✕
-          </button>
-        </div>
-
-        {/* Notifications List */}
-        <div className="max-h-96 overflow-y-auto">
-          {!unreadCount || unreadCount === 0 ? (
-            <div className="p-6 text-center text-gray-500">
-              <span className="text-4xl mb-2 block">🔕</span>
-              <p>No notifications yet</p>
-              <p className="text-sm">We'll notify you about matches, events, and more!</p>
-            </div>
-          ) : (
-            <div className="p-2">
-              {/* This section is now empty as notifications are removed */}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="p-3 border-t border-white/20 space-y-2">
-          <button 
-            onClick={handleMarkAllAsRead}
-            className="w-full py-2 px-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl text-sm font-medium hover:from-orange-600 hover:to-pink-600 transition-all hover-scale"
-          >
-            Mark All as Read
-          </button>
-          <button 
-            onClick={handleCreateSampleNotifications}
-            className="w-full py-2 px-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl text-sm font-medium hover:from-blue-600 hover:to-purple-600 transition-all hover-scale"
-          >
-            Create Sample Notifications
-          </button>
-        </div>
-      </div>
-    </>
-  );
-}
+// Remove NotificationDropdown and all api.notifications references
 
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState("discover");
@@ -234,11 +124,7 @@ export function Dashboard() {
               {/* Notification Badge */}
               {/* Notification Badge */}
             </button>
-            <NotificationDropdown 
-              isOpen={showNotifications} 
-              onClose={() => setShowNotifications(false)}
-              unreadCount={undefined}
-            />
+            {/* Notification Dropdown */}
           </div>
           <button className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center hover:bg-white/30 transition hover-scale" onClick={() => setActiveTab('profile')} title="Go to Profile">
             <span className="text-2xl">👤</span>
@@ -287,86 +173,24 @@ export function Dashboard() {
               <span className="text-2xl">⚙️</span>
             </button>
           </div>
-          
-          {/* Kandi under Profile */}
-          <button
-            className="flex items-center space-x-2 py-3 px-4 rounded-xl bg-gradient-to-r from-yellow-300 to-pink-300 text-black font-semibold mb-6 hover:scale-105 transition shadow-lg bounce-gentle"
-            onClick={() => setActiveTab("kandi")}
-          >
-            <span className="text-2xl">🐕</span>
-            <span>Kandi AI</span>
-          </button>
-          
-          {/* Main navigation */}
+          {/* Main navigation - match mobile toolbar */}
           <nav className="flex flex-col space-y-2 flex-1">
-            <button 
-              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left hover-lift"
-              onClick={() => setActiveTab("discover")}
-            >
-              <span className="text-xl">🔍</span>
-              <span>Discover</span>
-            </button>
-            <button 
-              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left hover-lift"
-              onClick={() => setActiveTab("matches")}
-            >
-              <span className="text-xl">💫</span>
-              <span>Matches</span>
-            </button>
-            <button 
-              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left hover-lift"
-              onClick={() => setActiveTab("friends")}
-            >
-              <span className="text-xl">👥</span>
-              <span>Friends</span>
-            </button>
-            <button 
-              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left hover-lift"
-              onClick={() => setActiveTab("messages")}
-            >
-              <span className="text-xl">💬</span>
-              <span>Messages</span>
-            </button>
-            <button 
-              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left hover-lift"
-              onClick={() => setActiveTab("community")}
-            >
-              <span className="text-xl">🏘️</span>
-              <span>Community</span>
-            </button>
-            <button 
-              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left hover-lift"
-              onClick={() => setActiveTab("explore")}
-            >
-              <span className="text-xl">📱</span>
-              <span>Explore</span>
-            </button>
-            <button 
-              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left hover-lift"
-              onClick={() => setActiveTab("games")}
-            >
-              <span className="text-xl">🎮</span>
-              <span>Games</span>
-            </button>
-            <button 
-              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left hover-lift"
-              onClick={() => setActiveTab("stories")}
-            >
-              <span className="text-xl">📖</span>
-              <span>Stories</span>
-            </button>
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                className={`flex items-center space-x-3 py-3 px-4 rounded-xl transition text-left hover-lift ${activeTab === tab.id ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg pulse-glow' : 'text-white/70 hover:text-white hover:bg-white/10 hover-scale'}`}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  if (tab.onClick) tab.onClick();
+                }}
+              >
+                <span className="text-xl">{tab.icon}</span>
+                <span>{tab.label}</span>
+              </button>
+            ))}
           </nav>
-          
-          {/* Bottom section */}
+          {/* Bottom section (optional: logout, verification, etc.) */}
           <div className="mt-auto pt-6 border-t border-white/20">
-            <button 
-              className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-white/10 transition text-left w-full hover-lift"
-              onClick={() => setShowVerification(true)}
-            >
-              <span className="text-xl">✅</span>
-              <span>Verification</span>
-              {isVerified && <span className="ml-auto text-green-400 pulse-glow">✔️</span>}
-            </button>
             <button 
               className="flex items-center space-x-3 py-3 px-4 rounded-xl hover:bg-red-500/20 transition text-left w-full mt-2 text-red-300 hover:text-red-200 hover-lift"
               onClick={() => setShowConfirm({ type: 'logout', open: true })}
