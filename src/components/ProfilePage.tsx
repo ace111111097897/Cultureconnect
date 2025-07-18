@@ -146,7 +146,7 @@ export function ProfilePage() {
       // Hide success animation after 2 seconds
       setTimeout(() => {
         setShowSuccess(false);
-        setIsEditing(false);
+      setIsEditing(false);
       }, 2000);
       
     } catch (error) {

@@ -128,11 +128,11 @@ function Content() {
       <Authenticated>
         {!userProfile ? (
           <div className="slide-in-bottom">
-            <ProfileSetup />
+          <ProfileSetup />
           </div>
         ) : (
           <div className="fade-in">
-            <Dashboard />
+          <Dashboard />
           </div>
         )}
       </Authenticated>
