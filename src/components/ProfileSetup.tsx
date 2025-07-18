@@ -50,6 +50,7 @@ export function ProfileSetup() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [photoError, setPhotoError] = useState("");
 
   const upsertProfile = useMutation(api.profiles.upsertProfile);
   const generateUploadUrl = useMutation(api.profiles.generateUploadUrl);
@@ -444,10 +445,17 @@ export function ProfileSetup() {
 
           {step < 4 ? (
             <button
-              onClick={() => setStep(step + 1)}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all hover-scale"
+              onClick={() => {
+                if (!selectedImage) {
+                  setPhotoError("Please upload a profile photo to continue.");
+                  return;
+                }
+                setPhotoError("");
+                setStep(step + 1);
+              }}
+              className="w-full mt-6 bg-gradient-to-r from-orange-500 to-pink-500 text-white font-bold py-3 rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all hover-scale"
             >
-              Next
+              Continue
             </button>
           ) : (
             <button
@@ -468,6 +476,7 @@ export function ProfileSetup() {
             </button>
           )}
         </div>
+        {photoError && <div className="text-red-500 mt-2 text-center font-semibold">{photoError}</div>}
       </div>
     </div>
   );

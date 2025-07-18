@@ -63,6 +63,8 @@ export function Dashboard() {
     { id: "community", label: "Community", icon: "🌐" },
   ];
 
+  const userProfile = useQuery(api.profiles.getCurrentUserProfile);
+
   const renderContent = () => {
     switch (activeTab) {
       case "discover":
@@ -87,6 +89,38 @@ export function Dashboard() {
         return <ExploreSection />;
       case "kandi":
         return <KandiChat />;
+      case "events":
+        return (
+          <div className="p-8">
+            <h2 className="text-3xl font-bold mb-6 text-white">Events Near You</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Example event cards (replace with real data later) */}
+              {[{
+                title: "Cultural Food Festival",
+                date: "July 20, 2024",
+                location: "Downtown Park",
+                description: "Taste dishes from around the world and enjoy live performances!"
+              }, {
+                title: "Music & Dance Night",
+                date: "July 22, 2024",
+                location: "City Arts Center",
+                description: "Join us for a night of music, dance, and cultural exchange."
+              }, {
+                title: "Language Exchange Meetup",
+                date: "July 25, 2024",
+                location: "Cafe Global",
+                description: "Practice languages and make new friends in a fun, relaxed setting."
+              }].map((event, i) => (
+                <div key={i} className="bg-white/10 rounded-2xl p-6 border border-white/20 shadow-lg flex flex-col">
+                  <div className="text-xl font-bold text-white mb-2">{event.title}</div>
+                  <div className="text-white/80 mb-1">{event.date} • {event.location}</div>
+                  <div className="text-white/70 mb-2">{event.description}</div>
+                  <button className="mt-auto px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all">View Details</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
       default:
         return <DiscoverSection />;
     }
@@ -156,8 +190,12 @@ export function Dashboard() {
           {/* Top section: Profile and Settings */}
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab("profile")}> 
-              <div className="w-12 h-12 rounded-full bg-yellow-200 flex items-center justify-center border-2 border-white float-animation">
-                <span className="text-3xl">👤</span>
+              <div className="w-12 h-12 rounded-full bg-yellow-200 flex items-center justify-center border-2 border-white float-animation overflow-hidden">
+                {userProfile?.profileImageUrl ? (
+                  <img src={userProfile.profileImageUrl} alt="Profile" className="w-full h-full object-cover rounded-full" />
+                ) : (
+                  <span className="text-3xl">👤</span>
+                )}
               </div>
               <div>
                 <div className="font-bold text-lg">Your Profile</div>
