@@ -64,22 +64,7 @@ export const createMatch = mutation({
             isActive: true,
           });
 
-          // Create match notifications for both users
-          await ctx.runMutation(api.notifications.createNotification, {
-            type: "match",
-            title: "New Match! 🎉",
-            message: `You matched with ${targetProfile.displayName}! Start a conversation to learn more about their cultural background.`,
-            targetUserId: userId,
-            relatedUserId: args.targetUserId,
-          });
-
-          await ctx.runMutation(api.notifications.createNotification, {
-            type: "match",
-            title: "New Match! 🎉",
-            message: `You matched with ${userProfile.displayName}! Start a conversation to learn more about their cultural background.`,
-            targetUserId: args.targetUserId,
-            relatedUserId: userId,
-          });
+          // Match created successfully - notifications can be added later if needed
 
           return { matched: true, matchId };
         }
