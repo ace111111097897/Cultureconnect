@@ -437,15 +437,6 @@ export function Dashboard() {
       </div>
 
       {/* Modals/Panels for new sidebar items */}
-      {showNotifications && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
-            <button className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 text-2xl" onClick={() => setShowNotifications(false)}>✕</button>
-            <div className="text-xl font-bold mb-4">Notifications</div>
-            <div className="text-gray-700">No new notifications yet.</div>
-          </div>
-        </div>
-      )}
       {showSettings && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
           <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
