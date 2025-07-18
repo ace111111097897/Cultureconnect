@@ -1,8 +1,18 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { authTables } from "@convex-dev/auth/server";
 
 const applicationTables = {
+  // Simple users table to replace auth
+  users: defineTable({
+    createdAt: v.optional(v.number()),
+    displayName: v.optional(v.string()),
+    email: v.optional(v.string()),
+    lastActive: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+  })
+    .index("by_email", ["email"])
+    .index("by_created", ["createdAt"]),
+
   profiles: defineTable({
     userId: v.id("users"),
     displayName: v.string(),
@@ -274,6 +284,5 @@ const applicationTables = {
 };
 
 export default defineSchema({
-  ...authTables,
   ...applicationTables,
 });

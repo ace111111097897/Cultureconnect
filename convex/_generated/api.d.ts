@@ -14,7 +14,6 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as ai from "../ai.js";
-import type * as auth from "../auth.js";
 import type * as conversations from "../conversations.js";
 import type * as emailActions from "../emailActions.js";
 import type * as friends from "../friends.js";
@@ -30,6 +29,7 @@ import type * as reels from "../reels.js";
 import type * as router from "../router.js";
 import type * as stories from "../stories.js";
 import type * as storyReactions from "../storyReactions.js";
+import type * as users from "../users.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -41,7 +41,6 @@ import type * as storyReactions from "../storyReactions.js";
  */
 declare const fullApi: ApiFromModules<{
   ai: typeof ai;
-  auth: typeof auth;
   conversations: typeof conversations;
   emailActions: typeof emailActions;
   friends: typeof friends;
@@ -57,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   router: typeof router;
   stories: typeof stories;
   storyReactions: typeof storyReactions;
+  users: typeof users;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

@@ -1,6 +1,8 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+
+// Default user ID for demo purposes
+const DEFAULT_USER_ID = "demo_user_123" as any;
 
 export const upsertProfile = mutation({
   args: {
@@ -31,8 +33,7 @@ export const upsertProfile = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = DEFAULT_USER_ID;
 
     const existingProfile = await ctx.db
       .query("profiles")
@@ -76,8 +77,7 @@ export const upsertProfile = mutation({
 export const getCurrentUserProfile = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return null;
+    const userId = DEFAULT_USER_ID;
 
     const profile = await ctx.db
       .query("profiles")
@@ -107,8 +107,7 @@ export const getDiscoverProfiles = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return [];
+    const userId = DEFAULT_USER_ID;
 
     const userProfile = await ctx.db
       .query("profiles")
@@ -172,9 +171,6 @@ export const getDiscoverProfiles = query({
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -184,8 +180,7 @@ export const updateProfileImage = mutation({
     storageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = DEFAULT_USER_ID;
 
     const profile = await ctx.db
       .query("profiles")
@@ -205,8 +200,7 @@ export const updateProfileVideo = mutation({
     storageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = DEFAULT_USER_ID;
 
     const profile = await ctx.db
       .query("profiles")
@@ -222,9 +216,7 @@ export const updateProfileVideo = mutation({
 });
 
 export const getProfileById = query({
-  args: {
-    profileId: v.id("profiles"),
-  },
+  args: { profileId: v.id("profiles") },
   handler: async (ctx, args) => {
     const profile = await ctx.db.get(args.profileId);
     if (!profile) return null;

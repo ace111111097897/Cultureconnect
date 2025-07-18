@@ -3,7 +3,6 @@ import * as friends from "./friends";
 import * as profiles from "./profiles";
 import * as conversations from "./conversations";
 import * as prompts from "./prompts";
-import * as auth from "./auth";
 import * as stories from "./stories";
 import * as storyReactions from "./storyReactions";
 import * as matches from "./matches";
@@ -17,7 +16,6 @@ export default {
   profiles,
   conversations,
   prompts,
-  auth,
   stories,
   storyReactions,
   matches,

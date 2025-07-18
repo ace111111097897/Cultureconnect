@@ -1,6 +1,8 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
+
+// Default user ID for demo purposes
+const DEFAULT_USER_ID = "demo_user_123" as any;
 
 export const createCulturalStory = mutation({
   args: {
@@ -12,8 +14,7 @@ export const createCulturalStory = mutation({
     videos: v.optional(v.array(v.id("_storage"))),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = DEFAULT_USER_ID;
 
     return await ctx.db.insert("culturalStories", {
       userId,
@@ -86,8 +87,7 @@ export const likeCulturalStory = mutation({
     storyId: v.id("culturalStories"),
   },
   handler: async (ctx, args) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
+    const userId = DEFAULT_USER_ID;
 
     const story = await ctx.db.get(args.storyId);
     if (!story) throw new Error("Story not found");
@@ -101,9 +101,6 @@ export const likeCulturalStory = mutation({
 export const generateUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
     return await ctx.storage.generateUploadUrl();
   },
 });
@@ -111,9 +108,6 @@ export const generateUploadUrl = mutation({
 export const generateVideoUploadUrl = mutation({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) throw new Error("Not authenticated");
-
     return await ctx.storage.generateUploadUrl();
   },
 });
