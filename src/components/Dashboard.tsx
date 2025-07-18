@@ -15,7 +15,6 @@ import KandiChat from "./KandiChat";
 
 // Notification component
 function NotificationDropdown({ isOpen, onClose, unreadCount }: { isOpen: boolean; onClose: () => void; unreadCount?: number }) {
-  const notifications = useQuery(api.notifications.getUserNotifications, { limit: 20 });
   const markAsRead = useMutation(api.notifications.markNotificationAsRead);
   const markAllAsRead = useMutation(api.notifications.markAllNotificationsAsRead);
   const createSampleNotifications = useMutation(api.notifications.createSampleNotifications);
@@ -93,7 +92,7 @@ function NotificationDropdown({ isOpen, onClose, unreadCount }: { isOpen: boolea
 
         {/* Notifications List */}
         <div className="max-h-96 overflow-y-auto">
-          {!notifications || notifications.length === 0 ? (
+          {!unreadCount || unreadCount === 0 ? (
             <div className="p-6 text-center text-gray-500">
               <span className="text-4xl mb-2 block">🔕</span>
               <p>No notifications yet</p>
@@ -101,43 +100,7 @@ function NotificationDropdown({ isOpen, onClose, unreadCount }: { isOpen: boolea
             </div>
           ) : (
             <div className="p-2">
-              {notifications.map((notification) => (
-                <div
-                  key={notification._id}
-                  onClick={() => handleNotificationClick(notification)}
-                  className={`p-3 rounded-xl mb-2 transition-all hover-lift cursor-pointer ${
-                    notification.read 
-                      ? 'bg-white/50 hover:bg-white/70' 
-                      : 'bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100'
-                  }`}
-                >
-                  <div className="flex items-start space-x-3">
-                    <div className={`text-2xl ${notification.read ? 'opacity-60' : 'pulse-glow'}`}>
-                      {getNotificationIcon(notification.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <h4 className={`font-semibold text-sm ${
-                          notification.read ? 'text-gray-600' : 'text-gray-800'
-                        }`}>
-                          {notification.title}
-                        </h4>
-                        {!notification.read && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        )}
-                      </div>
-                      <p className={`text-xs mt-1 ${
-                        notification.read ? 'text-gray-500' : 'text-gray-700'
-                      }`}>
-                        {notification.message}
-                      </p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {formatTime(notification.createdAt)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+              {/* This section is now empty as notifications are removed */}
             </div>
           )}
         </div>
