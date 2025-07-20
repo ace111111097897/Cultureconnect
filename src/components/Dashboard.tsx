@@ -266,10 +266,15 @@ export function Dashboard() {
           {/* Top section with culture tags */}
           <div className="mb-8 md:mb-8">
             <div className="flex items-center space-x-4 md:space-x-4 mb-6">
-              <span className="px-4 py-3 bg-white/10 rounded-full text-white text-sm">Mediterranean</span>
-              <span className="px-4 py-3 bg-white/10 rounded-full text-white text-sm">Fusion • Mutual</span>
-        </div>
-      </div>
+              {/* Culture tags */}
+              <div className="bg-gradient-to-r from-orange-400 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-medium">
+                Mediterranean
+              </div>
+              <div className="bg-gradient-to-r from-purple-400 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium">
+                Fusion • Mutual
+              </div>
+            </div>
+          </div>
 
           {/* Content based on active tab - Full Width */}
           <div className="w-full">

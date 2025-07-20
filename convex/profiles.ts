@@ -76,8 +76,17 @@ export const upsertProfile = mutation({
 export const getCurrentUserProfile = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getAuthUserId(ctx);
-    if (!userId) return null;
+    let userId = await getAuthUserId(ctx);
+    
+    // If no authenticated user, try to get the first user as fallback
+    if (!userId) {
+      const firstUser = await ctx.db.query("users").first();
+      if (firstUser) {
+        userId = firstUser._id;
+      } else {
+        return null;
+      }
+    }
 
     const profile = await ctx.db
       .query("profiles")
@@ -101,6 +110,171 @@ export const getCurrentUserProfile = query({
     };
   },
 });
+
+// Initialize demo data for testing
+export const initializeDemoData = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // Check if there's already data
+    const existingUser = await ctx.db.query("users").first();
+    if (existingUser) {
+      return { message: "Demo data already exists" };
+    }
+    
+    // Create a demo user
+    const userId = await ctx.db.insert("users", {
+      createdAt: Date.now(),
+      displayName: "Demo User",
+      email: "demo@example.com",
+      lastActive: Date.now(),
+      isAnonymous: false,
+    });
+    
+    // Create a demo profile
+    await ctx.db.insert("profiles", {
+      userId,
+      displayName: "Demo User",
+      age: 25,
+      bio: "I love exploring different cultures and meeting new people!",
+      location: "New York, NY",
+      languages: ["English", "Spanish"],
+      culturalBackground: ["Mixed Heritage"],
+      traditions: ["Family gatherings", "Cultural festivals"],
+      foodPreferences: ["Mediterranean", "Asian", "Latin American"],
+      musicGenres: ["Pop", "Jazz", "World Music"],
+      travelInterests: ["Cultural immersion", "Food tours"],
+      lifeGoals: ["Travel the world", "Learn new languages"],
+      values: ["Family first", "Cultural preservation"],
+      relationshipGoals: "Long-term partnership",
+      zodiacSign: "Libra",
+      ageRangeMin: 20,
+      ageRangeMax: 35,
+      maxDistance: 50,
+      isActive: true,
+      lastActive: Date.now(),
+    });
+    
+    // Create demo friends and matches
+    await createDemoFriendsAndMatches(ctx, userId);
+    
+    return { message: "Demo data created successfully" };
+  },
+});
+
+// Helper function to create demo friends and matches
+async function createDemoFriendsAndMatches(ctx: any, mainUserId: any) {
+  // Create demo users for friends and matches
+  const demoUsers = [
+    {
+      displayName: "babyf",
+      age: 23,
+      bio: "Love traveling and trying new foods!",
+      location: "Los Angeles, CA",
+      languages: ["English", "French"],
+      culturalBackground: ["European"],
+      traditions: ["Traditional Cooking", "Music & Dance"],
+      foodPreferences: ["French", "Italian", "Mediterranean"],
+      musicGenres: ["Jazz", "Classical", "Pop"],
+      travelInterests: ["Cultural Heritage Sites", "Food Tours"],
+      lifeGoals: ["Career Growth", "Travel the world"],
+      values: ["Creativity", "Adventure"],
+      relationshipGoals: "Long-term partnership",
+      zodiacSign: "Gemini",
+    },
+    {
+      displayName: "Bruce Wayne",
+      age: 28,
+      bio: "Entrepreneur by day, adventurer by night.",
+      location: "Gotham City",
+      languages: ["English", "Latin"],
+      culturalBackground: ["European", "American"],
+      traditions: ["Family Gatherings", "Traditional Medicine"],
+      foodPreferences: ["American", "Italian", "Asian"],
+      musicGenres: ["Classical", "Jazz", "Rock"],
+      travelInterests: ["Historical Sites", "Adventure Sports"],
+      lifeGoals: ["Career Growth", "Community Service"],
+      values: ["Justice", "Family"],
+      relationshipGoals: "Marriage",
+      zodiacSign: "Capricorn",
+    },
+    {
+      displayName: "sibby",
+      age: 26,
+      bio: "Passionate about cultural exchange and learning!",
+      location: "San Francisco, CA",
+      languages: ["English", "Spanish", "Japanese"],
+      culturalBackground: ["Asian", "Latin American"],
+      traditions: ["Tea Ceremony", "Cultural Festivals"],
+      foodPreferences: ["Japanese", "Mexican", "Thai"],
+      musicGenres: ["J-Pop", "Folk", "Electronic"],
+      travelInterests: ["Cultural immersion", "Music festivals"],
+      lifeGoals: ["Language Learning", "Cultural Exchange"],
+      values: ["Diversity", "Education"],
+      relationshipGoals: "Cultural exchange",
+      zodiacSign: "Aquarius",
+    },
+    {
+      displayName: "マシュー",
+      age: 24,
+      bio: "Japanese-American who loves connecting cultures!",
+      location: "Tokyo, Japan",
+      languages: ["Japanese", "English"],
+      culturalBackground: ["Asian", "American"],
+      traditions: ["Tea Ceremony", "Cherry Blossom Viewing"],
+      foodPreferences: ["Japanese", "Korean", "Thai"],
+      musicGenres: ["J-Pop", "K-Pop", "Traditional"],
+      travelInterests: ["Cultural Heritage Sites", "Food Tours"],
+      lifeGoals: ["Cultural Exchange", "Language Learning"],
+      values: ["Tradition", "Innovation"],
+      relationshipGoals: "Long-term partnership",
+      zodiacSign: "Cancer",
+    }
+  ];
+
+  for (const demoUser of demoUsers) {
+    // Create user
+    const userId = await ctx.db.insert("users", {
+      createdAt: Date.now(),
+      displayName: demoUser.displayName,
+      email: `${demoUser.displayName.toLowerCase()}@example.com`,
+      lastActive: Date.now(),
+      isAnonymous: false,
+    });
+
+    // Create profile
+    await ctx.db.insert("profiles", {
+      userId,
+      ...demoUser,
+      ageRangeMin: 20,
+      ageRangeMax: 35,
+      maxDistance: 50,
+      isActive: true,
+      lastActive: Date.now(),
+    });
+
+    // Create friendship (for first 3 users)
+    if (demoUser.displayName !== "マシュー") {
+      await ctx.db.insert("friends", {
+        user1Id: mainUserId,
+        user2Id: userId,
+        timestamp: Date.now(),
+      });
+    }
+
+    // Create match (for マシュー)
+    if (demoUser.displayName === "マシュー") {
+      await ctx.db.insert("matches", {
+        user1Id: mainUserId,
+        user2Id: userId,
+        compatibilityScore: 85,
+        sharedInterests: ["Cultural Exchange", "Language Learning", "Food Tours"],
+        matchType: "cultural",
+        status: "mutual",
+        timestamp: Date.now(),
+      });
+    }
+  }
+}
 
 export const getDiscoverProfiles = query({
   args: {

@@ -24,6 +24,7 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   const sendMessage = useMutation(api.conversations.sendMessage);
   const markAsRead = useMutation(api.conversations.markAsRead);
   const createConversation = useMutation(api.conversations.createConversation);
+  const initializeDemoData = useMutation(api.profiles.initializeDemoData);
 
   // Debug logging
   console.log("ConversationsSection - Conversations:", conversations);
@@ -175,7 +176,8 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
     );
   };
 
-  if (!matches || !friends) {
+  // Show loading only if data is still loading
+  if (matches === undefined || friends === undefined) {
     return (
       <div className="flex justify-center items-center h-96">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/30 border-t-white"></div>
@@ -185,15 +187,29 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
 
   const allUsers = getAllUsers();
 
+  // Show empty state only if there are truly no users at all
   if (allUsers.length === 0) {
     return (
       <div className="text-center space-y-6">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
           <div className="text-6xl mb-4">💬</div>
-          <h2 className="text-2xl font-bold text-white mb-4">No conversations yet</h2>
-          <p className="text-white/70">
-            Start matching with people to begin meaningful conversations!
+          <h2 className="text-2xl font-bold text-white mb-4">No friends or matches yet</h2>
+          <p className="text-white/70 mb-6">
+            Start matching with people or adding friends to begin meaningful conversations!
           </p>
+          <button
+            onClick={async () => {
+              try {
+                await initializeDemoData();
+                toast.success("Demo data created! Refresh the page to see your friends and matches.");
+              } catch (error) {
+                toast.error("Failed to create demo data");
+              }
+            }}
+            className="px-6 py-3 bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold rounded-xl hover:from-orange-500 hover:to-pink-600 transition-all"
+          >
+            🎭 Create Demo Data
+          </button>
         </div>
       </div>
     );
@@ -206,8 +222,8 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   const getConversationHistory = () => {
     if (!messages || !selectedConversationData) return "";
     return messages.map(msg => {
-      const isOtherUser = msg.senderId === (selectedConversationData as any)?.otherProfile?.userId;
-      const senderName = isOtherUser ? (selectedConversationData as any)?.otherProfile?.displayName : "You";
+      const isOtherUser = msg.senderId !== userProfile?.userId;
+      const senderName = isOtherUser ? (selectedConversationData as any)?.otherProfile?.displayName || "Other" : "You";
       return `${senderName}: ${msg.content}`;
     }).join("\n");
   };
@@ -381,8 +397,8 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
       {(selectedConversationData || selectedUserData) && (
         <KandiBubble
           conversationHistory={getConversationHistory()}
-          recipientName={(selectedConversationData as any)?.otherProfile?.displayName || selectedUserData?.displayName}
-          recipientUserId={(selectedConversationData as any)?.otherProfile?.userId || selectedUserData?.userId}
+          recipientName={(selectedConversationData as any)?.otherProfile?.displayName || selectedUserData?.displayName || "User"}
+          recipientUserId={(selectedConversationData as any)?.otherProfile?.userId || selectedUserData?.userId || ""}
         />
       )}
     </div>
