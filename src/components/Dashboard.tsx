@@ -68,6 +68,7 @@ export function Dashboard() {
   const createTestData = useMutation(api.profiles.createTestData);
 
   const renderContent = () => {
+    console.log("Dashboard - Active tab:", activeTab);
     switch (activeTab) {
       case "discover":
         return <DiscoverSection />;
@@ -76,6 +77,7 @@ export function Dashboard() {
       case "friends":
         return <FriendsSection onNavigateToConversation={setInitialConversationId} onNavigateToTab={setActiveTab} />;
       case "conversations":
+        console.log("Dashboard - Rendering ConversationsSection");
         return <ConversationsSection initialConversationId={initialConversationId} />;
       case "games":
         return <GamesSection />;
