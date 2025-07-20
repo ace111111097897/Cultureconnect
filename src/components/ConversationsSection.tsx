@@ -262,13 +262,9 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
 
   console.log("ConversationsSection - About to render main interface");
   return (
-    <div className="grid lg:grid-cols-3 gap-6 md:gap-6 h-[600px] md:h-[700px]">
-      {/* TEST - This should be visible */}
-      <div className="fixed top-20 left-20 bg-red-500 text-white p-4 z-50 rounded-lg">
-        MESSAGES COMPONENT IS RENDERING!
-      </div>
+    <div className="w-full h-full min-h-[600px] grid lg:grid-cols-3 gap-6 md:gap-6">
       {/* Conversations List */}
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden">
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden h-[600px]">
         <div className="p-4 md:p-4 border-b border-white/20">
           <h3 className="text-base md:text-lg font-semibold text-white">Messages</h3>
         </div>
@@ -328,7 +324,7 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
       </div>
 
       {/* Chat Area */}
-      <div className="lg:col-span-2 flex flex-col">
+      <div className="lg:col-span-2 flex flex-col h-[600px]">
         {/* Chat Container */}
         <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col flex-1">
           {/* Chat Header */}
