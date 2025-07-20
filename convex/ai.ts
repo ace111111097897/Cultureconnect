@@ -11,6 +11,7 @@ export const getKandiUserData = action({
     currentUser: any;
     targetUser: any;
     availableUsers: any[];
+    culturalInsights: any;
   }> => {
     const currentUserId = await getAuthUserId(ctx);
     if (!currentUserId) {
@@ -24,7 +25,8 @@ export const getKandiUserData = action({
       return {
         currentUser: null,
         targetUser: null,
-        availableUsers: []
+        availableUsers: [],
+        culturalInsights: null
       };
     }
 
@@ -38,6 +40,9 @@ export const getKandiUserData = action({
 
     // Get available users for context (limited to protect privacy)
     const availableUsers: any[] = await ctx.runQuery(api.profiles.getDiscoverProfiles, { limit: 10 });
+
+    // Generate cultural insights and conversation topics
+    const culturalInsights = generateCulturalInsights(currentUserProfile, targetUserProfile);
 
     return {
       currentUser: {
@@ -77,7 +82,63 @@ export const getKandiUserData = action({
         location: user.location,
         culturalBackground: user.culturalBackground,
         compatibilityScore: user.compatibilityScore
-      }))
+      })),
+      culturalInsights
     };
   },
-}); 
+});
+
+// Helper function to generate cultural insights and conversation topics
+function generateCulturalInsights(currentUser: any, targetUser: any) {
+  if (!currentUser || !targetUser) {
+    return {
+      sharedInterests: [],
+      conversationTopics: [],
+      culturalConnections: [],
+      icebreakers: []
+    };
+  }
+
+  // Find shared interests
+  const sharedInterests = [
+    ...currentUser.foodPreferences.filter((food: string) => targetUser.foodPreferences.includes(food)),
+    ...currentUser.musicGenres.filter((music: string) => targetUser.musicGenres.includes(music)),
+    ...currentUser.travelInterests.filter((travel: string) => targetUser.travelInterests.includes(travel)),
+    ...currentUser.values.filter((value: string) => targetUser.values.includes(value))
+  ];
+
+  // Generate conversation topics based on profiles
+  const conversationTopics = [
+    `Ask about ${targetUser.displayName}'s cultural background: ${targetUser.culturalBackground.join(', ')}`,
+    `Discuss shared interest in ${sharedInterests.length > 0 ? sharedInterests[0] : 'cultural exchange'}`,
+    `Explore ${targetUser.displayName}'s traditions: ${targetUser.traditions.join(', ')}`,
+    `Talk about travel experiences, especially ${targetUser.travelInterests.join(', ')}`,
+    `Share music recommendations from ${targetUser.musicGenres.join(', ')} genres`,
+    `Discuss food culture and ${targetUser.foodPreferences.join(', ')} preferences`
+  ];
+
+  // Cultural connections
+  const culturalConnections = [
+    `Both interested in ${sharedInterests.length > 0 ? sharedInterests.join(', ') : 'cultural learning'}`,
+    `Shared values: ${currentUser.values.filter((v: string) => targetUser.values.includes(v)).join(', ')}`,
+    `Language connection: ${currentUser.languages.filter((l: string) => targetUser.languages.includes(l)).join(', ')}`,
+    `Cultural exchange potential between ${currentUser.culturalBackground.join(', ')} and ${targetUser.culturalBackground.join(', ')}`
+  ];
+
+  // Icebreakers
+  const icebreakers = [
+    `"What's your favorite cultural tradition and why?"`,
+    `"If you could travel anywhere to experience a different culture, where would you go?"`,
+    `"What's a dish from your culture that you'd love to share with others?"`,
+    `"What's a cultural celebration that's meaningful to you?"`,
+    `"How do you like to celebrate your cultural heritage?"`,
+    `"What's something about your culture that you think others should know?"`
+  ];
+
+  return {
+    sharedInterests,
+    conversationTopics,
+    culturalConnections,
+    icebreakers
+  };
+} 

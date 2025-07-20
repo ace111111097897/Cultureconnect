@@ -34,12 +34,10 @@ export default function KandiBubble({ conversationHistory, recipientName, recipi
     fetchUserData();
   }, [getKandiUserData, recipientUserId]);
 
-  const quickAdvice = [
+  const quickAdvice = userData?.culturalInsights?.icebreakers?.slice(0, 3) || [
     "Ask about their cultural background",
     "Share a cultural tradition",
-    "Plan a cultural date idea",
-    "Find common interests",
-    "Ask about their family traditions"
+    "Find common interests"
   ];
 
   const sendMessage = async (messageText?: string) => {
@@ -76,8 +74,15 @@ export default function KandiBubble({ conversationHistory, recipientName, recipi
   };
 
   const getPersonalizedAdvice = async () => {
-    if (userData?.targetUser) {
-      const advicePrompt = `Based on my profile and ${recipientName || 'this person'}'s profile, what are some great conversation starters or topics we could discuss? What cultural connections might we have?`;
+    if (userData?.culturalInsights) {
+      const insights = userData.culturalInsights;
+      const advicePrompt = `Based on our profiles, here's what I found:
+
+Shared Interests: ${insights.sharedInterests.join(', ') || 'None yet'}
+Cultural Connections: ${insights.culturalConnections.join(', ')}
+Conversation Topics: ${insights.conversationTopics.slice(0, 3).join(', ')}
+
+What specific advice can you give me for connecting with ${recipientName || 'this person'}?`;
       await sendMessage(advicePrompt);
     } else {
       await sendMessage("What are some good cultural conversation starters I can use?");
@@ -115,7 +120,7 @@ export default function KandiBubble({ conversationHistory, recipientName, recipi
       <div className="p-3 bg-gray-50">
         <div className="text-sm text-gray-600 mb-2">Quick advice for {recipientName || 'your chat'}:</div>
         <div className="flex flex-wrap gap-1">
-          {quickAdvice.map((advice, index) => (
+          {quickAdvice.map((advice: string, index: number) => (
             <button
               key={index}
               onClick={() => sendMessage(advice)}
@@ -149,6 +154,11 @@ export default function KandiBubble({ conversationHistory, recipientName, recipi
             {userData?.targetUser && (
               <div className="mt-2 text-xs text-blue-600">
                 Connected with {userData.targetUser.displayName} ({userData.targetUser.compatibilityScore}% compatibility)
+              </div>
+            )}
+            {userData?.culturalInsights?.sharedInterests?.length > 0 && (
+              <div className="mt-2 text-xs text-green-600">
+                🎯 Shared interests: {userData.culturalInsights.sharedInterests.slice(0, 2).join(', ')}
               </div>
             )}
           </div>
