@@ -266,13 +266,7 @@ export function Dashboard() {
           {/* Top section with culture tags */}
           <div className="mb-8 md:mb-8">
             <div className="flex items-center space-x-4 md:space-x-4 mb-6">
-              {/* Culture tags */}
-              <div className="bg-gradient-to-r from-orange-400 to-pink-500 text-white px-4 py-2 rounded-full text-sm font-medium">
-                Mediterranean
-              </div>
-              <div className="bg-gradient-to-r from-purple-400 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-medium">
-                Fusion • Mutual
-              </div>
+              {/* Culture tags removed */}
             </div>
           </div>
 
