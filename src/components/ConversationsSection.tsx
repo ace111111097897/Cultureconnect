@@ -24,7 +24,6 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   const sendMessage = useMutation(api.conversations.sendMessage);
   const markAsRead = useMutation(api.conversations.markAsRead);
   const createConversation = useMutation(api.conversations.createConversation);
-  const initializeDemoData = useMutation(api.profiles.initializeDemoData);
 
   // Debug logging
   console.log("ConversationsSection - Conversations:", conversations);
@@ -164,6 +163,8 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
       });
     }
     
+
+    
     return allUsers;
   };
 
@@ -193,32 +194,21 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
       <div className="text-center space-y-6">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
           <div className="text-6xl mb-4">💬</div>
-          <h2 className="text-2xl font-bold text-white mb-4">No friends or matches yet</h2>
-          <p className="text-white/70 mb-6">
-            Click the button below to create demo friends and matches so you can test the messaging system!
+          <h2 className="text-2xl font-bold text-white mb-4">Messages</h2>
+          <p className="text-white/70 mb-4">
+            This area shows your friends and matches. Click on any person to start a conversation!
           </p>
-          <button
-            onClick={async () => {
-              try {
-                console.log("Creating demo data...");
-                const result = await initializeDemoData();
-                console.log("Demo data result:", result);
-                toast.success("Demo data created! The page will refresh automatically.");
-                // Force a page refresh to reload the data
-                setTimeout(() => {
-                  window.location.reload();
-                }, 1000);
-              } catch (error) {
-                console.error("Failed to create demo data:", error);
-                toast.error("Failed to create demo data. Please try again.");
-              }
-            }}
-            className="px-8 py-4 bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold rounded-xl hover:from-orange-500 hover:to-pink-600 transition-all text-lg"
-          >
-            🎭 Create Demo Friends & Matches
-          </button>
-          <p className="text-white/50 text-sm mt-4">
-            This will create demo users: babyf, Bruce Wayne, sibby (friends) and マシュー (match)
+          <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+            <h3 className="text-lg font-semibold text-white mb-3">How it works:</h3>
+            <ul className="text-white/70 text-left space-y-2">
+              <li>• <strong>Friends:</strong> People you've added as friends will appear here</li>
+              <li>• <strong>Matches:</strong> People you've matched with will appear here</li>
+              <li>• <strong>Click any person</strong> to open a chat and start messaging</li>
+              <li>• <strong>Real-time messaging</strong> with your connections</li>
+            </ul>
+          </div>
+          <p className="text-white/50 text-sm mt-6">
+            Go to Discover to find new people, or check your Matches tab to see who you've connected with!
           </p>
         </div>
       </div>

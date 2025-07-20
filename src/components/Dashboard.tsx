@@ -65,7 +65,6 @@ export function Dashboard() {
   ];
 
   const userProfile = useQuery(api.profiles.getCurrentUserProfile);
-  const initializeDemoData = useMutation(api.profiles.initializeDemoData);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -272,40 +271,7 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* Demo Data Creation Button - Show when no user profile exists */}
-          {!userProfile && (
-            <div className="text-center space-y-6 mb-8">
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
-                <div className="text-4xl mb-4">🎭</div>
-                <h2 className="text-2xl font-bold text-white mb-4">Welcome to CultureConnect!</h2>
-                <p className="text-white/70 mb-6">
-                  Create demo data to start exploring the platform with sample friends and matches.
-                </p>
-                <button
-                  onClick={async () => {
-                    try {
-                      console.log("Creating demo data from Dashboard...");
-                      const result = await initializeDemoData();
-                      console.log("Demo data result:", result);
-                      toast.success("Demo data created! The page will refresh automatically.");
-                      setTimeout(() => {
-                        window.location.reload();
-                      }, 1000);
-                    } catch (error) {
-                      console.error("Failed to create demo data:", error);
-                      toast.error("Failed to create demo data. Please try again.");
-                    }
-                  }}
-                  className="px-8 py-4 bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold rounded-xl hover:from-orange-500 hover:to-pink-600 transition-all text-lg"
-                >
-                  🎭 Create Demo Data
-                </button>
-                <p className="text-white/50 text-sm mt-4">
-                  This will create demo users: babyf, Bruce Wayne, sibby (friends) and マシュー (match)
-                </p>
-              </div>
-            </div>
-          )}
+          
 
           {/* Content based on active tab - Full Width */}
           <div className="w-full">
