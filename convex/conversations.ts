@@ -5,6 +5,7 @@ import { api } from "./_generated/api";
 
 export const getUserConversations = query({
   args: {},
+  returns: v.array(v.any()),
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
@@ -56,6 +57,7 @@ export const getConversationMessages = query({
   args: {
     conversationId: v.id("conversations"),
   },
+  returns: v.array(v.any()),
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
@@ -80,6 +82,7 @@ export const sendMessage = mutation({
     conversationId: v.id("conversations"),
     content: v.string(),
   },
+  returns: v.id("messages"),
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
@@ -117,6 +120,7 @@ export const markMessagesAsRead = mutation({
   args: {
     conversationId: v.id("conversations"),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
@@ -146,6 +150,7 @@ export const markAsRead = mutation({
   args: {
     conversationId: v.id("conversations"),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
@@ -173,6 +178,7 @@ export const markAsRead = mutation({
 
 export const getUnreadMessageCount = query({
   args: {},
+  returns: v.number(),
   handler: async (ctx) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return 0;
@@ -208,6 +214,7 @@ export const createConversation = mutation({
     participantIds: v.array(v.id("users")),
     type: v.string(), // "direct" or "group"
   },
+  returns: v.id("conversations"),
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
