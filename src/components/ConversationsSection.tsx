@@ -26,7 +26,16 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   const createConversation = useMutation(api.conversations.createConversation);
   const createTestData = useMutation(api.profiles.createTestData);
 
-
+  // Play notification sound for new messages
+  const playNotificationSound = () => {
+    try {
+      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmGgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
+      audio.volume = 0.3;
+      audio.play().catch(() => {}); // Ignore errors if audio fails
+    } catch (e) {
+      // Ignore audio errors
+    }
+  };
 
   // Auto-select conversation when initialConversationId is provided and conversations are loaded
   useEffect(() => {
@@ -170,7 +179,7 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
     if (!conversations) return null;
     return conversations.find(c => 
       c.type === "direct" && 
-      c.participants.includes(userId)
+      c.participants.includes(userId as any)
     );
   };
 
@@ -331,7 +340,7 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
           {/* Chat Header - Fixed at top */}
           <div className="p-4 md:p-4 border-b border-white/20 flex justify-between items-center flex-shrink-0">
             {(() => {
-              const otherProfile = selectedConversationData?.otherProfile || selectedUserData;
+              const otherProfile = (selectedConversationData as any)?.otherProfile || selectedUserData;
               return otherProfile ? (
                 <div className="flex items-center space-x-3 md:space-x-3">
                   <div className="w-10 h-10 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">

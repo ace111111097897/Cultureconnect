@@ -67,6 +67,8 @@ export function Dashboard() {
 
   const userProfile = useQuery(api.profiles.getCurrentUserProfile);
   const createTestData = useMutation(api.profiles.createTestData);
+  const friendRequests = useQuery(api.friends.getFriendRequests);
+  const unreadMessageCount = useQuery(api.conversations.getUnreadMessageCount);
 
   const renderContent = () => {
     console.log("Dashboard - Active tab:", activeTab);
@@ -220,7 +222,7 @@ export function Dashboard() {
             {tabs.map((tab) => (
             <button 
                 key={tab.id}
-                className={`flex items-center space-x-3 py-3 px-4 rounded-xl transition text-left hover-lift ${activeTab === tab.id ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg pulse-glow' : 'text-white/70 hover:text-white hover:bg-white/10 hover-scale'}`}
+                className={`flex items-center space-x-3 py-3 px-4 rounded-xl transition text-left hover-lift relative ${activeTab === tab.id ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg pulse-glow' : 'text-white/70 hover:text-white hover:bg-white/10 hover-scale'}`}
                 onClick={() => {
                   setActiveTab(tab.id);
                   if (tab.onClick) tab.onClick();
@@ -228,6 +230,23 @@ export function Dashboard() {
             >
                 <span className="text-xl">{tab.icon}</span>
                 <span>{tab.label}</span>
+                
+                {/* Notification badges */}
+                {tab.id === "friends" && friendRequests && friendRequests.length > 0 && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center pulse-glow">
+                    <span className="text-white text-xs font-bold">
+                      {friendRequests.length > 9 ? '9+' : friendRequests.length}
+                    </span>
+                  </div>
+                )}
+                
+                {tab.id === "conversations" && unreadMessageCount && unreadMessageCount > 0 && (
+                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center pulse-glow">
+                    <span className="text-white text-xs font-bold">
+                      {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+                    </span>
+                  </div>
+                )}
             </button>
             ))}
           </nav>
