@@ -1,6 +1,5 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { getAuthUserId } from "@convex-dev/auth/server";
 
 // Cache news data to prevent excessive API calls
 let newsCache: any = null;
@@ -41,7 +40,6 @@ export const getNews = query({
       ];
 
       let newsData = null;
-      let error = null;
 
       // Try each API until one works
       for (const api of apis) {
@@ -86,7 +84,6 @@ export const getNews = query({
             }
           }
         } catch (apiError) {
-          error = apiError;
           continue; // Try next API
         }
       }
