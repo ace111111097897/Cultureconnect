@@ -250,3 +250,103 @@ export const getProfileById = query({
     };
   },
 });
+
+// Add some test friends and matches for development
+export const createTestData = mutation({
+  args: {},
+  handler: async (ctx) => {
+    let userId = await getAuthUserId(ctx);
+    
+    // If no authenticated user, try to get the first user as fallback
+    if (!userId) {
+      const firstUser = await ctx.db.query("users").first();
+      if (firstUser) {
+        userId = firstUser._id;
+      } else {
+        throw new Error("No users found");
+      }
+    }
+
+    // Get all other users
+    const allUsers = await ctx.db.query("users").collect();
+    const otherUsers = allUsers.filter(u => u._id !== userId).slice(0, 3);
+
+    if (otherUsers.length === 0) {
+      throw new Error("No other users found to create test data");
+    }
+
+    const results = [];
+
+    // Create some friendships
+    for (const otherUser of otherUsers.slice(0, 2)) {
+      try {
+        // Check if friendship already exists
+        const existingFriendship1 = await ctx.db
+          .query("friends")
+          .withIndex("by_user1", (q) => q.eq("user1Id", userId))
+          .filter((q) => q.eq(q.field("user2Id"), otherUser._id))
+          .unique();
+
+        const existingFriendship2 = await ctx.db
+          .query("friends")
+          .withIndex("by_user2", (q) => q.eq("user2Id", userId))
+          .filter((q) => q.eq(q.field("user1Id"), otherUser._id))
+          .unique();
+
+        if (!existingFriendship1 && !existingFriendship2) {
+          await ctx.db.insert("friends", {
+            user1Id: userId,
+            user2Id: otherUser._id,
+            timestamp: Date.now(),
+          });
+
+          // Create conversation for the friendship
+          await ctx.db.insert("conversations", {
+            participants: [userId, otherUser._id],
+            type: "direct",
+            isActive: true,
+            lastMessageTime: Date.now(),
+          });
+
+          results.push(`Created friendship with ${otherUser._id}`);
+        }
+      } catch (error) {
+        console.error("Error creating friendship:", error);
+      }
+    }
+
+    // Create some matches
+    for (const otherUser of otherUsers.slice(1, 3)) {
+      try {
+        // Check if match already exists
+        const existingMatch = await ctx.db
+          .query("matches")
+          .filter((q) => 
+            q.or(
+              q.and(q.eq(q.field("user1Id"), userId), q.eq(q.field("user2Id"), otherUser._id)),
+              q.and(q.eq(q.field("user1Id"), otherUser._id), q.eq(q.field("user2Id"), userId))
+            )
+          )
+          .unique();
+
+        if (!existingMatch) {
+          await ctx.db.insert("matches", {
+            user1Id: userId,
+            user2Id: otherUser._id,
+            compatibilityScore: 85,
+            sharedInterests: ["Music", "Travel"],
+            matchType: "cultural",
+            status: "mutual",
+            timestamp: Date.now(),
+          });
+
+          results.push(`Created match with ${otherUser._id}`);
+        }
+      } catch (error) {
+        console.error("Error creating match:", error);
+      }
+    }
+
+    return { success: true, results };
+  },
+});

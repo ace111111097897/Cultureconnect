@@ -65,6 +65,7 @@ export function Dashboard() {
   ];
 
   const userProfile = useQuery(api.profiles.getCurrentUserProfile);
+  const createTestData = useMutation(api.profiles.createTestData);
 
   const renderContent = () => {
     switch (activeTab) {

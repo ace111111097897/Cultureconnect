@@ -24,12 +24,9 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   const sendMessage = useMutation(api.conversations.sendMessage);
   const markAsRead = useMutation(api.conversations.markAsRead);
   const createConversation = useMutation(api.conversations.createConversation);
+  const createTestData = useMutation(api.profiles.createTestData);
 
-  // Debug logging
-  console.log("ConversationsSection - Conversations:", conversations);
-  console.log("ConversationsSection - Matches:", matches);
-  console.log("ConversationsSection - Friends:", friends);
-  console.log("ConversationsSection - Selected User:", selectedUser);
+
 
   // Auto-select conversation when initialConversationId is provided and conversations are loaded
   useEffect(() => {
@@ -188,6 +185,14 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
 
   const allUsers = getAllUsers();
 
+  // Debug logging
+  console.log("ConversationsSection - Conversations:", conversations);
+  console.log("ConversationsSection - Matches:", matches);
+  console.log("ConversationsSection - Friends:", friends);
+  console.log("ConversationsSection - User Profile:", userProfile);
+  console.log("ConversationsSection - Selected User:", selectedUser);
+  console.log("ConversationsSection - All Users:", allUsers);
+
   // Show empty state only if there are truly no users at all
   if (allUsers.length === 0) {
     return (
@@ -210,6 +215,21 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
           <p className="text-white/50 text-sm mt-6">
             Go to Discover to find new people, or check your Matches tab to see who you've connected with!
           </p>
+          <button
+            onClick={async () => {
+              try {
+                const result = await createTestData();
+                toast.success("Test data created! Check your Messages now.");
+                console.log("Test data result:", result);
+              } catch (error) {
+                console.error("Error creating test data:", error);
+                toast.error("Failed to create test data");
+              }
+            }}
+            className="mt-6 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold hover:from-orange-500 hover:to-pink-600 transition-all"
+          >
+            Create Test Friends & Matches
+          </button>
         </div>
       </div>
     );
