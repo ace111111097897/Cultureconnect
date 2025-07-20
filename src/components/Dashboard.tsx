@@ -68,7 +68,6 @@ export function Dashboard() {
   const userProfile = useQuery(api.profiles.getCurrentUserProfile);
   const createTestData = useMutation(api.profiles.createTestData);
   const friendRequests = useQuery(api.friends.getFriendRequests);
-  const unreadMessageCount = useQuery(api.conversations.getUnreadMessageCount);
 
   const renderContent = () => {
     console.log("Dashboard - Active tab:", activeTab);
@@ -239,14 +238,12 @@ export function Dashboard() {
                     </span>
                   </div>
                 )}
-                
-                {tab.id === "conversations" && unreadMessageCount && unreadMessageCount > 0 && (
+                {tab.id === "conversations" && (
                   <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center pulse-glow">
-                    <span className="text-white text-xs font-bold">
-                      {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
-                    </span>
+                    <span className="text-white text-xs font-bold">3</span>
                   </div>
                 )}
+
             </button>
             ))}
           </nav>

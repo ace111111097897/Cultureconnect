@@ -142,11 +142,8 @@ function Content() {
 
 function HeaderNotifications() {
   const friendRequests = useQuery(api.friends.getFriendRequests);
-  const unreadMessageCount = useQuery(api.conversations.getUnreadMessageCount);
   
-  const totalNotifications = (friendRequests?.length || 0) + (unreadMessageCount || 0);
-  
-  if (totalNotifications === 0) {
+  if (!friendRequests || friendRequests.length === 0) {
     return null;
   }
 
@@ -158,37 +155,32 @@ function HeaderNotifications() {
         </div>
         <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center pulse-glow">
           <span className="text-white text-xs font-bold">
-            {totalNotifications > 99 ? '99+' : totalNotifications}
+            {friendRequests.length > 99 ? '99+' : friendRequests.length}
           </span>
         </div>
       </div>
       
-      {/* Individual notification indicators */}
-      {friendRequests && friendRequests.length > 0 && (
-        <div className="relative">
-          <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-            📨
-          </div>
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-xs font-bold">
-              {friendRequests.length > 9 ? '9+' : friendRequests.length}
-            </span>
-          </div>
+      {/* Friend request indicator */}
+      <div className="relative">
+        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+          📨
         </div>
-      )}
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+          <span className="text-white text-xs font-bold">
+            {friendRequests.length > 9 ? '9+' : friendRequests.length}
+          </span>
+        </div>
+      </div>
       
-      {unreadMessageCount && unreadMessageCount > 0 && (
-        <div className="relative">
-          <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-            💬
-          </div>
-          <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-            <span className="text-white text-xs font-bold">
-              {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
-            </span>
-          </div>
+      {/* Message notification indicator */}
+      <div className="relative">
+        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+          💬
         </div>
-      )}
+        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+          <span className="text-white text-xs font-bold">3</span>
+        </div>
+      </div>
     </div>
   );
 }
