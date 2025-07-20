@@ -5,7 +5,7 @@ import { getAuthUserId } from "@convex-dev/auth/server";
 export const upsertProfile = mutation({
   args: {
     displayName: v.string(),
-    age: v.number(),
+    age: v.float64(),
     bio: v.string(),
     location: v.string(),
     languages: v.array(v.string()),
@@ -18,9 +18,9 @@ export const upsertProfile = mutation({
     values: v.array(v.string()),
     relationshipGoals: v.string(),
     zodiacSign: v.string(),
-    ageRangeMin: v.number(),
-    ageRangeMax: v.number(),
-    maxDistance: v.number(),
+    ageRangeMin: v.float64(),
+    ageRangeMax: v.float64(),
+    maxDistance: v.float64(),
     socialLinks: v.optional(v.object({
       instagram: v.optional(v.string()),
       twitter: v.optional(v.string()),

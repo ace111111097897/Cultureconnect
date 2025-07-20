@@ -16,7 +16,7 @@ const applicationTables = {
   profiles: defineTable({
     userId: v.id("users"),
     displayName: v.string(),
-    age: v.number(),
+    age: v.float64(),
     bio: v.string(),
     profileImage: v.optional(v.id("_storage")),
     profileVideo: v.optional(v.id("_storage")),
@@ -47,9 +47,9 @@ const applicationTables = {
     zodiacSign: v.string(),
     
     // Preferences
-    ageRangeMin: v.number(),
-    ageRangeMax: v.number(),
-    maxDistance: v.number(),
+    ageRangeMin: v.float64(),
+    ageRangeMax: v.float64(),
+    maxDistance: v.float64(),
     
     isActive: v.boolean(),
     lastActive: v.number(),
