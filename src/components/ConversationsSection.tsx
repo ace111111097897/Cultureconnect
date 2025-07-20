@@ -323,105 +323,87 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
 
       {/* Chat Area */}
       <div className="lg:col-span-2 flex flex-col">
-        {(selectedConversation || selectedUser) ? (
-          <>
-            {/* Messaging Prompts */}
-            {showPrompts && (selectedConversationData || selectedUserData) && userProfile && (
-              <MessagingPrompts
-                conversationId={selectedConversation || "new"}
-                userProfile={userProfile}
-                matchProfile={selectedConversationData?.otherProfile || selectedUserData}
-                onPromptSelect={handlePromptSelect}
-              />
-            )}
-
-            {/* Chat Container */}
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col flex-1">
-              {/* Chat Header */}
-              <div className="p-4 md:p-4 border-b border-white/20 flex justify-between items-center">
-                {(() => {
-                  const otherProfile = selectedConversationData?.otherProfile || selectedUserData;
-                  return otherProfile ? (
-                    <div className="flex items-center space-x-3 md:space-x-3">
-                      <div className="w-10 h-10 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                        {otherProfile.profileImageUrl ? (
-                          <img
-                            src={otherProfile.profileImageUrl}
-                            alt={otherProfile.displayName}
-                            className="w-full h-full rounded-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-white text-sm">👤</span>
-                        )}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-white">{otherProfile.displayName}</div>
-                        <div className="text-white/70 text-sm">Online</div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-white">Select a conversation</div>
-                  );
-                })()}
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {messages?.map((message, index) => (
-                  <div
-                    key={index}
-                    className={`flex ${message.senderId === userProfile?.userId ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[70%] p-3 rounded-lg ${
-                        message.senderId === userProfile?.userId
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-white/10 text-white'
-                      }`}
-                    >
-                      {message.content}
-                    </div>
+        {/* Chat Container */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col flex-1">
+          {/* Chat Header */}
+          <div className="p-4 md:p-4 border-b border-white/20 flex justify-between items-center">
+            {(() => {
+              const otherProfile = selectedConversationData?.otherProfile || selectedUserData;
+              return otherProfile ? (
+                <div className="flex items-center space-x-3 md:space-x-3">
+                  <div className="w-10 h-10 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                    {otherProfile.profileImageUrl ? (
+                      <img
+                        src={otherProfile.profileImageUrl}
+                        alt={otherProfile.displayName}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-white text-sm">👤</span>
+                    )}
                   </div>
-                ))}
-                {selectedUser && messages?.length === 0 && (
-                  <div className="text-center text-white/50 text-sm">
-                    Start the conversation by sending a message!
+                  <div>
+                    <div className="font-semibold text-white">{otherProfile.displayName}</div>
+                    <div className="text-white/70 text-sm">Online</div>
                   </div>
-                )}
-              </div>
-
-              {/* Message Input */}
-              <form onSubmit={handleSendMessage} className="p-4 border-t border-white/20">
-                <div className="flex space-x-3">
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    placeholder="Type a message..."
-                    className="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm md:text-base"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!newMessage.trim() || isSending}
-                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold hover:from-orange-500 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                  >
-                    {isSending ? "Sending..." : "Send"}
-                  </button>
                 </div>
-              </form>
-            </div>
-          </>
-        ) : (
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex-1 flex items-center justify-center">
-            <div className="text-center">
-              <div className="text-4xl mb-4">💬</div>
-              <p className="text-white/70">Select a conversation to start chatting</p>
-              <p className="text-white/50 text-sm mt-2">
-                💡 Use our AI dog assistant for conversation starters!
-              </p>
-            </div>
+              ) : (
+                <div className="text-white font-semibold">Messages</div>
+              );
+            })()}
           </div>
-        )}
+
+          {/* Messages */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            {messages?.map((message, index) => (
+              <div
+                key={index}
+                className={`flex ${message.senderId === userProfile?.userId ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[70%] p-3 rounded-2xl ${
+                    message.senderId === userProfile?.userId
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                      : 'bg-white/20 text-white'
+                  }`}
+                >
+                  {message.content}
+                </div>
+              </div>
+            ))}
+            {selectedUser && messages?.length === 0 && (
+              <div className="text-center text-white/50 text-sm">
+                Start the conversation by sending a message!
+              </div>
+            )}
+            {!selectedConversation && !selectedUser && (
+              <div className="text-center text-white/50 text-sm">
+                Select a friend or match from the list to start chatting
+              </div>
+            )}
+          </div>
+
+          {/* Message Input */}
+          <form onSubmit={handleSendMessage} className="p-4 border-t border-white/20">
+            <div className="flex space-x-3">
+              <input
+                type="text"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                placeholder={selectedConversation || selectedUser ? "Type a message..." : "Select someone to chat with..."}
+                disabled={!selectedConversation && !selectedUser}
+                className="flex-1 px-4 py-3 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-orange-400 text-sm md:text-base disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={!newMessage.trim() || isSending || (!selectedConversation && !selectedUser)}
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold hover:from-orange-500 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              >
+                {isSending ? "Sending..." : "Send"}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
       
       {/* Kandi Bubble for real-time advice */}
