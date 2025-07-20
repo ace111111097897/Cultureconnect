@@ -137,7 +137,7 @@ export function ProfilePage() {
         lifeGoals: editData.lifeGoals,
         values: editData.values,
         relationshipGoals: editData.relationshipGoals,
-        zodiacSign: editData.zodiacSign,
+        zodiacSign: editData.zodiacSign || "", // Keep for TypeScript compatibility
         ageRangeMin: editData.ageRangeMin,
         ageRangeMax: editData.ageRangeMax,
         maxDistance: editData.maxDistance,
@@ -353,7 +353,7 @@ export function ProfilePage() {
                 placeholder="Tell us about yourself..."
               />
             </div>
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <label className="block text-sm font-medium mb-1">Zodiac Sign</label>
               <select
                 className="w-full border rounded-lg p-2 hover-glow"
@@ -365,7 +365,7 @@ export function ProfilePage() {
                   <option key={sign} value={sign}>{sign}</option>
                 ))}
               </select>
-            </div>
+            </div> */}
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-6 fade-in">
@@ -378,7 +378,7 @@ export function ProfilePage() {
             </div>
             <div>
               <h3 className="text-white font-semibold mb-2">Zodiac Sign</h3>
-              <p className="text-white/70">Zodiac Sign: {profile?.zodiacSign || "Not set"}</p>
+              {/* <p className="text-white/70">Zodiac Sign: {profile?.zodiacSign || "Not set"}</p> */}
             </div>
           </div>
         )}
