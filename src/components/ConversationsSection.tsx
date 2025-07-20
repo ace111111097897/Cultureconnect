@@ -327,9 +327,9 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
       {/* Chat Area */}
       <div className="lg:col-span-2 flex flex-col h-[600px]">
         {/* Chat Container */}
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col flex-1">
-          {/* Chat Header */}
-          <div className="p-4 md:p-4 border-b border-white/20 flex justify-between items-center">
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex flex-col h-full">
+          {/* Chat Header - Fixed at top */}
+          <div className="p-4 md:p-4 border-b border-white/20 flex justify-between items-center flex-shrink-0">
             {(() => {
               const otherProfile = selectedConversationData?.otherProfile || selectedUserData;
               return otherProfile ? (
@@ -356,8 +356,8 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
             })()}
           </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {/* Messages - Scrollable area */}
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
             {messages?.map((message, index) => (
               <div
                 key={index}
@@ -386,8 +386,8 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
             )}
           </div>
 
-          {/* Message Input */}
-          <form onSubmit={handleSendMessage} className="p-4 border-t border-white/20">
+          {/* Message Input - Fixed at bottom */}
+          <form onSubmit={handleSendMessage} className="p-4 border-t border-white/20 flex-shrink-0">
             <div className="flex space-x-3">
               <input
                 type="text"
