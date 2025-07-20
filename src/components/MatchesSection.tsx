@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
-import MatchPercentage from "./MatchPercentage";
+// import MatchPercentage from "./MatchPercentage";
 
 export function MatchesSection() {
   const [showMessagePrompt, setShowMessagePrompt] = useState(false);
@@ -137,10 +137,10 @@ export function MatchesSection() {
                 {match!.otherProfile.bio}
               </p>
 
-              {/* Match Percentage */}
-              <div className="mb-4">
+              {/* Match Percentage - Temporarily disabled */}
+              {/* <div className="mb-4">
                 <MatchPercentage targetUserId={match!.otherProfile.userId} showDetails={false} />
-              </div>
+              </div> */}
 
               {/* Shared Interests */}
               {match!.sharedInterests && match!.sharedInterests.length > 0 && (

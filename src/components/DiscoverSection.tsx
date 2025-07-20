@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
-import MatchPercentage from "./MatchPercentage";
+// import MatchPercentage from "./MatchPercentage";
 
 // Add modal for 'View More'
 function ProfileModal({ profile, onClose }: { profile: any; onClose: () => void }) {
@@ -19,10 +19,10 @@ function ProfileModal({ profile, onClose }: { profile: any; onClose: () => void 
           <div className="text-2xl font-bold text-white mb-2">{profile.displayName}, {profile.age}</div>
           <div className="text-white/80 mb-4">{profile.bio || "No bio yet."}</div>
           
-          {/* Match Percentage */}
-          <div className="w-full mb-6">
+          {/* Match Percentage - Temporarily disabled */}
+          {/* <div className="w-full mb-6">
             <MatchPercentage targetUserId={profile.userId} showDetails={true} />
-          </div>
+          </div> */}
           
           {/* Show all details */}
           <div className="w-full space-y-2">
@@ -217,10 +217,10 @@ export function DiscoverSection() {
                   <span className="text-xs text-white/80">Recently Active</span>
                 </div>
                 
-                {/* Compact Match Percentage */}
-                <div className="w-full">
+                {/* Compact Match Percentage - Temporarily disabled */}
+                {/* <div className="w-full">
                   <MatchPercentage targetUserId={profile.userId} showDetails={false} />
-                </div>
+                </div> */}
               </div>
             </div>
                   ))}
