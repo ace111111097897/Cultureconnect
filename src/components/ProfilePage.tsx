@@ -137,7 +137,26 @@ export function ProfilePage() {
   const handleSave = async () => {
     try {
       setIsSaving(true);
-      await updateProfile(editData);
+      await updateProfile({
+        displayName: editData.displayName,
+        age: editData.age,
+        bio: editData.bio,
+        location: editData.location,
+        languages: editData.languages,
+        culturalBackground: editData.culturalBackground,
+        traditions: editData.traditions,
+        foodPreferences: editData.foodPreferences,
+        musicGenres: editData.musicGenres,
+        travelInterests: editData.travelInterests,
+        lifeGoals: editData.lifeGoals,
+        values: editData.values,
+        relationshipGoals: editData.relationshipGoals,
+        zodiacSign: editData.zodiacSign,
+        ageRangeMin: editData.ageRangeMin,
+        ageRangeMax: editData.ageRangeMax,
+        maxDistance: editData.maxDistance,
+        socialLinks: editData.socialLinks,
+      });
       
       // Show success animation
       setShowSuccess(true);
@@ -146,7 +165,7 @@ export function ProfilePage() {
       // Hide success animation after 2 seconds
       setTimeout(() => {
         setShowSuccess(false);
-      setIsEditing(false);
+        setIsEditing(false);
       }, 2000);
       
     } catch (error) {
