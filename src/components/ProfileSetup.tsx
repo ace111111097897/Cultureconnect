@@ -36,14 +36,7 @@ export function ProfileSetup() {
     ageRangeMax: 50,
     maxDistance: 50,
     zodiacSign: "",
-    socialLinks: {
-      instagram: "",
-      twitter: "",
-      facebook: "",
-      linkedin: "",
-      tiktok: "",
-      youtube: "",
-    },
+
   });
 
   const [selectedImage, setSelectedImage] = useState<File | null>(null);

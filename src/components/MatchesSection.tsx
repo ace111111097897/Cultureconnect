@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
+import MatchPercentage from "./MatchPercentage";
 
 export function MatchesSection() {
   const [showMessagePrompt, setShowMessagePrompt] = useState(false);
@@ -112,7 +113,7 @@ export function MatchesSection() {
               </div>
 
               {/* Live status bubble */}
-              <div className="absolute top-2 right-2 w-4 h-4 rounded-full border-2 border-white" style={{ backgroundColor: status?.active ? '#22c55e' : '#a3a3a3' }} title={status?.active ? 'Active' : 'Inactive'}></div>
+              <div className="absolute top-2 right-2 w-4 h-4 rounded-full border-2 border-white bg-green-400" title="Active"></div>
             </div>
 
             {/* Match Info */}
@@ -135,6 +136,11 @@ export function MatchesSection() {
               <p className="text-white/80 text-sm mb-4 line-clamp-2">
                 {match!.otherProfile.bio}
               </p>
+
+              {/* Match Percentage */}
+              <div className="mb-4">
+                <MatchPercentage targetUserId={match!.otherProfile.userId} showDetails={false} />
+              </div>
 
               {/* Shared Interests */}
               {match!.sharedInterests && match!.sharedInterests.length > 0 && (
@@ -335,28 +341,7 @@ export function MatchesSection() {
                 </div>
               </div>
 
-              {/* Social Links */}
-              {selectedProfile.socialLinks && (
-                <div>
-                  <h4 className="text-white font-semibold mb-3">Social Media</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.entries(selectedProfile.socialLinks).map(([platform, url]) => {
-                      if (!url) return null;
-                      return (
-                        <a
-                          key={platform}
-                          href={url as string}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-3 py-1 bg-white/10 text-white rounded-full text-sm border border-white/20 hover:bg-white/20 transition-all"
-                        >
-                          {platform}
-                        </a>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+
 
               {/* Action Buttons */}
               <div className="flex space-x-3 pt-4 border-t border-white/20">

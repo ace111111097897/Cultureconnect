@@ -2,12 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
+import MatchPercentage from "./MatchPercentage";
 
 // Add modal for 'View More'
 function ProfileModal({ profile, onClose }: { profile: any; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-3xl shadow-2xl p-8 max-w-lg w-full relative">
+      <div className="bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-3xl shadow-2xl p-8 max-w-lg w-full relative max-h-[90vh] overflow-y-auto">
         <button className="absolute top-4 right-4 text-white/70 hover:text-white text-2xl" onClick={onClose}>✕</button>
         <div className="flex flex-col items-center">
           {profile.profileImageUrl ? (
@@ -15,8 +16,14 @@ function ProfileModal({ profile, onClose }: { profile: any; onClose: () => void 
           ) : (
             <div className="w-32 h-32 rounded-full bg-white/20 flex items-center justify-center text-6xl text-white/60 border-4 border-purple-400/40 shadow-xl mb-4">👤</div>
           )}
-          <div className="text-2xl font-bold text-white mb-2">{profile.displayName}</div>
+          <div className="text-2xl font-bold text-white mb-2">{profile.displayName}, {profile.age}</div>
           <div className="text-white/80 mb-4">{profile.bio || "No bio yet."}</div>
+          
+          {/* Match Percentage */}
+          <div className="w-full mb-6">
+            <MatchPercentage targetUserId={profile.userId} showDetails={true} />
+          </div>
+          
           {/* Show all details */}
           <div className="w-full space-y-2">
             {profile.culturalBackground && profile.culturalBackground.length > 0 && (
@@ -30,6 +37,12 @@ function ProfileModal({ profile, onClose }: { profile: any; onClose: () => void 
             )}
             {profile.foodPreferences && profile.foodPreferences.length > 0 && (
               <div><span className="font-bold text-white">Food:</span> <span className="text-white/80">{profile.foodPreferences.join(", ")}</span></div>
+            )}
+            {profile.musicGenres && profile.musicGenres.length > 0 && (
+              <div><span className="font-bold text-white">Music:</span> <span className="text-white/80">{profile.musicGenres.join(", ")}</span></div>
+            )}
+            {profile.travelInterests && profile.travelInterests.length > 0 && (
+              <div><span className="font-bold text-white">Travel:</span> <span className="text-white/80">{profile.travelInterests.join(", ")}</span></div>
             )}
           </div>
         </div>
@@ -198,11 +211,16 @@ export function DiscoverSection() {
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg font-bold text-white cursor-pointer hover:underline" onClick={() => setSelectedProfile(profile)}>{profile.displayName}, {profile.age}</span>
                   {profile.verified && <span className="text-blue-400 text-lg" title="Verified">✔️</span>}
-            </div>
-                <div className="flex items-center gap-2">
+                </div>
+                <div className="flex items-center gap-2 mb-2">
                   <span className="w-3 h-3 rounded-full bg-green-400 inline-block"></span>
                   <span className="text-xs text-white/80">Recently Active</span>
-      </div>
+                </div>
+                
+                {/* Compact Match Percentage */}
+                <div className="w-full">
+                  <MatchPercentage targetUserId={profile.userId} showDetails={false} />
+                </div>
               </div>
             </div>
                   ))}

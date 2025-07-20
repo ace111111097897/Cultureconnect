@@ -22,15 +22,7 @@ const applicationTables = {
     profileVideo: v.optional(v.id("_storage")),
     location: v.string(),
     
-    // Social Media Links
-    socialLinks: v.optional(v.object({
-      instagram: v.optional(v.string()),
-      twitter: v.optional(v.string()),
-      facebook: v.optional(v.string()),
-      linkedin: v.optional(v.string()),
-      tiktok: v.optional(v.string()),
-      youtube: v.optional(v.string()),
-    })),
+
     
     // Cultural Information
     languages: v.array(v.string()),

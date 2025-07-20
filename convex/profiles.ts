@@ -21,14 +21,7 @@ export const upsertProfile = mutation({
     ageRangeMin: v.float64(),
     ageRangeMax: v.float64(),
     maxDistance: v.float64(),
-    socialLinks: v.optional(v.object({
-      instagram: v.optional(v.string()),
-      twitter: v.optional(v.string()),
-      facebook: v.optional(v.string()),
-      linkedin: v.optional(v.string()),
-      tiktok: v.optional(v.string()),
-      youtube: v.optional(v.string()),
-    })),
+
   },
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
@@ -58,7 +51,7 @@ export const upsertProfile = mutation({
       ageRangeMin: args.ageRangeMin,
       ageRangeMax: args.ageRangeMax,
       maxDistance: args.maxDistance,
-      socialLinks: args.socialLinks,
+
       isActive: true,
       lastActive: Date.now(),
     };
@@ -348,5 +341,161 @@ export const createTestData = mutation({
     }
 
     return { success: true, results };
+  },
+});
+
+// Calculate match percentage between two users
+export const calculateMatchPercentage = query({
+  args: {
+    targetUserId: v.id("users"),
+  },
+  returns: v.object({
+    matchPercentage: v.number(),
+    sharedInterests: v.array(v.string()),
+    culturalCompatibility: v.number(),
+    interestOverlap: v.number(),
+    detailedBreakdown: v.object({
+      languages: v.number(),
+      culturalBackground: v.number(),
+      traditions: v.number(),
+      foodPreferences: v.number(),
+      musicGenres: v.number(),
+      travelInterests: v.number(),
+      lifeGoals: v.number(),
+      values: v.number(),
+    }),
+  }),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q) => q.eq("email", identity.email!))
+      .first();
+
+    if (!currentUser) {
+      throw new Error("Current user not found");
+    }
+
+    const targetUser = await ctx.db.get(args.targetUserId);
+    if (!targetUser) {
+      throw new Error("Target user not found");
+    }
+
+    const currentProfile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", currentUser._id))
+      .first();
+
+    const targetProfile = await ctx.db
+      .query("profiles")
+      .withIndex("by_user", (q) => q.eq("userId", args.targetUserId))
+      .first();
+
+    if (!currentProfile || !targetProfile) {
+      return {
+        matchPercentage: 0,
+        sharedInterests: [],
+        culturalCompatibility: 0,
+        interestOverlap: 0,
+        detailedBreakdown: {
+          languages: 0,
+          culturalBackground: 0,
+          traditions: 0,
+          foodPreferences: 0,
+          musicGenres: 0,
+          travelInterests: 0,
+          lifeGoals: 0,
+          values: 0,
+        },
+      };
+    }
+
+    // Calculate overlap for each category
+    const calculateOverlap = (arr1: string[], arr2: string[]) => {
+      if (arr1.length === 0 && arr2.length === 0) return 1;
+      if (arr1.length === 0 || arr2.length === 0) return 0;
+      
+      const set1 = new Set(arr1.map(item => item.toLowerCase()));
+      const set2 = new Set(arr2.map(item => item.toLowerCase()));
+      const intersection = new Set([...set1].filter(x => set2.has(x)));
+      const union = new Set([...set1, ...set2]);
+      
+      return union.size > 0 ? intersection.size / union.size : 0;
+    };
+
+    const detailedBreakdown = {
+      languages: calculateOverlap(currentProfile.languages, targetProfile.languages),
+      culturalBackground: calculateOverlap(currentProfile.culturalBackground, targetProfile.culturalBackground),
+      traditions: calculateOverlap(currentProfile.traditions, targetProfile.traditions),
+      foodPreferences: calculateOverlap(currentProfile.foodPreferences, targetProfile.foodPreferences),
+      musicGenres: calculateOverlap(currentProfile.musicGenres, targetProfile.musicGenres),
+      travelInterests: calculateOverlap(currentProfile.travelInterests, targetProfile.travelInterests),
+      lifeGoals: calculateOverlap(currentProfile.lifeGoals, targetProfile.lifeGoals),
+      values: calculateOverlap(currentProfile.values, targetProfile.values),
+    };
+
+    // Calculate weighted scores
+    const weights = {
+      languages: 0.15,
+      culturalBackground: 0.20,
+      traditions: 0.15,
+      foodPreferences: 0.10,
+      musicGenres: 0.10,
+      travelInterests: 0.10,
+      lifeGoals: 0.10,
+      values: 0.10,
+    };
+
+    const culturalCompatibility = Object.entries(detailedBreakdown).reduce(
+      (total, [key, score]) => total + (score * weights[key as keyof typeof weights]),
+      0
+    );
+
+    // Find shared interests
+    const allInterests = [
+      ...currentProfile.languages,
+      ...currentProfile.culturalBackground,
+      ...currentProfile.traditions,
+      ...currentProfile.foodPreferences,
+      ...currentProfile.musicGenres,
+      ...currentProfile.travelInterests,
+      ...currentProfile.lifeGoals,
+      ...currentProfile.values,
+    ];
+
+    const targetInterests = [
+      ...targetProfile.languages,
+      ...targetProfile.culturalBackground,
+      ...targetProfile.traditions,
+      ...targetProfile.foodPreferences,
+      ...targetProfile.musicGenres,
+      ...targetProfile.travelInterests,
+      ...targetProfile.lifeGoals,
+      ...targetProfile.values,
+    ];
+
+    const sharedInterests = allInterests.filter(interest => 
+      targetInterests.some(targetInterest => 
+        targetInterest.toLowerCase() === interest.toLowerCase()
+      )
+    );
+
+    // Remove duplicates and limit to top 5
+    const uniqueSharedInterests = [...new Set(sharedInterests)].slice(0, 5);
+
+    // Calculate overall match percentage
+    const matchPercentage = Math.round(culturalCompatibility * 100);
+
+    return {
+      matchPercentage,
+      sharedInterests: uniqueSharedInterests,
+      culturalCompatibility,
+      interestOverlap: culturalCompatibility,
+      detailedBreakdown,
+    };
   },
 });

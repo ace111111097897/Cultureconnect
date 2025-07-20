@@ -24,14 +24,7 @@ export function ProfilePage() {
     ageRangeMin: 18,
     ageRangeMax: 50,
     maxDistance: 50,
-    socialLinks: {
-      instagram: "",
-      twitter: "",
-      facebook: "",
-      linkedin: "",
-      tiktok: "",
-      youtube: "",
-    },
+
     zodiacSign: "",
   });
 
@@ -120,14 +113,7 @@ export function ProfilePage() {
         ageRangeMin: profile.ageRangeMin,
         ageRangeMax: profile.ageRangeMax,
         maxDistance: profile.maxDistance,
-        socialLinks: {
-          instagram: (profile.socialLinks?.instagram ?? "") as string,
-          twitter: (profile.socialLinks?.twitter ?? "") as string,
-          facebook: (profile.socialLinks?.facebook ?? "") as string,
-          linkedin: (profile.socialLinks?.linkedin ?? "") as string,
-          tiktok: (profile.socialLinks?.tiktok ?? "") as string,
-          youtube: (profile.socialLinks?.youtube ?? "") as string,
-        },
+        
         zodiacSign: profile.zodiacSign || "",
       });
       setIsEditing(true);
@@ -155,7 +141,7 @@ export function ProfilePage() {
         ageRangeMin: editData.ageRangeMin,
         ageRangeMax: editData.ageRangeMax,
         maxDistance: editData.maxDistance,
-        socialLinks: editData.socialLinks,
+  
       });
       
       // Show success animation
