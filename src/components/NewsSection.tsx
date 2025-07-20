@@ -19,11 +19,11 @@ export function NewsSection() {
       setError(null);
       try {
         const res = await fetch(
-          `https://newsapi.org/v2/top-headlines?country=us&pageSize=10&apiKey=bf9f8040204d430a9842c126924175ef`
+          `https://gnews.io/api/v4/top-headlines?country=us&max=10&apikey=abd383463e9ac18dac54399f8df1b778`
         );
         const data = await res.json();
-        if (data.status !== "ok") throw new Error(data.message || "Failed to fetch news");
-        setNews(data.articles);
+        if (data.errors) throw new Error(data.errors[0] || "Failed to fetch news");
+        setNews(data.articles || []);
       } catch (e: any) {
         setError(e.message || "Failed to fetch news");
       } finally {
