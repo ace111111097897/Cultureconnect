@@ -175,10 +175,11 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   };
 
   // Show loading only if data is still loading
-  if (matches === undefined || friends === undefined) {
+  if (matches === undefined || friends === undefined || userProfile === undefined) {
     return (
       <div className="flex justify-center items-center h-96">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/30 border-t-white"></div>
+        <div className="text-white mt-4">Loading messages...</div>
       </div>
     );
   }
@@ -192,6 +193,46 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   console.log("ConversationsSection - User Profile:", userProfile);
   console.log("ConversationsSection - Selected User:", selectedUser);
   console.log("ConversationsSection - All Users:", allUsers);
+
+  // Always show the empty state for now to test
+  return (
+    <div className="text-center space-y-6">
+      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
+        <div className="text-6xl mb-4">💬</div>
+        <h2 className="text-2xl font-bold text-white mb-4">Messages</h2>
+        <p className="text-white/70 mb-4">
+          This area shows your friends and matches. Click on any person to start a conversation!
+        </p>
+        <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+          <h3 className="text-lg font-semibold text-white mb-3">How it works:</h3>
+          <ul className="text-white/70 text-left space-y-2">
+            <li>• <strong>Friends:</strong> People you've added as friends will appear here</li>
+            <li>• <strong>Matches:</strong> People you've matched with will appear here</li>
+            <li>• <strong>Click any person</strong> to open a chat and start messaging</li>
+            <li>• <strong>Real-time messaging</strong> with your connections</li>
+          </ul>
+        </div>
+        <p className="text-white/50 text-sm mt-6">
+          Go to Discover to find new people, or check your Matches tab to see who you've connected with!
+        </p>
+        <button
+          onClick={async () => {
+            try {
+              const result = await createTestData();
+              toast.success("Test data created! Check your Messages now.");
+              console.log("Test data result:", result);
+            } catch (error) {
+              console.error("Error creating test data:", error);
+              toast.error("Failed to create test data");
+            }
+          }}
+          className="mt-6 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold hover:from-orange-500 hover:to-pink-600 transition-all"
+        >
+          Create Test Friends & Matches
+        </button>
+      </div>
+    </div>
+  );
 
   // Show empty state only if there are truly no users at all
   if (allUsers.length === 0) {
