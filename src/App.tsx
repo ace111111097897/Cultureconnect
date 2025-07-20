@@ -172,15 +172,7 @@ function HeaderNotifications() {
         </div>
       </div>
       
-      {/* Message notification indicator */}
-      <div className="relative">
-        <div className="w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-          💬
-        </div>
-        <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-          <span className="text-white text-xs font-bold">3</span>
-        </div>
-      </div>
+
     </div>
   );
 }

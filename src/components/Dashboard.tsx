@@ -68,6 +68,7 @@ export function Dashboard() {
   const userProfile = useQuery(api.profiles.getCurrentUserProfile);
   const createTestData = useMutation(api.profiles.createTestData);
   const friendRequests = useQuery(api.friends.getFriendRequests);
+  const [testMessageCount, setTestMessageCount] = useState(0);
 
   const renderContent = () => {
     console.log("Dashboard - Active tab:", activeTab);
@@ -238,11 +239,15 @@ export function Dashboard() {
                     </span>
                   </div>
                 )}
-                {tab.id === "conversations" && (
+                
+                {tab.id === "conversations" && testMessageCount > 0 && (
                   <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center pulse-glow">
-                    <span className="text-white text-xs font-bold">3</span>
+                    <span className="text-white text-xs font-bold">
+                      {testMessageCount > 9 ? '9+' : testMessageCount}
+                    </span>
                   </div>
                 )}
+
 
             </button>
             ))}
@@ -322,6 +327,25 @@ export function Dashboard() {
                 <a href="mailto:support@cultureconnect.com" className="text-blue-600 hover:underline">Contact Support</a>
               </div>
               <button className="w-full mt-4 bg-red-500 text-white py-2 rounded-lg font-semibold hover:bg-red-600 transition" onClick={() => setShowConfirm({ type: 'report', open: true })}>Report / Block User</button>
+              
+              {/* Test notification button */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                <p className="text-gray-600 text-sm mb-2">Test Notifications:</p>
+                <div className="flex space-x-2">
+                  <button 
+                    className="flex-1 bg-blue-500 text-white py-2 rounded-lg font-semibold hover:bg-blue-600 transition text-sm"
+                    onClick={() => setTestMessageCount(prev => prev + 1)}
+                  >
+                    +1 Message
+                  </button>
+                  <button 
+                    className="flex-1 bg-gray-500 text-white py-2 rounded-lg font-semibold hover:bg-gray-600 transition text-sm"
+                    onClick={() => setTestMessageCount(0)}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
