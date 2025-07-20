@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, action } from "./_generated/server";
 import { v } from "convex/values";
 
 // Cache news data to prevent excessive API calls
@@ -91,5 +91,38 @@ export const testNews = query({
   args: {},
   handler: async (ctx) => {
     return { message: "News module is working!", timestamp: Date.now() };
+  },
+});
+
+// Gemini AI-powered news action
+export const getAiNews = action({
+  args: {},
+  returns: v.array(
+    v.object({
+      title: v.string(),
+      description: v.string(),
+      url: v.string(),
+      published: v.string(),
+      source: v.string(),
+    })
+  ),
+  handler: async (ctx, args) => {
+    // Use Gemini (Google Generative AI) to generate news headlines
+    // You must install @google/generative-ai and set GEMINI_API_KEY in your environment
+    // "use node"; // Uncomment if running in Node.js environment
+    const { GoogleGenerativeAI } = await import("@google/generative-ai");
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+
+    const prompt = `Give me 5 current world news headlines. For each, provide:\n- title\n- a 1-sentence description\n- a reputable source link\n- published date (ISO format)\n- source name\nRespond as a JSON array.`;
+
+    const result = await model.generateContent(prompt);
+    let news;
+    try {
+      news = JSON.parse(result.response.text());
+    } catch (e) {
+      throw new Error("Failed to parse Gemini response as JSON: " + result.response.text());
+    }
+    return news;
   },
 }); 
