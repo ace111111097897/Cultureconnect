@@ -12,110 +12,13 @@ export const getNews = query({
     country: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const now = Date.now();
-    
-    // Return cached data if it's still fresh
-    if (newsCache && (now - lastFetchTime) < CACHE_DURATION) {
-      return newsCache;
-    }
-
-    try {
-      // Use a reliable free news API with fallbacks
-      const apis = [
-        {
-          url: "https://newsapi.org/v2/top-headlines",
-          params: {
-            country: args.country || "us",
-            category: args.category || "general",
-            apiKey: "demo" // Replace with your API key
-          }
-        },
-        {
-          url: "https://api.currentsapi.services/v1/latest-news",
-          params: {
-            country: args.country || "US",
-            apiKey: "demo"
-          }
-        }
-      ];
-
-      let newsData = null;
-
-      // Try each API until one works
-      for (const api of apis) {
-        try {
-          // Filter out undefined values from params and ensure all values are strings
-          const cleanParams: Record<string, string> = {};
-          Object.entries(api.params).forEach(([key, value]) => {
-            if (value !== undefined) {
-              cleanParams[key] = String(value);
-            }
-          });
-          const response = await fetch(`${api.url}?${new URLSearchParams(cleanParams)}`);
-          
-          if (response.ok) {
-            const data = await response.json();
-            
-            // Normalize data from different APIs
-            if (data.articles) {
-              // NewsAPI format
-              newsData = data.articles.map((article: any) => ({
-                title: article.title,
-                description: article.description,
-                url: article.url,
-                published: article.publishedAt,
-                source: article.source?.name,
-                image: article.urlToImage
-              }));
-            } else if (data.news) {
-              // CurrentsAPI format
-              newsData = data.news.map((article: any) => ({
-                title: article.title,
-                description: article.description,
-                url: article.url,
-                published: article.published,
-                source: article.author,
-                image: article.image
-              }));
-            }
-            
-            if (newsData && newsData.length > 0) {
-              break; // Success, exit loop
-            }
-          }
-        } catch (apiError) {
-          continue; // Try next API
-        }
-      }
-
-      // If all APIs fail, return fallback news
-      if (!newsData || newsData.length === 0) {
-        newsData = getFallbackNews();
-      }
-
-      // Cache the successful result
-      newsCache = newsData;
-      lastFetchTime = now;
-
-      return {
-        success: true,
-        news: newsData.slice(0, 12), // Limit to 12 articles
-        timestamp: now,
-        source: "live"
-      };
-
-    } catch (error) {
-      console.error("News fetch error:", error);
-      
-      // Return fallback news on error
-      return {
-        success: false,
-        news: getFallbackNews(),
-        timestamp: now,
-        source: "fallback",
-        error: "Unable to fetch live news"
-      };
-    }
+    // Simple test version - just return fallback news
+    return {
+      success: true,
+      news: getFallbackNews(),
+      timestamp: Date.now(),
+      source: "fallback"
+    };
   },
 });
 
