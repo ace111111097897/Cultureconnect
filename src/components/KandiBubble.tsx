@@ -16,8 +16,10 @@ export default function KandiBubble({ conversationHistory, recipientName, recipi
   const [messages, setMessages] = useState<Array<{ from: "user" | "kandi"; text: string }>>([]);
   const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState<any>(null);
+  const [searchedUser, setSearchedUser] = useState<any>(null);
 
   const getKandiUserData = useAction(api.ai.getKandiUserData);
+  const getKandiUserByName = useAction(api.ai.getKandiUserByName);
 
   // Fetch user data when component mounts
   useEffect(() => {
@@ -48,13 +50,45 @@ export default function KandiBubble({ conversationHistory, recipientName, recipi
     setLoading(true);
     
     try {
-      const contextPrompt = conversationHistory 
-        ? `Context: You're helping me chat with ${recipientName || 'someone'}. Here's our conversation history: ${conversationHistory}. User question: ${textToSend}`
-        : textToSend;
-      
-      // Pass user data to Kandi for personalized responses
-      const reply = await callGeminiAI(contextPrompt, userData);
-      setMessages((msgs) => [...msgs, { from: "kandi", text: reply }]);
+      // Check if user is asking about a specific person
+      const nameMatch = textToSend.match(/(?:tell me about|who is|what about|tell me more about)\s+([A-Za-z]+)/i);
+      if (nameMatch) {
+        const userName = nameMatch[1];
+        const userInfo = await getKandiUserByName({ userName });
+        
+        if (userInfo.user) {
+          setSearchedUser(userInfo);
+          const userResponse = `🐕 Woof! I found ${userInfo.user.displayName} in your CultureConnect community! 
+
+${userInfo.conversationAdvice.profileSummary}
+
+${userInfo.conversationAdvice.interests}
+
+${userInfo.conversationAdvice.values}
+
+${userInfo.conversationAdvice.compatibility}
+
+**Great conversation starters:**
+${userInfo.conversationAdvice.conversationStarters.slice(0, 3).map((starter: string) => `• ${starter}`).join('\n')}
+
+**Cultural questions to ask:**
+${userInfo.conversationAdvice.culturalQuestions.slice(0, 2).map((question: string) => `• ${question}`).join('\n')}
+
+Would you like me to help you start a conversation with ${userInfo.user.displayName}? 🐾`;
+          
+          setMessages((msgs) => [...msgs, { from: "kandi", text: userResponse }]);
+        } else {
+          setMessages((msgs) => [...msgs, { from: "kandi", text: `Woof! I couldn't find anyone named "${userName}" in your CultureConnect community. Maybe try a different name or check your Discover tab to see who's available! 🐕` }]);
+        }
+      } else {
+        const contextPrompt = conversationHistory 
+          ? `Context: You're helping me chat with ${recipientName || 'someone'}. Here's our conversation history: ${conversationHistory}. User question: ${textToSend}`
+          : textToSend;
+        
+        // Pass user data to Kandi for personalized responses
+        const reply = await callGeminiAI(contextPrompt, userData);
+        setMessages((msgs) => [...msgs, { from: "kandi", text: reply }]);
+      }
     } catch (err: any) {
       setMessages((msgs) => [...msgs, { from: "kandi", text: "Woof! I'm having trouble thinking right now. Can you try again? 🐕" }]);
     } finally {
@@ -142,6 +176,14 @@ What specific advice can you give me for connecting with ${recipientName || 'thi
             className="flex-1 p-2 bg-purple-500 text-white text-xs rounded hover:bg-purple-600 transition"
           >
             💡 Personalized
+          </button>
+        </div>
+        <div className="mt-2">
+          <button
+            onClick={() => sendMessage("Tell me about someone in my community")}
+            className="w-full p-2 bg-orange-500 text-white text-xs rounded hover:bg-orange-600 transition"
+          >
+            🐕 Ask about someone
           </button>
         </div>
       </div>
