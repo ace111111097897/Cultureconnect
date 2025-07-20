@@ -281,7 +281,7 @@ export function Dashboard() {
             {activeTab === "discover" && <DiscoverSection />}
             {activeTab === "matches" && <MatchesSection />}
             {activeTab === "friends" && <FriendsSection onNavigateToConversation={setInitialConversationId} onNavigateToTab={setActiveTab} />}
-            {activeTab === "messages" && <ConversationsSection />}
+            {activeTab === "conversations" && <ConversationsSection initialConversationId={initialConversationId} />}
             {activeTab === "community" && <CommunityPage />}
             {activeTab === "explore" && <ExploreSection />}
             {activeTab === "games" && <GamesSection />}

@@ -262,7 +262,7 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
 
   console.log("ConversationsSection - About to render main interface");
   return (
-    <div className="grid lg:grid-cols-3 gap-6 md:gap-6 h-[600px] md:h-[700px] bg-red-500/20">
+    <div className="grid lg:grid-cols-3 gap-6 md:gap-6 h-[600px] md:h-[700px]">
       {/* Conversations List */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden">
         <div className="p-4 md:p-4 border-b border-white/20">
