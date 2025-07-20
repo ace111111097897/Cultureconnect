@@ -194,83 +194,53 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   console.log("ConversationsSection - Selected User:", selectedUser);
   console.log("ConversationsSection - All Users:", allUsers);
 
-  // Always show the empty state for now to test
-  return (
-    <div className="text-center space-y-6">
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
-        <div className="text-6xl mb-4">💬</div>
-        <h2 className="text-2xl font-bold text-white mb-4">Messages</h2>
-        <p className="text-white/70 mb-4">
-          This area shows your friends and matches. Click on any person to start a conversation!
-        </p>
-        <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-          <h3 className="text-lg font-semibold text-white mb-3">How it works:</h3>
-          <ul className="text-white/70 text-left space-y-2">
-            <li>• <strong>Friends:</strong> People you've added as friends will appear here</li>
-            <li>• <strong>Matches:</strong> People you've matched with will appear here</li>
-            <li>• <strong>Click any person</strong> to open a chat and start messaging</li>
-            <li>• <strong>Real-time messaging</strong> with your connections</li>
-          </ul>
-        </div>
-        <p className="text-white/50 text-sm mt-6">
-          Go to Discover to find new people, or check your Matches tab to see who you've connected with!
-        </p>
-        <button
-          onClick={async () => {
-            try {
-              const result = await createTestData();
-              toast.success("Test data created! Check your Messages now.");
-              console.log("Test data result:", result);
-            } catch (error) {
-              console.error("Error creating test data:", error);
-              toast.error("Failed to create test data");
-            }
-          }}
-          className="mt-6 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold hover:from-orange-500 hover:to-pink-600 transition-all"
-        >
-          Create Test Friends & Matches
-        </button>
-      </div>
-    </div>
-  );
+
 
   // Show empty state only if there are truly no users at all
   if (allUsers.length === 0) {
     return (
-      <div className="text-center space-y-6">
-        <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
-          <div className="text-6xl mb-4">💬</div>
-          <h2 className="text-2xl font-bold text-white mb-4">Messages</h2>
-          <p className="text-white/70 mb-4">
-            This area shows your friends and matches. Click on any person to start a conversation!
-          </p>
-          <div className="bg-white/5 rounded-xl p-6 border border-white/10">
-            <h3 className="text-lg font-semibold text-white mb-3">How it works:</h3>
-            <ul className="text-white/70 text-left space-y-2">
-              <li>• <strong>Friends:</strong> People you've added as friends will appear here</li>
-              <li>• <strong>Matches:</strong> People you've matched with will appear here</li>
-              <li>• <strong>Click any person</strong> to open a chat and start messaging</li>
-              <li>• <strong>Real-time messaging</strong> with your connections</li>
-            </ul>
+      <div className="grid lg:grid-cols-3 gap-6 md:gap-6 h-[600px] md:h-[700px]">
+        {/* Conversations List */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden">
+          <div className="p-4 md:p-4 border-b border-white/20">
+            <h3 className="text-base md:text-lg font-semibold text-white">Messages</h3>
           </div>
-          <p className="text-white/50 text-sm mt-6">
-            Go to Discover to find new people, or check your Matches tab to see who you've connected with!
-          </p>
-          <button
-            onClick={async () => {
-              try {
-                const result = await createTestData();
-                toast.success("Test data created! Check your Messages now.");
-                console.log("Test data result:", result);
-              } catch (error) {
-                console.error("Error creating test data:", error);
-                toast.error("Failed to create test data");
-              }
-            }}
-            className="mt-6 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold hover:from-orange-500 hover:to-pink-600 transition-all"
-          >
-            Create Test Friends & Matches
-          </button>
+          
+          <div className="p-8 text-center">
+            <div className="text-4xl mb-4">💬</div>
+            <h3 className="text-lg font-semibold text-white mb-3">No conversations yet</h3>
+            <p className="text-white/70 mb-4">
+              Start matching with people or adding friends to begin meaningful conversations!
+            </p>
+            <button
+              onClick={async () => {
+                try {
+                  const result = await createTestData();
+                  toast.success("Test data created! Check your Messages now.");
+                  console.log("Test data result:", result);
+                } catch (error) {
+                  console.error("Error creating test data:", error);
+                  toast.error("Failed to create test data");
+                }
+              }}
+              className="px-6 py-3 rounded-xl bg-gradient-to-r from-orange-400 to-pink-500 text-white font-semibold hover:from-orange-500 hover:to-pink-600 transition-all"
+            >
+              Create Test Friends & Matches
+            </button>
+          </div>
+        </div>
+
+        {/* Chat Area */}
+        <div className="lg:col-span-2 flex flex-col">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="text-4xl mb-4">💬</div>
+              <p className="text-white/70">Select a conversation to start chatting</p>
+              <p className="text-white/50 text-sm mt-2">
+                💡 Use our AI dog assistant for conversation starters!
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
