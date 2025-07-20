@@ -142,6 +142,35 @@ export const markMessagesAsRead = mutation({
   },
 });
 
+export const markAsRead = mutation({
+  args: {
+    conversationId: v.id("conversations"),
+  },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
+
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation || !conversation.participants.includes(userId)) {
+      throw new Error("Conversation not found or not authorized");
+    }
+
+    // Mark all unread messages in this conversation as read
+    const unreadMessages = await ctx.db
+      .query("messages")
+      .withIndex("by_conversation", (q) => q.eq("conversationId", args.conversationId))
+      .filter((q) => q.neq(q.field("senderId"), userId))
+      .filter((q) => q.eq(q.field("isRead"), false))
+      .collect();
+
+    for (const message of unreadMessages) {
+      await ctx.db.patch(message._id, {
+        isRead: true,
+      });
+    }
+  },
+});
+
 export const getUnreadMessageCount = query({
   args: {},
   handler: async (ctx) => {

@@ -1,11 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-
-// Helper to get the first user in the users table
-async function getFirstUserId(ctx: any) {
-  const user = await ctx.db.query("users").first();
-  return user?._id;
-}
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const upsertProfile = mutation({
   args: {
@@ -36,8 +31,8 @@ export const upsertProfile = mutation({
     })),
   },
   handler: async (ctx, args) => {
-    const userId = await getFirstUserId(ctx);
-    if (!userId) throw new Error("No user found in users table");
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
 
     const existingProfile = await ctx.db
       .query("profiles")
@@ -81,7 +76,7 @@ export const upsertProfile = mutation({
 export const getCurrentUserProfile = query({
   args: {},
   handler: async (ctx) => {
-    const userId = await getFirstUserId(ctx);
+    const userId = await getAuthUserId(ctx);
     if (!userId) return null;
 
     const profile = await ctx.db
@@ -112,7 +107,7 @@ export const getDiscoverProfiles = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = await getFirstUserId(ctx);
+    const userId = await getAuthUserId(ctx);
     if (!userId) return [];
 
     const userProfile = await ctx.db
@@ -186,8 +181,8 @@ export const updateProfileImage = mutation({
     storageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
-    const userId = await getFirstUserId(ctx);
-    if (!userId) throw new Error("No user found in users table");
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
 
     const profile = await ctx.db
       .query("profiles")
@@ -207,8 +202,8 @@ export const updateProfileVideo = mutation({
     storageId: v.id("_storage"),
   },
   handler: async (ctx, args) => {
-    const userId = await getFirstUserId(ctx);
-    if (!userId) throw new Error("No user found in users table");
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
 
     const profile = await ctx.db
       .query("profiles")

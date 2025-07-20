@@ -2,9 +2,7 @@ import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 import { Id } from "./_generated/dataModel";
-
-// Default user ID for demo purposes
-const DEFAULT_USER_ID = "demo_user_123" as any;
+import { getAuthUserId } from "@convex-dev/auth/server";
 
 export const createMatch = mutation({
   args: {
@@ -12,7 +10,8 @@ export const createMatch = mutation({
     interactionType: v.string(), // "like", "pass"
   },
   handler: async (ctx, args) => {
-    const userId = DEFAULT_USER_ID;
+    const userId = await getAuthUserId(ctx);
+    if (!userId) throw new Error("Not authenticated");
 
     // Record the interaction
     await ctx.db.insert("userInteractions", {
@@ -79,7 +78,8 @@ export const createMatch = mutation({
 export const getUserMatches = query({
   args: {},
   handler: async (ctx) => {
-    const userId = DEFAULT_USER_ID;
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
 
     const matches = await ctx.db
       .query("matches")
@@ -132,7 +132,8 @@ export const getFriendsOfFriends = query({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const userId = DEFAULT_USER_ID;
+    const userId = await getAuthUserId(ctx);
+    if (!userId) return [];
 
     // Get user's friends
     const friendships1 = await ctx.db

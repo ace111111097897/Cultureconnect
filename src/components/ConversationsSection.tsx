@@ -11,6 +11,7 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   const [newMessage, setNewMessage] = useState("");
   const [showPrompts, setShowPrompts] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   
   const conversations = useQuery(api.conversations.getUserConversations);
   const messages = useQuery(
@@ -22,13 +23,13 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   const friends = useQuery(api.friends.getFriends);
   const sendMessage = useMutation(api.conversations.sendMessage);
   const markAsRead = useMutation(api.conversations.markAsRead);
+  const createConversation = useMutation(api.conversations.createConversation);
 
   // Debug logging
   console.log("ConversationsSection - Conversations:", conversations);
-  console.log("ConversationsSection - Selected Conversation:", selectedConversation);
-  console.log("ConversationsSection - Initial Conversation ID:", initialConversationId);
-  console.log("ConversationsSection - Messages:", messages);
-  console.log("ConversationsSection - User Profile:", userProfile);
+  console.log("ConversationsSection - Matches:", matches);
+  console.log("ConversationsSection - Friends:", friends);
+  console.log("ConversationsSection - Selected User:", selectedUser);
 
   // Auto-select conversation when initialConversationId is provided and conversations are loaded
   useEffect(() => {
@@ -46,19 +47,33 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || !selectedConversation || isSending) return;
+    if (!newMessage.trim() || (!selectedConversation && !selectedUser) || isSending) return;
 
     const messageContent = newMessage.trim();
     setNewMessage(""); // Clear input immediately for better UX
     setIsSending(true);
 
     try {
-      console.log("Sending message:", { conversationId: selectedConversation, content: messageContent });
-      await sendMessage({
-        conversationId: selectedConversation,
-        content: messageContent,
-      });
-      console.log("Message sent successfully");
+      let conversationId = selectedConversation;
+      
+      // If we have a selected user but no conversation, create one
+      if (selectedUser && !selectedConversation) {
+        console.log("Creating conversation for user:", selectedUser.userId);
+        conversationId = await createConversation({
+          participantIds: [selectedUser.userId],
+          type: "direct"
+        });
+        setSelectedConversation(conversationId);
+      }
+
+      if (conversationId) {
+        console.log("Sending message:", { conversationId, content: messageContent });
+        await sendMessage({
+          conversationId,
+          content: messageContent,
+        });
+        console.log("Message sent successfully");
+      }
     } catch (error) {
       console.error("Failed to send message:", error);
       setNewMessage(messageContent); // Restore the message if it failed
@@ -70,11 +85,36 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
 
   const handleSelectConversation = async (conversationId: Id<"conversations">) => {
     setSelectedConversation(conversationId);
+    setSelectedUser(null);
     setShowPrompts(false);
     try {
       await markAsRead({ conversationId });
     } catch (error) {
       console.error("Failed to mark messages as read:", error);
+    }
+  };
+
+  const handleSelectUser = async (user: any) => {
+    setSelectedUser(user);
+    setSelectedConversation(null);
+    setShowPrompts(false);
+    
+    // Check if there's already a conversation with this user
+    if (conversations) {
+      const existingConversation = conversations.find(c => 
+        c.type === "direct" && 
+        c.participants.includes(user.userId)
+      );
+      
+      if (existingConversation) {
+        setSelectedConversation(existingConversation._id);
+        setSelectedUser(null);
+        try {
+          await markAsRead({ conversationId: existingConversation._id });
+        } catch (error) {
+          console.error("Failed to mark messages as read:", error);
+        }
+      }
     }
   };
 
@@ -84,22 +124,58 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   };
 
   const getSelectedConversationData = () => {
-    if (!selectedConversation || !conversations) return null;
-    return conversations.find(c => c._id === selectedConversation);
+    if (selectedConversation && conversations) {
+      return conversations.find(c => c._id === selectedConversation);
+    }
+    return null;
   };
 
-  // Helper to get conversationId for a friend
-  function getFriendConversationId(friend: any, conversations: any[]) {
-    if (!friend || !conversations) return null;
-    const conv = conversations.find((c: any) =>
-      c.type === "direct" &&
-      c.otherProfile &&
-      c.otherProfile.userId === friend.userId
-    );
-    return conv ? conv._id : null;
-  }
+  const getSelectedUserData = () => {
+    return selectedUser;
+  };
 
-  if (!conversations) {
+  // Combine all users (matches and friends) for display
+  const getAllUsers = () => {
+    const allUsers: any[] = [];
+    
+    // Add matches
+    if (matches) {
+      matches.forEach(match => {
+        if (match && match.otherProfile) {
+          allUsers.push({
+            ...match.otherProfile,
+            type: 'match',
+            matchId: match._id
+          });
+        }
+      });
+    }
+    
+    // Add friends
+    if (friends) {
+      friends.forEach(friend => {
+        if (friend) {
+          allUsers.push({
+            ...friend,
+            type: 'friend'
+          });
+        }
+      });
+    }
+    
+    return allUsers;
+  };
+
+  // Check if a user has an existing conversation
+  const getUserConversation = (userId: string) => {
+    if (!conversations) return null;
+    return conversations.find(c => 
+      c.type === "direct" && 
+      c.participants.includes(userId)
+    );
+  };
+
+  if (!matches || !friends) {
     return (
       <div className="flex justify-center items-center h-96">
         <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/30 border-t-white"></div>
@@ -107,7 +183,9 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
     );
   }
 
-  if (conversations.length === 0) {
+  const allUsers = getAllUsers();
+
+  if (allUsers.length === 0) {
     return (
       <div className="text-center space-y-6">
         <div className="bg-white/10 backdrop-blur-md rounded-2xl p-12 border border-white/20">
@@ -122,6 +200,7 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   }
 
   const selectedConversationData = getSelectedConversationData();
+  const selectedUserData = getSelectedUserData();
 
   // Get conversation history for Kandi
   const getConversationHistory = () => {
@@ -142,88 +221,69 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
         </div>
         
         <div className="overflow-y-auto h-full">
-          {/* At the top of the Messages tab, show a list of matched and friended users: */}
-          <div className="mb-6">
-            <h3 className="text-lg font-bold text-white mb-2">Your Matches & Friends</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {/* Matches */}
-              {(matches || []).map((match, i) => (
-                match && match._id && match.otherProfile ? (
-                  <div key={"match-" + match._id} className="bg-white/10 rounded-xl p-4 flex flex-col items-center cursor-pointer hover:scale-105 transition-all" onClick={() => handleSelectConversation(match._id)}>
-                    {match.otherProfile.profileImageUrl ? (
-                      <img src={match.otherProfile.profileImageUrl} alt={match.otherProfile.displayName} className="w-16 h-16 rounded-full object-cover mb-2" />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-2">
-                        <span className="text-2xl text-white/60">👤</span>
+          {allUsers.map((user, index) => {
+            const existingConversation = getUserConversation(user.userId);
+            const isSelected = selectedConversation === existingConversation?._id || 
+                             (selectedUser && selectedUser.userId === user.userId);
+            
+            return (
+              <button
+                key={`${user.type}-${user.userId}-${index}`}
+                onClick={() => existingConversation ? handleSelectConversation(existingConversation._id) : handleSelectUser(user)}
+                className={`w-full p-4 md:p-4 text-left hover:bg-white/10 transition-all border-b border-white/10 ${
+                  isSelected ? 'bg-white/15' : ''
+                }`}
+              >
+                <div className="flex items-center space-x-3 md:space-x-3">
+                  <div className="relative">
+                    <div className="w-12 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                      {user.profileImageUrl ? (
+                        <img
+                          src={user.profileImageUrl}
+                          alt={user.displayName}
+                          className="w-full h-full rounded-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-white text-sm">👤</span>
+                      )}
+                    </div>
+                    {/* Status indicator */}
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-green-500 border-2 border-white"></div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2">
+                      <div className="font-semibold text-white truncate">
+                        {user.displayName}
                       </div>
-                    )}
-                    <div className="text-white font-semibold">{match.otherProfile.displayName}</div>
-                  </div>
-                ) : null
-              ))}
-              {/* Friends */}
-              {(friends || []).map((friend, i) => {
-                const conversationId = getFriendConversationId(friend, conversations || []);
-                if (!friend || !conversationId) return null;
-                return (
-                  <div key={"friend-" + friend._id} className="bg-white/10 rounded-xl p-4 flex flex-col items-center cursor-pointer hover:scale-105 transition-all" onClick={() => handleSelectConversation(conversationId)}>
-                    {friend.profileImageUrl ? (
-                      <img src={friend.profileImageUrl} alt={friend.displayName} className="w-16 h-16 rounded-full object-cover mb-2" />
-                    ) : (
-                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center mb-2">
-                        <span className="text-2xl text-white/60">👤</span>
-                      </div>
-                    )}
-                    <div className="text-white font-semibold">{friend.displayName}</div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          {conversations.map((conversation) => (
-            <button
-              key={conversation._id}
-              onClick={() => handleSelectConversation(conversation._id)}
-              className={`w-full p-4 md:p-4 text-left hover:bg-white/10 transition-all border-b border-white/10 ${
-                selectedConversation === conversation._id ? 'bg-white/15' : ''
-              }`}
-            >
-              <div className="flex items-center space-x-3 md:space-x-3">
-                <div className="w-12 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
-                  {(conversation as any).otherProfile?.profileImageUrl ? (
-                    <img
-                      src={(conversation as any).otherProfile.profileImageUrl}
-                      alt={(conversation as any).otherProfile.displayName}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-white text-sm">👤</span>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-white truncate">
-                    {(conversation as any).otherProfile?.displayName || "Unknown User"}
-                  </div>
-                  <div className="text-white/70 text-sm truncate">
-                    {conversation.lastMessage || "No messages yet"}
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        user.type === 'match' 
+                          ? 'bg-orange-500/20 text-orange-300' 
+                          : 'bg-blue-500/20 text-blue-300'
+                      }`}>
+                        {user.type === 'match' ? 'Match' : 'Friend'}
+                      </span>
+                    </div>
+                    <div className="text-white/70 text-sm truncate">
+                      {existingConversation?.lastMessage || "Click to start chatting"}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Chat Area */}
       <div className="lg:col-span-2 flex flex-col">
-        {selectedConversation ? (
+        {(selectedConversation || selectedUser) ? (
           <>
             {/* Messaging Prompts */}
-            {showPrompts && selectedConversationData && userProfile && (
+            {showPrompts && (selectedConversationData || selectedUserData) && userProfile && (
               <MessagingPrompts
-                conversationId={selectedConversation}
+                conversationId={selectedConversation || "new"}
                 userProfile={userProfile}
-                matchProfile={(selectedConversationData as any).otherProfile}
+                matchProfile={selectedConversationData?.otherProfile || selectedUserData}
                 onPromptSelect={handlePromptSelect}
               />
             )}
@@ -233,8 +293,7 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
               {/* Chat Header */}
               <div className="p-4 md:p-4 border-b border-white/20 flex justify-between items-center">
                 {(() => {
-                  const conversation = conversations.find(c => c._id === selectedConversation);
-                  const otherProfile = (conversation as any)?.otherProfile;
+                  const otherProfile = selectedConversationData?.otherProfile || selectedUserData;
                   return otherProfile ? (
                     <div className="flex items-center space-x-3 md:space-x-3">
                       <div className="w-10 h-10 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
@@ -277,6 +336,11 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
                     </div>
                   </div>
                 ))}
+                {selectedUser && messages?.length === 0 && (
+                  <div className="text-center text-white/50 text-sm">
+                    Start the conversation by sending a message!
+                  </div>
+                )}
               </div>
 
               {/* Message Input */}
@@ -314,11 +378,11 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
       </div>
       
       {/* Kandi Bubble for real-time advice */}
-      {selectedConversationData && (
+      {(selectedConversationData || selectedUserData) && (
         <KandiBubble
           conversationHistory={getConversationHistory()}
-          recipientName={(selectedConversationData as any)?.otherProfile?.displayName}
-          recipientUserId={(selectedConversationData as any)?.otherProfile?.userId}
+          recipientName={(selectedConversationData as any)?.otherProfile?.displayName || selectedUserData?.displayName}
+          recipientUserId={(selectedConversationData as any)?.otherProfile?.userId || selectedUserData?.userId}
         />
       )}
     </div>
