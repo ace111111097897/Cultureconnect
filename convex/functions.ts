@@ -6,6 +6,7 @@ import * as storyReactions from "./storyReactions";
 import * as conversations from "./conversations";
 import * as prompts from "./prompts";
 import * as news from "./news";
+import * as ai from "./ai";
 
 export default {
   friends,
@@ -16,4 +17,5 @@ export default {
   conversations,
   prompts,
   news,
+  ai,
 }; 

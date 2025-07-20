@@ -84,4 +84,12 @@ export const clearNewsCache = mutation({
     lastFetchTime = 0;
     return { success: true };
   },
+});
+
+// Simple test function to verify Convex is working
+export const testNews = query({
+  args: {},
+  handler: async (ctx) => {
+    return { message: "News module is working!", timestamp: Date.now() };
+  },
 }); 
