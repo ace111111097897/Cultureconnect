@@ -21,8 +21,8 @@ export const upsertProfile = mutation({
     ageRangeMin: v.float64(),
     ageRangeMax: v.float64(),
     maxDistance: v.float64(),
-
   },
+  returns: v.id("profiles"),
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
@@ -68,6 +68,7 @@ export const upsertProfile = mutation({
 
 export const getCurrentUserProfile = query({
   args: {},
+  returns: v.union(v.null(), v.any()),
   handler: async (ctx) => {
     let userId = await getAuthUserId(ctx);
     
@@ -175,6 +176,7 @@ export const getDiscoverProfiles = query({
 
 export const generateUploadUrl = mutation({
   args: {},
+  returns: v.string(),
   handler: async (ctx) => {
     return await ctx.storage.generateUploadUrl();
   },
@@ -184,6 +186,7 @@ export const updateProfileImage = mutation({
   args: {
     storageId: v.id("_storage"),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");
@@ -205,6 +208,7 @@ export const updateProfileVideo = mutation({
   args: {
     storageId: v.id("_storage"),
   },
+  returns: v.null(),
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) throw new Error("Not authenticated");

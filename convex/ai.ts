@@ -8,12 +8,13 @@ export const getKandiUserData = action({
     targetUserId: v.optional(v.string()),
     searchName: v.optional(v.string()),
   },
-  handler: async (ctx, args): Promise<{
-    currentUser: any;
-    targetUser: any;
-    availableUsers: any[];
-    culturalInsights: any;
-  }> => {
+  returns: v.object({
+    currentUser: v.union(v.null(), v.any()),
+    targetUser: v.union(v.null(), v.any()),
+    availableUsers: v.array(v.any()),
+    culturalInsights: v.union(v.null(), v.any()),
+  }),
+  handler: async (ctx, args) => {
     const currentUserId = await getAuthUserId(ctx);
     if (!currentUserId) {
       throw new Error("Not authenticated");
@@ -157,11 +158,12 @@ export const getKandiUserByName = action({
   args: {
     userName: v.string(),
   },
-  handler: async (ctx, args): Promise<{
-    user: any;
-    culturalInsights: any;
-    conversationAdvice: any;
-  }> => {
+  returns: v.object({
+    user: v.union(v.null(), v.any()),
+    culturalInsights: v.union(v.null(), v.any()),
+    conversationAdvice: v.union(v.null(), v.any()),
+  }),
+  handler: async (ctx, args) => {
     const currentUserId = await getAuthUserId(ctx);
     if (!currentUserId) {
       throw new Error("Not authenticated");
