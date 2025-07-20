@@ -111,6 +111,7 @@ export const getDiscoverProfiles = query({
   args: {
     limit: v.optional(v.number()),
   },
+  returns: v.array(v.any()),
   handler: async (ctx, args) => {
     const userId = await getAuthUserId(ctx);
     if (!userId) return [];
@@ -228,6 +229,7 @@ export const updateProfileVideo = mutation({
 
 export const getProfileById = query({
   args: { profileId: v.id("profiles") },
+  returns: v.union(v.null(), v.any()),
   handler: async (ctx, args) => {
     const profile = await ctx.db.get(args.profileId);
     if (!profile) return null;
@@ -251,6 +253,10 @@ export const getProfileById = query({
 // Add some test friends and matches for development
 export const createTestData = mutation({
   args: {},
+  returns: v.object({
+    success: v.boolean(),
+    results: v.array(v.string()),
+  }),
   handler: async (ctx) => {
     let userId = await getAuthUserId(ctx);
     
