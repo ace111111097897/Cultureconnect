@@ -262,7 +262,8 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
 
   console.log("ConversationsSection - About to render main interface");
   return (
-    <div className="w-full h-full min-h-[600px] grid lg:grid-cols-3 gap-6 md:gap-6">
+    <div className="w-full max-w-6xl mx-auto p-6">
+      <div className="grid lg:grid-cols-3 gap-6 md:gap-6 h-[600px] max-h-[600px]">
       {/* Conversations List */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden h-[600px]">
         <div className="p-4 md:p-4 border-b border-white/20">
@@ -416,6 +417,7 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
           recipientUserId={(selectedConversationData as any)?.otherProfile?.userId || selectedUserData?.userId || ""}
         />
       )}
+      </div>
     </div>
   );
 }
