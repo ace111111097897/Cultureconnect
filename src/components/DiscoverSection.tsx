@@ -293,60 +293,61 @@ export function DiscoverSection() {
         </div>
         {/* Mobile: Full-bleed card */}
         <div className="w-full sm:hidden flex flex-col items-center justify-center relative">
-          <div className="relative w-full max-w-[370px] aspect-[4/5] mx-auto rounded-2xl overflow-hidden shadow-2xl bg-white/10 border border-white/30 my-6" onClick={() => setSelectedProfile(profile)}>
+          <div className="relative bg-white/10 rounded-3xl shadow-xl border border-white/20 flex flex-col items-center hover:scale-105 transition-all hover-lift mx-auto w-full max-w-sm px-2 p-0 mb-16 sm:mb-0">
             {profile.profileImageUrl ? (
               <img
                 src={profile.profileImageUrl}
                 alt={profile.displayName}
-                className="w-full h-full object-cover"
+                className="w-full h-48 object-cover rounded-t-3xl cursor-pointer"
+                onClick={() => setSelectedProfile(profile)}
               />
             ) : (
               <div
-                className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500"
+                className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 rounded-t-3xl cursor-pointer"
+                onClick={() => setSelectedProfile(profile)}
               >
-                <span className="text-6xl text-white/60">👤</span>
+                <span className="text-4xl text-white/60">👤</span>
               </div>
             )}
             {/* Overlayed info at bottom */}
-            <div className="absolute bottom-0 left-0 w-full px-0 pb-0 flex flex-col items-center">
-              <div className="w-[93%] mb-4 rounded-2xl bg-white/90 shadow-lg px-5 py-4 flex flex-col items-start gap-2 border border-white/60">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg font-bold text-gray-900 drop-shadow">{profile.displayName}, {profile.age}</span>
-                  {profile.verified && (
-                    <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1">Verified</span>
-                  )}
-                  {profile.createdAt && Date.now() - profile.createdAt < 1000 * 60 * 60 * 24 * 7 && (
-                    <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1">New</span>
-                  )}
-                  {profile.lastActive && Date.now() - profile.lastActive < 1000 * 60 * 5 && (
-                    <span className="bg-green-400 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1 animate-pulse">Online</span>
-                  )}
-                </div>
-                <div className="text-xs text-gray-700/90 mb-1">{getMutualInfo(profile)}</div>
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
-                  <span className="text-xs text-gray-700/80">Recently Active</span>
-                </div>
+            <div className="w-full flex flex-col items-start p-3">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg font-bold text-white">{profile.displayName}, {profile.age}</span>
+                {/* Profile Badges */}
+                {profile.verified && (
+                  <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1">Verified</span>
+                )}
+                {profile.createdAt && Date.now() - profile.createdAt < 1000 * 60 * 60 * 24 * 7 && (
+                  <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1">New</span>
+                )}
+                {profile.lastActive && Date.now() - profile.lastActive < 1000 * 60 * 5 && (
+                  <span className="bg-green-400 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1 animate-pulse">Online</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="w-3 h-3 rounded-full bg-green-400 inline-block"></span>
+                <span className="text-xs text-white/80">Recently Active</span>
               </div>
             </div>
-            {/* Floating Like button */}
-            <button
-              onClick={(e) => { e.stopPropagation(); handleLike(profile); }}
-              disabled={liked[profile.userId]}
-              className={`absolute bottom-12 right-8 bg-white/90 hover:bg-pink-500/90 text-pink-500 hover:text-white rounded-full p-5 shadow-2xl border-2 border-white text-2xl transition-all duration-200 ${liked[profile.userId] ? 'bg-pink-500 text-white scale-110 animate-pulse' : ''}`}
-              title={liked[profile.userId] ? 'Liked' : 'Like (Match)'}
-            >
-              <span role="img" aria-label="like">❤️</span>
-            </button>
-            {/* Floating Super Like button */}
-            <button
-              onClick={(e) => { e.stopPropagation(); handleSuperLike(profile); }}
-              disabled={superLiked[profile.userId] || !canSuperLike}
-              className={`absolute bottom-12 left-8 bg-white/90 hover:bg-yellow-400/90 text-yellow-500 hover:text-white rounded-full p-5 shadow-2xl border-2 border-white text-2xl transition-all duration-200 ${superLiked[profile.userId] ? 'bg-yellow-400 text-white scale-110 animate-bounce' : ''} ${!canSuperLike ? 'opacity-50 cursor-not-allowed' : ''}`}
-              title={superLiked[profile.userId] ? 'Super Liked' : canSuperLike ? 'Super Like (Add as Friend)' : 'No Super Likes left'}
-            >
-              <span role="img" aria-label="superlike">🌟</span>
-            </button>
+            {/* Like & Super Like Buttons */}
+            <div className="absolute top-3 right-3 z-10 flex flex-col gap-2 items-end">
+              <button
+                onClick={() => handleLike(profile)}
+                disabled={liked[profile.userId]}
+                className={`bg-white/80 hover:bg-pink-500/90 text-pink-500 hover:text-white rounded-full p-2 shadow-lg transition-all duration-200 border-2 border-white text-2xl ${liked[profile.userId] ? 'bg-pink-500 text-white scale-110 animate-pulse' : ''}`}
+                title={liked[profile.userId] ? 'Liked' : 'Like (Match)'}
+              >
+                <span role="img" aria-label="like">❤️</span>
+              </button>
+              <button
+                onClick={() => handleSuperLike(profile)}
+                disabled={superLiked[profile.userId] || !canSuperLike}
+                className={`bg-white/80 hover:bg-yellow-400/90 text-yellow-500 hover:text-white rounded-full p-2 shadow-lg transition-all duration-200 border-2 border-white text-2xl ${superLiked[profile.userId] ? 'bg-yellow-400 text-white scale-110 animate-bounce' : ''} ${!canSuperLike ? 'opacity-50 cursor-not-allowed' : ''}`}
+                title={superLiked[profile.userId] ? 'Super Liked' : canSuperLike ? 'Super Like (Add as Friend)' : 'No Super Likes left'}
+              >
+                <span role="img" aria-label="superlike">🌟</span>
+              </button>
+            </div>
           </div>
         </div>
         {/* Desktop: Grid of cards (unchanged) */}
