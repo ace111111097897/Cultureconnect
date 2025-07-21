@@ -235,6 +235,9 @@ export function DiscoverSection() {
 
   const profile = visibleProfiles[currentIndex];
 
+  // Stories row: use visibleProfiles for demo
+  const stories = visibleProfiles.slice(0, 10);
+
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800 flex flex-col items-center justify-center py-4 relative overflow-hidden">
       {/* Animated background blobs */}
@@ -242,6 +245,25 @@ export function DiscoverSection() {
         <div className="absolute top-[-10%] left-[-10%] w-1/2 h-1/2 bg-purple-700 opacity-30 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-[-10%] right-[-10%] w-1/3 h-1/3 bg-pink-600 opacity-20 rounded-full blur-2xl animate-pulse" />
         <div className="absolute top-1/2 left-1/2 w-1/4 h-1/4 bg-blue-500 opacity-20 rounded-full blur-2xl animate-pulse" />
+      </div>
+      {/* Stories Row (Mobile Only) */}
+      <div className="w-full flex sm:hidden overflow-x-auto py-2 px-2 gap-3 mb-2">
+        <div className="flex gap-3">
+          <div className="flex flex-col items-center">
+            <button className="w-14 h-14 rounded-full bg-gradient-to-tr from-pink-400 to-orange-400 flex items-center justify-center text-3xl text-white border-2 border-white/40 shadow-lg mb-1">+</button>
+            <span className="text-xs text-white/80">Add Story</span>
+          </div>
+          {stories.map((user: any, idx: number) => (
+            <div key={user.userId || idx} className="flex flex-col items-center">
+              {user.profileImageUrl ? (
+                <img src={user.profileImageUrl} alt={user.displayName} className="w-14 h-14 rounded-full object-cover border-2 border-pink-400 shadow mb-1" />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-2xl text-white/60 border-2 border-pink-400 shadow mb-1">👤</div>
+              )}
+              <span className="text-xs text-white/80 truncate max-w-[3.5rem]">{user.displayName}</span>
+            </div>
+          ))}
+        </div>
       </div>
       {/* Notification Area */}
       {notifications.length > 0 && (
@@ -258,31 +280,87 @@ export function DiscoverSection() {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Profile Counter */}
-        <div className="mb-4 text-white/80 text-lg font-semibold select-none">
+        {/* Profile Counter (Mobile Only) */}
+        <div className="mb-2 text-white/80 text-base font-semibold select-none sm:hidden">
           Profile {currentIndex + 1} of {visibleProfiles.length}
         </div>
-        {/* Replace the main profile display with a grid of cards: */}
-        <div className="flex flex-wrap justify-center gap-6 w-full max-w-6xl mx-auto mt-8 px-2 sm:px-0">
+        {/* Mobile: Full-bleed card */}
+        <div className="w-full sm:hidden flex flex-col items-center justify-center relative">
+          <div className="relative w-full max-w-[420px] aspect-[3/4] mx-auto rounded-3xl overflow-hidden shadow-2xl bg-white/10">
+            {profile.profileImageUrl ? (
+              <img
+                src={profile.profileImageUrl}
+                alt={profile.displayName}
+                className="w-full h-full object-cover"
+                onClick={() => setSelectedProfile(profile)}
+              />
+            ) : (
+              <div
+                className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 cursor-pointer"
+                onClick={() => setSelectedProfile(profile)}
+              >
+                <span className="text-6xl text-white/60">👤</span>
+              </div>
+            )}
+            {/* Overlayed info at bottom */}
+            <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 via-black/40 to-transparent px-5 py-4 flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-bold text-white drop-shadow">{profile.displayName}, {profile.age}</span>
+                {profile.verified && (
+                  <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1">Verified</span>
+                )}
+                {profile.createdAt && Date.now() - profile.createdAt < 1000 * 60 * 60 * 24 * 7 && (
+                  <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1">New</span>
+                )}
+                {profile.lastActive && Date.now() - profile.lastActive < 1000 * 60 * 5 && (
+                  <span className="bg-green-400 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1 animate-pulse">Online</span>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
+                <span className="text-xs text-white/80">Recently Active</span>
+              </div>
+            </div>
+            {/* Floating Like button */}
+            <button
+              onClick={() => handleLike(profile)}
+              disabled={liked[profile.userId]}
+              className={`absolute bottom-5 right-5 bg-white/90 hover:bg-pink-500/90 text-pink-500 hover:text-white rounded-full p-5 shadow-xl border-2 border-white text-3xl transition-all duration-200 ${liked[profile.userId] ? 'bg-pink-500 text-white scale-110 animate-pulse' : ''}`}
+              title={liked[profile.userId] ? 'Liked' : 'Like (Match)'}
+            >
+              <span role="img" aria-label="like">❤️</span>
+            </button>
+            {/* Floating Super Like button */}
+            <button
+              onClick={() => handleSuperLike(profile)}
+              disabled={superLiked[profile.userId] || !canSuperLike}
+              className={`absolute bottom-5 left-5 bg-white/90 hover:bg-yellow-400/90 text-yellow-500 hover:text-white rounded-full p-5 shadow-xl border-2 border-white text-3xl transition-all duration-200 ${superLiked[profile.userId] ? 'bg-yellow-400 text-white scale-110 animate-bounce' : ''} ${!canSuperLike ? 'opacity-50 cursor-not-allowed' : ''}`}
+              title={superLiked[profile.userId] ? 'Super Liked' : canSuperLike ? 'Super Like (Add as Friend)' : 'No Super Likes left'}
+            >
+              <span role="img" aria-label="superlike">🌟</span>
+            </button>
+          </div>
+        </div>
+        {/* Desktop: Grid of cards (unchanged) */}
+        <div className="hidden sm:flex flex-wrap justify-center gap-6 w-full max-w-6xl mx-auto mt-8 px-2 sm:px-0">
           {visibleProfiles.map((profile: any, idx: number) => (
             <div
               key={profile._id || idx}
-              className="relative bg-white/10 rounded-3xl shadow-xl border border-white/20 flex flex-col items-center hover:scale-105 transition-all hover-lift mx-auto w-full max-w-xs p-0 mb-24 sm:mb-0"
+              className="relative bg-white/10 rounded-3xl shadow-xl border border-white/20 flex flex-col items-center hover:scale-105 transition-all hover-lift mx-auto w-full max-w-sm px-2 p-0 mb-16 sm:mb-0"
             >
-              {/* Edge-to-edge image on mobile */}
               {profile.profileImageUrl ? (
                 <img
                   src={profile.profileImageUrl}
                   alt={profile.displayName}
-                  className="w-full h-[320px] object-cover rounded-t-[2.5rem] sm:rounded-t-2xl cursor-pointer"
+                  className="w-full h-48 object-cover rounded-t-3xl cursor-pointer"
                   onClick={() => setSelectedProfile(profile)}
                 />
               ) : (
                 <div
-                  className="w-full h-[320px] flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 rounded-t-[2.5rem] sm:rounded-t-2xl cursor-pointer"
+                  className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 rounded-t-3xl cursor-pointer"
                   onClick={() => setSelectedProfile(profile)}
                 >
-                  <span className="text-5xl text-white/60">👤</span>
+                  <span className="text-4xl text-white/60">👤</span>
                 </div>
               )}
               {/* Like & Super Like Buttons */}
@@ -305,7 +383,7 @@ export function DiscoverSection() {
                 </button>
               </div>
               {/* Name, Age, Status */}
-              <div className="w-full flex flex-col items-start p-4">
+              <div className="w-full flex flex-col items-start p-3">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg font-bold text-white">{profile.displayName}, {profile.age}</span>
                   {/* Profile Badges */}
@@ -323,24 +401,19 @@ export function DiscoverSection() {
                   <span className="w-3 h-3 rounded-full bg-green-400 inline-block"></span>
                   <span className="text-xs text-white/80">Recently Active</span>
                 </div>
-                
-                {/* Compact Match Percentage - Temporarily disabled */}
-                {/* <div className="w-full">
-                  <MatchPercentage targetUserId={profile.userId} showDetails={false} />
-                </div> */}
               </div>
             </div>
-                  ))}
-          </div>
+          ))}
+        </div>
         {/* Profile Modal Popup */}
         {selectedProfile && (
           <ProfileModal profile={selectedProfile} onClose={() => setSelectedProfile(null)} />
         )}
-          {/* Swipe/arrow hint for desktop */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-base select-none pointer-events-none hidden md:block">
-            <span className="mr-2">←</span> Use arrows or swipe to browse <span className="ml-2">→</span>
-          </div>
+        {/* Swipe/arrow hint for desktop */}
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/50 text-base select-none pointer-events-none hidden md:block">
+          <span className="mr-2">←</span> Use arrows or swipe to browse <span className="ml-2">→</span>
         </div>
+      </div>
       {/* Super Like Counter */}
       <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full shadow-lg text-yellow-400 font-bold text-lg backdrop-blur-md border border-yellow-300">
         <span role="img" aria-label="superlike">🌟</span> {maxPerDay - count} Super Likes (Add as Friend) left today
