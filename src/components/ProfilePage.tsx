@@ -94,6 +94,23 @@ export function ProfilePage() {
     "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"
   ];
 
+  // Helper: Profile completion percentage
+  const getCompletion = () => {
+    if (!profile) return 0;
+    let filled = 0, total = 10;
+    if (profile.displayName) filled++;
+    if (profile.age) filled++;
+    if (profile.bio) filled++;
+    if (profile.location) filled++;
+    if (profile.languages && profile.languages.length) filled++;
+    if (profile.culturalBackground && profile.culturalBackground.length) filled++;
+    if (profile.traditions && profile.traditions.length) filled++;
+    if (profile.foodPreferences && profile.foodPreferences.length) filled++;
+    if (profile.musicGenres && profile.musicGenres.length) filled++;
+    if (profile.travelInterests && profile.travelInterests.length) filled++;
+    return Math.round((filled / total) * 100);
+  };
+
   const handleEdit = () => {
     if (profile) {
       setEditData({
@@ -240,6 +257,19 @@ export function ProfilePage() {
 
   return (
     <div className="w-full max-w-3xl mx-auto p-2 sm:p-6 overflow-y-auto max-h-screen fade-in">
+      {/* Profile Completion Progress Bar */}
+      <div className="mb-4">
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-white/70 text-sm">Profile Completion</span>
+          <span className="text-white/80 text-sm font-bold">{getCompletion()}%</span>
+        </div>
+        <div className="w-full bg-white/20 rounded-full h-2">
+          <div 
+            className="bg-gradient-to-r from-orange-400 to-pink-500 h-2 rounded-full transition-all duration-300"
+            style={{ width: `${getCompletion()}%` }}
+          ></div>
+        </div>
+      </div>
       {/* Profile Header */}
       <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover-lift">
         <div className="flex flex-col sm:flex-row items-start justify-between mb-6 space-y-4 sm:space-y-0">
@@ -257,6 +287,18 @@ export function ProfilePage() {
                 )}
               </div>
               
+              {/* Profile Badges */}
+              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                {profile.verified && (
+                  <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">Verified</span>
+                )}
+                {profile.createdAt && Date.now() - profile.createdAt < 1000 * 60 * 60 * 24 * 7 && (
+                  <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">New</span>
+                )}
+                {profile.lastActive && Date.now() - profile.lastActive < 1000 * 60 * 5 && (
+                  <span className="bg-green-400 text-white px-2 py-1 rounded-full text-xs font-bold shadow animate-pulse">Online</span>
+                )}
+              </div>
               {/* Image Upload Button */}
               <label className="absolute -bottom-2 -right-2 w-8 h-8 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full flex items-center justify-center cursor-pointer hover:from-orange-600 hover:to-pink-600 transition-all border-2 border-white hover-scale">
                 {isUploadingImage ? (

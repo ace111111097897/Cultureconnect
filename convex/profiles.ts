@@ -99,6 +99,9 @@ export const getCurrentUserProfile = query({
 
     return {
       ...profile,
+      createdAt: profile._creationTime,
+      lastActive: profile.lastActive,
+      verified: ('verified' in profile ? (profile as any).verified : false),
       profileImageUrl,
       profileVideoUrl,
     };
@@ -164,6 +167,9 @@ export const getDiscoverProfiles = query({
 
         return {
           ...profile,
+          createdAt: profile._creationTime,
+          lastActive: profile.lastActive,
+          verified: ('verified' in profile ? (profile as any).verified : false),
           profileImageUrl,
           profileVideoUrl,
           compatibilityScore,
@@ -244,6 +250,9 @@ export const getProfileById = query({
 
     return {
       ...profile,
+      createdAt: profile._creationTime,
+      lastActive: profile.lastActive,
+      verified: ('verified' in profile ? (profile as any).verified : false),
       profileImageUrl,
       profileVideoUrl,
     };

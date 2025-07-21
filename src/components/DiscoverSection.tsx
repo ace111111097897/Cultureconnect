@@ -51,6 +51,23 @@ function ProfileModal({ profile, onClose }: { profile: any; onClose: () => void 
   );
 }
 
+const useLikedProfiles = () => {
+  const [liked, setLiked] = useState<{ [userId: string]: boolean }>({});
+  const markLiked = (userId: string) => setLiked(prev => ({ ...prev, [userId]: true }));
+  return { liked, markLiked };
+};
+
+const useSuperLike = (maxPerDay = 3) => {
+  const [superLiked, setSuperLiked] = useState<{ [userId: string]: boolean }>({});
+  const [count, setCount] = useState(0);
+  const canSuperLike = count < maxPerDay;
+  const markSuperLiked = (userId: string) => {
+    setSuperLiked(prev => ({ ...prev, [userId]: true }));
+    setCount(c => c + 1);
+  };
+  return { superLiked, canSuperLike, markSuperLiked, count, maxPerDay };
+};
+
 export function DiscoverSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [notifications, setNotifications] = useState<string[]>([]);
@@ -62,6 +79,9 @@ export function DiscoverSection() {
   const profiles = useQuery(api.profiles.getDiscoverProfiles, { limit: 20 });
   const currentUser = useQuery(api.profiles.getCurrentUserProfile);
   const sendFriendRequest = useMutation(api.friends.sendFriendRequest);
+  const createMatch = useMutation(api.matches.createMatch);
+  const { liked, markLiked } = useLikedProfiles();
+  const { superLiked, canSuperLike, markSuperLiked, count, maxPerDay } = useSuperLike();
 
   // Simulate current user for mutual interests and completion
   const currentUserProfile = currentUser;
@@ -120,16 +140,26 @@ export function DiscoverSection() {
     touchStartX.current = null;
   };
 
-  const [liked, setLiked] = useState(false);
-  const [showMatch, setShowMatch] = useState(false);
+  const handleLike = async (profile: any) => {
+    if (liked[profile.userId]) return;
+    try {
+      await createMatch({ targetUserId: profile.userId, interactionType: "like" });
+      markLiked(profile.userId);
+      toast.success(`You liked ${profile.displayName}!`);
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to like profile.");
+    }
+  };
 
-  // Like/Heart button handler
-  const handleLike = () => {
-    setLiked(true);
-    // Simulate a match (in real app, check backend)
-    setTimeout(() => setShowMatch(true), 600);
-    setTimeout(() => setLiked(false), 1200);
-    setTimeout(() => setShowMatch(false), 2500);
+  const handleSuperLike = async (profile: any) => {
+    if (superLiked[profile.userId] || !canSuperLike) return;
+    try {
+      await createMatch({ targetUserId: profile.userId, interactionType: "superlike" });
+      markSuperLiked(profile.userId);
+      toast.success(`You sent a Super Like to ${profile.displayName}! 🌟`);
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to super like profile.");
+    }
   };
 
   if (!profiles) {
@@ -184,11 +214,11 @@ export function DiscoverSection() {
           Profile {currentIndex + 1} of {visibleProfiles.length}
         </div>
         {/* Replace the main profile display with a grid of cards: */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full max-w-6xl mx-auto mt-8">
+        <div className="flex flex-wrap justify-center gap-4 w-full max-w-6xl mx-auto mt-8 px-2 sm:px-0">
           {visibleProfiles.map((profile: any, idx: number) => (
             <div
               key={profile._id || idx}
-              className="relative bg-white/10 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center p-0 hover:scale-105 transition-all hover-lift"
+              className="relative bg-white/10 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center p-0 hover:scale-105 transition-all hover-lift w-full max-w-xs sm:max-w-sm md:max-w-xs lg:max-w-xs min-w-[220px]"
           >
               {/* Profile Image - only this opens the modal */}
               {profile.profileImageUrl ? (
@@ -206,11 +236,39 @@ export function DiscoverSection() {
                   <span className="text-5xl text-white/60">👤</span>
                 </div>
               )}
+              {/* Like & Super Like Buttons */}
+              <div className="absolute top-3 right-3 z-10 flex flex-col gap-2 items-end">
+                <button
+                  onClick={() => handleLike(profile)}
+                  disabled={liked[profile.userId]}
+                  className={`bg-white/80 hover:bg-pink-500/90 text-pink-500 hover:text-white rounded-full p-2 shadow-lg transition-all duration-200 border-2 border-white text-2xl ${liked[profile.userId] ? 'bg-pink-500 text-white scale-110 animate-pulse' : ''}`}
+                  title={liked[profile.userId] ? 'Liked' : 'Like'}
+                >
+                  <span role="img" aria-label="like">❤️</span>
+                </button>
+                <button
+                  onClick={() => handleSuperLike(profile)}
+                  disabled={superLiked[profile.userId] || !canSuperLike}
+                  className={`bg-white/80 hover:bg-yellow-400/90 text-yellow-500 hover:text-white rounded-full p-2 shadow-lg transition-all duration-200 border-2 border-white text-2xl ${superLiked[profile.userId] ? 'bg-yellow-400 text-white scale-110 animate-bounce' : ''} ${!canSuperLike ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  title={superLiked[profile.userId] ? 'Super Liked' : canSuperLike ? 'Super Like' : 'No Super Likes left'}
+                >
+                  <span role="img" aria-label="superlike">🌟</span>
+                </button>
+              </div>
               {/* Name, Age, Status */}
               <div className="w-full flex flex-col items-start p-4">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-lg font-bold text-white cursor-pointer hover:underline" onClick={() => setSelectedProfile(profile)}>{profile.displayName}, {profile.age}</span>
-                  {profile.verified && <span className="text-blue-400 text-lg" title="Verified">✔️</span>}
+                  <span className="text-lg font-bold text-white">{profile.displayName}, {profile.age}</span>
+                  {/* Profile Badges */}
+                  {profile.verified && (
+                    <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1">Verified</span>
+                  )}
+                  {profile.createdAt && Date.now() - profile.createdAt < 1000 * 60 * 60 * 24 * 7 && (
+                    <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1">New</span>
+                  )}
+                  {profile.lastActive && Date.now() - profile.lastActive < 1000 * 60 * 5 && (
+                    <span className="bg-green-400 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1 animate-pulse">Online</span>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="w-3 h-3 rounded-full bg-green-400 inline-block"></span>
@@ -234,6 +292,10 @@ export function DiscoverSection() {
             <span className="mr-2">←</span> Use arrows or swipe to browse <span className="ml-2">→</span>
           </div>
         </div>
+      {/* Super Like Counter */}
+      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full shadow-lg text-yellow-400 font-bold text-lg backdrop-blur-md border border-yellow-300">
+        <span role="img" aria-label="superlike">🌟</span> {maxPerDay - count} Super Likes left today
+      </div>
     </div>
   );
 }

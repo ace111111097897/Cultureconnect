@@ -15,6 +15,44 @@ import { ExploreSection } from "./ExploreSection";
 import KandiChat from "./KandiChat";
 import { NewsSection } from "./NewsSection";
 
+// Onboarding tips modal content
+const OnboardingTipsModal = ({ onClose }: { onClose: () => void }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div className="bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800 rounded-3xl shadow-2xl p-8 max-w-lg w-full relative max-h-[90vh] overflow-y-auto border-2 border-white/20">
+      <button className="absolute top-4 right-4 text-white/70 hover:text-white text-2xl" onClick={onClose}>✕</button>
+      <div className="flex flex-col items-center">
+        <div className="text-5xl mb-4">👋</div>
+        <h2 className="text-2xl font-bold text-white mb-2">Welcome to CultureConnect!</h2>
+        <p className="text-white/80 mb-4 text-center">We're excited to help you connect with amazing people through shared culture, values, and interests.</p>
+        <div className="w-full bg-white/10 rounded-2xl p-4 mb-4">
+          <h3 className="text-lg font-semibold text-orange-400 mb-2">How to Get Started</h3>
+          <ul className="list-disc list-inside text-white/80 space-y-1">
+            <li>Complete your profile for better matches.</li>
+            <li>Use <span className="font-bold text-pink-400">Like</span> and <span className="font-bold text-yellow-400">Super Like</span> to show interest.</li>
+            <li>Send friend requests to connect and chat.</li>
+            <li>Explore stories, games, and community events.</li>
+          </ul>
+        </div>
+        <div className="w-full bg-white/10 rounded-2xl p-4 mb-4">
+          <h3 className="text-lg font-semibold text-pink-400 mb-2">Safety Tips</h3>
+          <ul className="list-disc list-inside text-white/80 space-y-1">
+            <li>Never share personal info too soon.</li>
+            <li>Meet in public places for first dates.</li>
+            <li>Report or block anyone who makes you uncomfortable.</li>
+            <li>Trust your instincts and stay safe.</li>
+          </ul>
+        </div>
+        <button
+          onClick={onClose}
+          className="mt-4 px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all text-lg hover-scale"
+        >
+          Get Started
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 // Remove NotificationDropdown and all api.notifications references
 
 export function Dashboard() {
@@ -38,6 +76,14 @@ export function Dashboard() {
   const [showExplorePrompt, setShowExplorePrompt] = useState(false);
   const [icebreakerIndex, setIcebreakerIndex] = useState(0);
   const [showActionConfirm, setShowActionConfirm] = useState<{ type: string; open: boolean }>({ type: '', open: false });
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    // Only show on first visit per session
+    if (typeof window !== 'undefined' && !window.sessionStorage.getItem('onboardingShown')) {
+      window.sessionStorage.setItem('onboardingShown', 'true');
+      return true;
+    }
+    return false;
+  });
 
   // Live notifications
 
@@ -63,6 +109,7 @@ export function Dashboard() {
     { id: "events", label: "Events", icon: "📅", onClick: () => setShowEvents(true) },
     { id: "explore", label: "Explore", icon: "🧭" },
     { id: "community", label: "Community", icon: "🌐" },
+    { id: "profile", label: "Profile", icon: "👤" }, // <-- Add Profile tab
   ];
 
   const userProfile = useQuery(api.profiles.getCurrentUserProfile);
@@ -135,6 +182,7 @@ export function Dashboard() {
 
   return (
     <div className={`min-h-screen w-full flex flex-col bg-gradient-to-br from-blue-900 via-indigo-900 to-purple-800 backdrop-blur-2xl gradient-animation${darkMode ? ' dark' : ''}`}>
+      {showOnboarding && <OnboardingTipsModal onClose={() => setShowOnboarding(false)} />}
       {/* Top Nav Bar */}
       <header className="hidden md:flex fixed top-0 left-0 right-0 h-16 bg-white/10 backdrop-blur-md items-center px-4 z-40 shadow-lg slide-in-top">
         <div className="text-2xl font-bold text-white tracking-wide mr-8 cursor-pointer hover-scale" onClick={() => setActiveTab('profile')}>
@@ -176,7 +224,10 @@ export function Dashboard() {
           {tabs.map((tab, index) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                if (tab.onClick) tab.onClick();
+              }}
             className={`relative px-5 py-3 mx-2 rounded-xl font-medium transition-all flex items-center space-x-2 stagger-item ${
                 activeTab === tab.id
                 ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg pulse-glow'

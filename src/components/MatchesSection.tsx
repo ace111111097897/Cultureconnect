@@ -4,16 +4,40 @@ import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
 // import MatchPercentage from "./MatchPercentage";
 
+const useLikedMatches = () => {
+  const [liked, setLiked] = useState<{ [userId: string]: boolean }>({});
+  const markLiked = (userId: string) => setLiked(prev => ({ ...prev, [userId]: true }));
+  return { liked, markLiked };
+};
+
+const useSuperLike = (maxPerDay = 3) => {
+  const [superLiked, setSuperLiked] = useState<{ [userId: string]: boolean }>({});
+  const [count, setCount] = useState(0);
+  const canSuperLike = count < maxPerDay;
+  const markSuperLiked = (userId: string) => {
+    setSuperLiked(prev => ({ ...prev, [userId]: true }));
+    setCount(c => c + 1);
+  };
+  return { superLiked, canSuperLike, markSuperLiked, count, maxPerDay };
+};
+
 export function MatchesSection() {
   const [showMessagePrompt, setShowMessagePrompt] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
   const [messagePrompt, setMessagePrompt] = useState("");
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<any>(null);
+  const [pendingRequests, setPendingRequests] = useState<{ [userId: string]: boolean }>({});
 
   const matches = useQuery(api.matches.getUserMatches);
   const getUserConversations = useQuery(api.conversations.getUserConversations);
   const sendMessage = useMutation(api.conversations.sendMessage);
+  const sendFriendRequest = useMutation(api.friends.sendFriendRequest);
+  const friends = useQuery(api.friends.getFriends);
+  const friendRequests = useQuery(api.friends.getFriendRequests);
+  const createMatch = useMutation(api.matches.createMatch);
+  const { liked, markLiked } = useLikedMatches();
+  const { superLiked, canSuperLike, markSuperLiked, count, maxPerDay } = useSuperLike();
 
   const handleMessage = async (match: any) => {
     // Check if there's already a conversation
@@ -30,6 +54,36 @@ export function MatchesSection() {
       setSelectedMatch(match);
       setShowMessagePrompt(true);
     }
+  };
+
+  const handleAddFriend = async (match: any) => {
+    const userId = match.otherProfile.userId;
+    if (pendingRequests[userId]) return;
+    setPendingRequests(prev => ({ ...prev, [userId]: true }));
+    try {
+      await sendFriendRequest({ toUserId: userId });
+      toast.success(`Friend request sent to ${match.otherProfile.displayName}!`);
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to send friend request.");
+    } finally {
+      setPendingRequests(prev => ({ ...prev, [userId]: false }));
+    }
+  };
+
+  // Helper to get friend request status for a user
+  const getFriendStatus = (userId: string) => {
+    if (friends && friends.some((f: any) => f.userId === userId)) {
+      return "friend";
+    }
+    if (friendRequests && friendRequests.some((r: any) => r.fromUserId === userId || r.toUserId === userId)) {
+      // If the current user sent the request, it's pending
+      const outgoing = friendRequests.find((r: any) => r.toUserId === userId);
+      if (outgoing) return "pending";
+      // If the current user received the request, it's also pending
+      const incoming = friendRequests.find((r: any) => r.fromUserId === userId);
+      if (incoming) return "requested_you";
+    }
+    return "none";
   };
 
   const handleSendMessage = async () => {
@@ -50,6 +104,28 @@ export function MatchesSection() {
   const handleViewProfile = (match: any) => {
     setSelectedProfile(match.otherProfile);
     setShowProfileModal(true);
+  };
+
+  const handleLike = async (profile: any) => {
+    if (liked[profile.userId]) return;
+    try {
+      await createMatch({ targetUserId: profile.userId, interactionType: "like" });
+      markLiked(profile.userId);
+      toast.success(`You liked ${profile.displayName}!`);
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to like profile.");
+    }
+  };
+
+  const handleSuperLike = async (profile: any) => {
+    if (superLiked[profile.userId] || !canSuperLike) return;
+    try {
+      await createMatch({ targetUserId: profile.userId, interactionType: "superlike" });
+      markSuperLiked(profile.userId);
+      toast.success(`You sent a Super Like to ${profile.displayName}! 🌟`);
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to super like profile.");
+    }
   };
 
   if (!matches) {
@@ -79,111 +155,170 @@ export function MatchesSection() {
       <h2 className="text-2xl font-bold text-white text-center">Your Cultural Matches</h2>
       
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {matches.filter(Boolean).map((match) => (
-          <div
-            key={match!._id}
-            className="bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 hover:bg-white/15 transition-all"
-          >
-            {/* Profile Image/Video */}
-            <div className="h-48 bg-gradient-to-br from-purple-500 to-pink-500 relative">
-              {match!.otherProfile.profileVideoUrl ? (
-                <video
-                  src={match!.otherProfile.profileVideoUrl}
-                  className="w-full h-full object-cover"
-                  controls
-                  muted
-                />
-              ) : match!.otherProfile.profileImageUrl ? (
-                <img
-                  src={match!.otherProfile.profileImageUrl}
-                  alt={match!.otherProfile.displayName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center">
-                  <div className="text-4xl text-white/50">👤</div>
-                </div>
-              )}
-              
-              {/* Compatibility Score */}
-              <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1">
-                <span className="text-white text-sm font-semibold">
-                  {match!.compatibilityScore}%
-                </span>
-              </div>
-
-              {/* Live status bubble */}
-              <div className="absolute top-2 right-2 w-4 h-4 rounded-full border-2 border-white bg-green-400" title="Active"></div>
-            </div>
-
-            {/* Match Info */}
-            <div className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-xl font-bold text-white">
-                    {match!.otherProfile.displayName}
-                  </h3>
-                  <p className="text-white/70">{match!.otherProfile.age} • {match!.otherProfile.location}</p>
-                </div>
-                <button
-                  onClick={() => handleViewProfile(match)}
-                  className="px-3 py-1 rounded-lg bg-white/10 text-white text-sm border border-white/20 hover:bg-white/20 transition-all"
-                >
-                  View Profile
-                </button>
-              </div>
-              
-              <p className="text-white/80 text-sm mb-4 line-clamp-2">
-                {match!.otherProfile.bio}
-              </p>
-
-              {/* Match Percentage - Temporarily disabled */}
-              {/* <div className="mb-4">
-                <MatchPercentage targetUserId={match!.otherProfile.userId} showDetails={false} />
-              </div> */}
-
-              {/* Shared Interests */}
-              {match!.sharedInterests && match!.sharedInterests.length > 0 && (
-                <div className="mb-4">
-                  <h4 className="text-white/70 text-sm font-medium mb-2">Shared Interests</h4>
-                  <div className="flex flex-wrap gap-1">
-                    {match!.sharedInterests.slice(0, 3).map((interest: string, index: number) => (
-                      <span key={index} className="px-2 py-1 bg-orange-500/20 text-orange-200 rounded text-xs">
-                        {interest}
-                      </span>
-                    ))}
-                    {match!.sharedInterests.length > 3 && (
-                      <span className="px-2 py-1 bg-white/10 text-white/60 rounded text-xs">
-                        +{match!.sharedInterests.length - 3} more
-                      </span>
-                    )}
+        {matches.filter(Boolean).map((match) => {
+          if (!match || !match.otherProfile) return null;
+          const status = getFriendStatus(match.otherProfile.userId);
+          const isLiked = liked[match.otherProfile.userId];
+          const isSuperLiked = superLiked[match.otherProfile.userId];
+          return (
+            <div
+              key={match._id}
+              className="bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 hover:bg-white/15 transition-all"
+            >
+              {/* Profile Image/Video */}
+              <div className="h-48 bg-gradient-to-br from-purple-500 to-pink-500 relative">
+                {match.otherProfile.profileVideoUrl ? (
+                  <video
+                    src={match.otherProfile.profileVideoUrl}
+                    className="w-full h-full object-cover"
+                    controls
+                    muted
+                  />
+                ) : match.otherProfile.profileImageUrl ? (
+                  <img
+                    src={match.otherProfile.profileImageUrl}
+                    alt={match.otherProfile.displayName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center">
+                    <div className="text-4xl text-white/50">👤</div>
                   </div>
+                )}
+                {/* Compatibility Score */}
+                <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1">
+                  <span className="text-white text-sm font-semibold">
+                    {match.compatibilityScore}%
+                  </span>
                 </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handleMessage(match)}
-                  className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-medium hover:from-blue-600 hover:to-cyan-600 transition-all"
-                >
-                  Message
-                </button>
-                <button
-                  onClick={() => handleViewProfile(match)}
-                  className="px-4 py-2 rounded-lg bg-white/10 text-white text-sm border border-white/20 hover:bg-white/20 transition-all"
-                >
-                  Profile
-                </button>
+                {/* Like & Super Like Buttons */}
+                <div className="absolute top-3 left-3 z-10 flex flex-col gap-2 items-start">
+                  <button
+                    onClick={() => handleLike(match.otherProfile)}
+                    disabled={isLiked}
+                    className={`bg-white/80 hover:bg-pink-500/90 text-pink-500 hover:text-white rounded-full p-2 shadow-lg transition-all duration-200 border-2 border-white text-2xl ${isLiked ? 'bg-pink-500 text-white scale-110 animate-pulse' : ''}`}
+                    title={isLiked ? 'Liked' : 'Like'}
+                  >
+                    <span role="img" aria-label="like">❤️</span>
+                  </button>
+                  <button
+                    onClick={() => handleSuperLike(match.otherProfile)}
+                    disabled={isSuperLiked || !canSuperLike}
+                    className={`bg-white/80 hover:bg-yellow-400/90 text-yellow-500 hover:text-white rounded-full p-2 shadow-lg transition-all duration-200 border-2 border-white text-2xl ${isSuperLiked ? 'bg-yellow-400 text-white scale-110 animate-bounce' : ''} ${!canSuperLike ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    title={isSuperLiked ? 'Super Liked' : canSuperLike ? 'Super Like' : 'No Super Likes left'}
+                  >
+                    <span role="img" aria-label="superlike">🌟</span>
+                  </button>
+                </div>
+                {/* Friend status badge */}
+                {status === "friend" && (
+                  <div className="absolute bottom-3 left-3 bg-green-500/90 text-white text-xs font-bold px-3 py-1 rounded-full shadow">Friend</div>
+                )}
+                {status === "pending" && (
+                  <div className="absolute bottom-3 left-3 bg-yellow-500/90 text-white text-xs font-bold px-3 py-1 rounded-full shadow animate-pulse">Pending</div>
+                )}
+                {status === "requested_you" && (
+                  <div className="absolute bottom-3 left-3 bg-blue-500/90 text-white text-xs font-bold px-3 py-1 rounded-full shadow">Requested You</div>
+                )}
+                {/* Profile Badges */}
+                <div className="absolute bottom-3 left-3 z-10 flex gap-2 items-center">
+                  {match.otherProfile.verified && (
+                    <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">Verified</span>
+                  )}
+                  {match.otherProfile.createdAt && Date.now() - match.otherProfile.createdAt < 1000 * 60 * 60 * 24 * 7 && (
+                    <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">New</span>
+                  )}
+                  {match.otherProfile.lastActive && Date.now() - match.otherProfile.lastActive < 1000 * 60 * 5 && (
+                    <span className="bg-green-400 text-white px-2 py-1 rounded-full text-xs font-bold shadow animate-pulse">Online</span>
+                  )}
+                </div>
               </div>
-
-              {/* Match Date */}
-              <p className="text-white/50 text-xs mt-3 text-center">
-                Matched {new Date(match!.timestamp).toLocaleDateString()}
-              </p>
+              {/* Match Info */}
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-white">
+                      {match.otherProfile.displayName}
+                    </h3>
+                    {/* Profile Badges */}
+                    <div className="flex gap-2 mt-1">
+                      {match.otherProfile.verified && (
+                        <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">Verified</span>
+                      )}
+                      {match.otherProfile.createdAt && Date.now() - match.otherProfile.createdAt < 1000 * 60 * 60 * 24 * 7 && (
+                        <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">New</span>
+                      )}
+                      {match.otherProfile.lastActive && Date.now() - match.otherProfile.lastActive < 1000 * 60 * 5 && (
+                        <span className="bg-green-400 text-white px-2 py-1 rounded-full text-xs font-bold shadow animate-pulse">Online</span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleViewProfile(match)}
+                    className="px-3 py-1 rounded-lg bg-white/10 text-white text-sm border border-white/20 hover:bg-white/20 transition-all"
+                  >
+                    View Profile
+                  </button>
+                </div>
+                <p className="text-white/80 text-sm mb-4 line-clamp-2">
+                  {match.otherProfile.bio}
+                </p>
+                {/* Shared Interests */}
+                {match.sharedInterests && match.sharedInterests.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-white/70 text-sm font-medium mb-2">Shared Interests</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {match.sharedInterests.slice(0, 3).map((interest: string, index: number) => (
+                        <span key={index} className="px-2 py-1 bg-orange-500/20 text-orange-200 rounded text-xs">
+                          {interest}
+                        </span>
+                      ))}
+                      {match.sharedInterests.length > 3 && (
+                        <span className="px-2 py-1 bg-white/10 text-white/60 rounded text-xs">
+                          +{match.sharedInterests.length - 3} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {/* Action Buttons */}
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleMessage(match)}
+                    className="flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-medium hover:from-blue-600 hover:to-cyan-600 transition-all"
+                  >
+                    Message
+                  </button>
+                  <button
+                    onClick={() => handleViewProfile(match)}
+                    className="px-4 py-2 rounded-lg bg-white/10 text-white text-sm border border-white/20 hover:bg-white/20 transition-all"
+                  >
+                    Profile
+                  </button>
+                  <button
+                    onClick={() => handleAddFriend(match)}
+                    disabled={pendingRequests[match.otherProfile.userId] || status !== "none"}
+                    className={`px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-pink-500 text-white text-sm font-semibold hover:from-orange-600 hover:to-pink-600 transition-all ${pendingRequests[match.otherProfile.userId] || status !== "none" ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {status === "friend" && 'Already Friends'}
+                    {status === "pending" && 'Pending'}
+                    {status === "requested_you" && 'Requested You'}
+                    {status === "none" && (pendingRequests[match.otherProfile.userId] ? 'Request Sent...' : 'Add Friend')}
+                  </button>
+                </div>
+                {/* Match Date */}
+                <p className="text-white/50 text-xs mt-3 text-center">
+                  Matched {new Date(match.timestamp).toLocaleDateString()}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
+      </div>
+
+      {/* Super Like Counter */}
+      <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full shadow-lg text-yellow-400 font-bold text-lg backdrop-blur-md border border-yellow-300">
+        <span role="img" aria-label="superlike">🌟</span> {maxPerDay - count} Super Likes left today
       </div>
 
       {/* Message Prompt Modal */}
@@ -285,8 +420,29 @@ export function MatchesSection() {
                     <div className="text-6xl text-white/50">👤</div>
                   </div>
                 )}
+                {/* Friend status badge in modal */}
+                {getFriendStatus(selectedProfile.userId) === "friend" && (
+                  <div className="absolute top-3 left-3 bg-green-500/90 text-white text-xs font-bold px-3 py-1 rounded-full shadow">Friend</div>
+                )}
+                {getFriendStatus(selectedProfile.userId) === "pending" && (
+                  <div className="absolute top-3 left-3 bg-yellow-500/90 text-white text-xs font-bold px-3 py-1 rounded-full shadow animate-pulse">Pending</div>
+                )}
+                {getFriendStatus(selectedProfile.userId) === "requested_you" && (
+                  <div className="absolute top-3 left-3 bg-blue-500/90 text-white text-xs font-bold px-3 py-1 rounded-full shadow">Requested You</div>
+                )}
+                {/* Profile Badges in Modal */}
+                <div className="flex gap-2 mb-4">
+                  {selectedProfile.verified && (
+                    <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">Verified</span>
+                  )}
+                  {selectedProfile.createdAt && Date.now() - selectedProfile.createdAt < 1000 * 60 * 60 * 24 * 7 && (
+                    <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">New</span>
+                  )}
+                  {selectedProfile.lastActive && Date.now() - selectedProfile.lastActive < 1000 * 60 * 5 && (
+                    <span className="bg-green-400 text-white px-2 py-1 rounded-full text-xs font-bold shadow animate-pulse">Online</span>
+                  )}
+                </div>
               </div>
-
               {/* Profile Info */}
               <div>
                 <h2 className="text-2xl font-bold text-white mb-2">{selectedProfile.displayName}</h2>
@@ -354,6 +510,28 @@ export function MatchesSection() {
                   className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold hover:from-blue-600 hover:to-cyan-600 transition-all"
                 >
                   Message
+                </button>
+                <button
+                  onClick={() => handleAddFriend({ otherProfile: selectedProfile })}
+                  disabled={pendingRequests[selectedProfile.userId] || getFriendStatus(selectedProfile.userId) !== "none"}
+                  className={`flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all ${pendingRequests[selectedProfile.userId] || getFriendStatus(selectedProfile.userId) !== "none" ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {getFriendStatus(selectedProfile.userId) === "friend" && 'Already Friends'}
+                  {getFriendStatus(selectedProfile.userId) === "pending" && 'Pending'}
+                  {getFriendStatus(selectedProfile.userId) === "requested_you" && 'Requested You'}
+                  {getFriendStatus(selectedProfile.userId) === "none" && (pendingRequests[selectedProfile.userId] ? 'Request Sent...' : 'Add Friend')}
+                </button>
+                <button
+                  onClick={() => { setShowProfileModal(false); toast.success('User blocked.'); }}
+                  className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-red-500 to-pink-600 text-white font-semibold hover:from-red-600 hover:to-pink-700 transition-all"
+                >
+                  Block
+                </button>
+                <button
+                  onClick={() => { setShowProfileModal(false); toast.success('User reported.'); }}
+                  className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-semibold hover:from-orange-600 hover:to-yellow-600 transition-all"
+                >
+                  Report
                 </button>
                 <button
                   onClick={() => setShowProfileModal(false)}
