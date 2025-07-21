@@ -129,6 +129,13 @@ export function DiscoverSection() {
   // For demo: allow switching tabs on mobile
   const [mobileTab, setMobileTab] = useState('discover');
 
+  // Helper: get mutual friends/info (demo)
+  const getMutualInfo = (profile: any) => {
+    // For demo, show a fake number or use profile.mutualFriends if available
+    if (profile.mutualFriends) return `${profile.mutualFriends} mutual friends`;
+    return '12 mutual friends';
+  };
+
   // Sync visibleProfiles with profiles from backend
   useEffect(() => {
     if (profiles) {
@@ -247,18 +254,18 @@ export function DiscoverSection() {
         <div className="absolute top-1/2 left-1/2 w-1/4 h-1/4 bg-blue-500 opacity-20 rounded-full blur-2xl animate-pulse" />
       </div>
       {/* Stories Row (Mobile Only) */}
-      <div className="w-full flex sm:hidden overflow-x-auto py-2 px-2 gap-3 mb-2">
-        <div className="flex gap-3">
+      <div className="w-full flex sm:hidden overflow-x-auto py-3 px-3 mb-4">
+        <div className="flex gap-5">
           <div className="flex flex-col items-center">
-            <button className="w-14 h-14 rounded-full bg-gradient-to-tr from-pink-400 to-orange-400 flex items-center justify-center text-3xl text-white border-2 border-white/40 shadow-lg mb-1">+</button>
+            <button className="w-16 h-16 rounded-full bg-gradient-to-tr from-pink-400 to-orange-400 flex items-center justify-center text-3xl text-white border-2 border-white/40 shadow-lg mb-1">+</button>
             <span className="text-xs text-white/80">Add Story</span>
           </div>
           {stories.map((user: any, idx: number) => (
             <div key={user.userId || idx} className="flex flex-col items-center">
               {user.profileImageUrl ? (
-                <img src={user.profileImageUrl} alt={user.displayName} className="w-14 h-14 rounded-full object-cover border-2 border-pink-400 shadow mb-1" />
+                <img src={user.profileImageUrl} alt={user.displayName} className="w-16 h-16 rounded-full object-cover border-2 border-pink-400 shadow mb-1" />
               ) : (
-                <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-2xl text-white/60 border-2 border-pink-400 shadow mb-1">👤</div>
+                <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-2xl text-white/60 border-2 border-pink-400 shadow mb-1">👤</div>
               )}
               <span className="text-xs text-white/80 truncate max-w-[3.5rem]">{user.displayName}</span>
             </div>
@@ -286,55 +293,56 @@ export function DiscoverSection() {
         </div>
         {/* Mobile: Full-bleed card */}
         <div className="w-full sm:hidden flex flex-col items-center justify-center relative">
-          <div className="relative w-full max-w-[420px] aspect-[3/4] mx-auto rounded-3xl overflow-hidden shadow-2xl bg-white/10">
+          <div className="relative w-full max-w-[390px] aspect-[3/4] mx-auto rounded-2xl overflow-hidden shadow-2xl bg-white/10 border border-white/30" onClick={() => setSelectedProfile(profile)}>
             {profile.profileImageUrl ? (
               <img
                 src={profile.profileImageUrl}
                 alt={profile.displayName}
                 className="w-full h-full object-cover"
-                onClick={() => setSelectedProfile(profile)}
               />
             ) : (
               <div
-                className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 cursor-pointer"
-                onClick={() => setSelectedProfile(profile)}
+                className="w-full h-full flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500"
               >
                 <span className="text-6xl text-white/60">👤</span>
               </div>
             )}
             {/* Overlayed info at bottom */}
-            <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/80 via-black/40 to-transparent px-5 py-4 flex flex-col gap-1">
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-bold text-white drop-shadow">{profile.displayName}, {profile.age}</span>
-                {profile.verified && (
-                  <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1">Verified</span>
-                )}
-                {profile.createdAt && Date.now() - profile.createdAt < 1000 * 60 * 60 * 24 * 7 && (
-                  <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1">New</span>
-                )}
-                {profile.lastActive && Date.now() - profile.lastActive < 1000 * 60 * 5 && (
-                  <span className="bg-green-400 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1 animate-pulse">Online</span>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
-                <span className="text-xs text-white/80">Recently Active</span>
+            <div className="absolute bottom-0 left-0 w-full px-0 pb-0 flex flex-col items-center">
+              <div className="w-[95%] mb-3 rounded-2xl bg-white/90 shadow-lg px-4 py-3 flex flex-col items-start gap-1 border border-white/60">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg font-bold text-gray-900 drop-shadow">{profile.displayName}, {profile.age}</span>
+                  {profile.verified && (
+                    <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1">Verified</span>
+                  )}
+                  {profile.createdAt && Date.now() - profile.createdAt < 1000 * 60 * 60 * 24 * 7 && (
+                    <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1">New</span>
+                  )}
+                  {profile.lastActive && Date.now() - profile.lastActive < 1000 * 60 * 5 && (
+                    <span className="bg-green-400 text-white px-2 py-1 rounded-full text-xs font-bold shadow ml-1 animate-pulse">Online</span>
+                  )}
+                </div>
+                <div className="text-xs text-gray-700/90 mb-1">{getMutualInfo(profile)}</div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
+                  <span className="text-xs text-gray-700/80">Recently Active</span>
+                </div>
               </div>
             </div>
             {/* Floating Like button */}
             <button
-              onClick={() => handleLike(profile)}
+              onClick={(e) => { e.stopPropagation(); handleLike(profile); }}
               disabled={liked[profile.userId]}
-              className={`absolute bottom-5 right-5 bg-white/90 hover:bg-pink-500/90 text-pink-500 hover:text-white rounded-full p-5 shadow-xl border-2 border-white text-3xl transition-all duration-200 ${liked[profile.userId] ? 'bg-pink-500 text-white scale-110 animate-pulse' : ''}`}
+              className={`absolute bottom-7 right-7 bg-white/90 hover:bg-pink-500/90 text-pink-500 hover:text-white rounded-full p-6 shadow-2xl border-2 border-white text-3xl transition-all duration-200 ${liked[profile.userId] ? 'bg-pink-500 text-white scale-110 animate-pulse' : ''}`}
               title={liked[profile.userId] ? 'Liked' : 'Like (Match)'}
             >
               <span role="img" aria-label="like">❤️</span>
             </button>
             {/* Floating Super Like button */}
             <button
-              onClick={() => handleSuperLike(profile)}
+              onClick={(e) => { e.stopPropagation(); handleSuperLike(profile); }}
               disabled={superLiked[profile.userId] || !canSuperLike}
-              className={`absolute bottom-5 left-5 bg-white/90 hover:bg-yellow-400/90 text-yellow-500 hover:text-white rounded-full p-5 shadow-xl border-2 border-white text-3xl transition-all duration-200 ${superLiked[profile.userId] ? 'bg-yellow-400 text-white scale-110 animate-bounce' : ''} ${!canSuperLike ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`absolute bottom-7 left-7 bg-white/90 hover:bg-yellow-400/90 text-yellow-500 hover:text-white rounded-full p-6 shadow-2xl border-2 border-white text-3xl transition-all duration-200 ${superLiked[profile.userId] ? 'bg-yellow-400 text-white scale-110 animate-bounce' : ''} ${!canSuperLike ? 'opacity-50 cursor-not-allowed' : ''}`}
               title={superLiked[profile.userId] ? 'Super Liked' : canSuperLike ? 'Super Like (Add as Friend)' : 'No Super Likes left'}
             >
               <span role="img" aria-label="superlike">🌟</span>
