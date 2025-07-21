@@ -293,7 +293,7 @@ export function DiscoverSection() {
         </div>
         {/* Mobile: Full-bleed card */}
         <div className="w-full sm:hidden flex flex-col items-center justify-center relative">
-          <div className="relative w-full max-w-[390px] aspect-[3/4] mx-auto rounded-2xl overflow-hidden shadow-2xl bg-white/10 border border-white/30" onClick={() => setSelectedProfile(profile)}>
+          <div className="relative w-full max-w-[370px] aspect-[4/5] mx-auto rounded-2xl overflow-hidden shadow-2xl bg-white/10 border border-white/30 my-6" onClick={() => setSelectedProfile(profile)}>
             {profile.profileImageUrl ? (
               <img
                 src={profile.profileImageUrl}
@@ -309,7 +309,7 @@ export function DiscoverSection() {
             )}
             {/* Overlayed info at bottom */}
             <div className="absolute bottom-0 left-0 w-full px-0 pb-0 flex flex-col items-center">
-              <div className="w-[95%] mb-3 rounded-2xl bg-white/90 shadow-lg px-4 py-3 flex flex-col items-start gap-1 border border-white/60">
+              <div className="w-[93%] mb-4 rounded-2xl bg-white/90 shadow-lg px-5 py-4 flex flex-col items-start gap-2 border border-white/60">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg font-bold text-gray-900 drop-shadow">{profile.displayName}, {profile.age}</span>
                   {profile.verified && (
@@ -333,7 +333,7 @@ export function DiscoverSection() {
             <button
               onClick={(e) => { e.stopPropagation(); handleLike(profile); }}
               disabled={liked[profile.userId]}
-              className={`absolute bottom-7 right-7 bg-white/90 hover:bg-pink-500/90 text-pink-500 hover:text-white rounded-full p-6 shadow-2xl border-2 border-white text-3xl transition-all duration-200 ${liked[profile.userId] ? 'bg-pink-500 text-white scale-110 animate-pulse' : ''}`}
+              className={`absolute bottom-12 right-8 bg-white/90 hover:bg-pink-500/90 text-pink-500 hover:text-white rounded-full p-5 shadow-2xl border-2 border-white text-2xl transition-all duration-200 ${liked[profile.userId] ? 'bg-pink-500 text-white scale-110 animate-pulse' : ''}`}
               title={liked[profile.userId] ? 'Liked' : 'Like (Match)'}
             >
               <span role="img" aria-label="like">❤️</span>
@@ -342,7 +342,7 @@ export function DiscoverSection() {
             <button
               onClick={(e) => { e.stopPropagation(); handleSuperLike(profile); }}
               disabled={superLiked[profile.userId] || !canSuperLike}
-              className={`absolute bottom-7 left-7 bg-white/90 hover:bg-yellow-400/90 text-yellow-500 hover:text-white rounded-full p-6 shadow-2xl border-2 border-white text-3xl transition-all duration-200 ${superLiked[profile.userId] ? 'bg-yellow-400 text-white scale-110 animate-bounce' : ''} ${!canSuperLike ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`absolute bottom-12 left-8 bg-white/90 hover:bg-yellow-400/90 text-yellow-500 hover:text-white rounded-full p-5 shadow-2xl border-2 border-white text-2xl transition-all duration-200 ${superLiked[profile.userId] ? 'bg-yellow-400 text-white scale-110 animate-bounce' : ''} ${!canSuperLike ? 'opacity-50 cursor-not-allowed' : ''}`}
               title={superLiked[profile.userId] ? 'Super Liked' : canSuperLike ? 'Super Like (Add as Friend)' : 'No Super Likes left'}
             >
               <span role="img" aria-label="superlike">🌟</span>
