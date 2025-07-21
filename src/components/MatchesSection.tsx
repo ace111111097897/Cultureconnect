@@ -1,8 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { toast } from "sonner";
 // import MatchPercentage from "./MatchPercentage";
+
+// Add prop types for navigation
+type MatchesSectionProps = {
+  onNavigateToConversation?: (conversationId: string) => void;
+  onNavigateToTab?: (tab: string) => void;
+};
 
 const useLikedMatches = () => {
   const [liked, setLiked] = useState<{ [userId: string]: boolean }>({});
@@ -10,18 +16,45 @@ const useLikedMatches = () => {
   return { liked, markLiked };
 };
 
-const useSuperLike = (maxPerDay = 3) => {
+const useSuperLike = (maxPerDay = 10) => {
   const [superLiked, setSuperLiked] = useState<{ [userId: string]: boolean }>({});
   const [count, setCount] = useState(0);
+  const [resetTime, setResetTime] = useState<number>(() => {
+    const stored = localStorage.getItem('superLikeResetTime');
+    return stored ? parseInt(stored) : 0;
+  });
+  useEffect(() => {
+    const now = Date.now();
+    if (resetTime && now > resetTime) {
+      setCount(0);
+      setSuperLiked({});
+      localStorage.setItem('superLikeCount', '0');
+      localStorage.setItem('superLikeResetTime', (now + 24 * 60 * 60 * 1000).toString());
+      setResetTime(now + 24 * 60 * 60 * 1000);
+    }
+  }, [resetTime]);
+  useEffect(() => {
+    const storedCount = localStorage.getItem('superLikeCount');
+    if (storedCount) setCount(parseInt(storedCount));
+  }, []);
   const canSuperLike = count < maxPerDay;
   const markSuperLiked = (userId: string) => {
     setSuperLiked(prev => ({ ...prev, [userId]: true }));
-    setCount(c => c + 1);
+    setCount(c => {
+      const newCount = c + 1;
+      localStorage.setItem('superLikeCount', newCount.toString());
+      if (!resetTime) {
+        const nextReset = Date.now() + 24 * 60 * 60 * 1000;
+        localStorage.setItem('superLikeResetTime', nextReset.toString());
+        setResetTime(nextReset);
+      }
+      return newCount;
+    });
   };
-  return { superLiked, canSuperLike, markSuperLiked, count, maxPerDay };
+  return { superLiked, canSuperLike, markSuperLiked, count, maxPerDay, resetTime };
 };
 
-export function MatchesSection() {
+export function MatchesSection(props: MatchesSectionProps) {
   const [showMessagePrompt, setShowMessagePrompt] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<any>(null);
   const [messagePrompt, setMessagePrompt] = useState("");
@@ -36,8 +69,9 @@ export function MatchesSection() {
   const friends = useQuery(api.friends.getFriends);
   const friendRequests = useQuery(api.friends.getFriendRequests);
   const createMatch = useMutation(api.matches.createMatch);
+  const createConversation = useMutation(api.conversations.createConversation);
   const { liked, markLiked } = useLikedMatches();
-  const { superLiked, canSuperLike, markSuperLiked, count, maxPerDay } = useSuperLike();
+  const { superLiked, canSuperLike, markSuperLiked, count, maxPerDay, resetTime } = useSuperLike();
 
   const handleMessage = async (match: any) => {
     // Check if there's already a conversation
@@ -88,14 +122,31 @@ export function MatchesSection() {
 
   const handleSendMessage = async () => {
     if (!selectedMatch || !messagePrompt.trim()) return;
-    
     try {
-      // Create a new conversation and send message
-      // This would need to be implemented in the backend
+      // Check if there's already a conversation
+      const existingConversation = getUserConversations?.find(conv => 
+        conv.participants.includes(selectedMatch.otherProfile.userId)
+      );
+      let conversationId = existingConversation?._id;
+      if (!conversationId) {
+        // Create a new conversation
+        conversationId = await createConversation({
+          participantIds: [selectedMatch.otherProfile.userId],
+          type: "direct"
+        });
+      }
+      // Send the message
+      await sendMessage({ conversationId, content: messagePrompt });
       toast.success("Message sent!");
       setShowMessagePrompt(false);
       setMessagePrompt("");
-      // Do NOT setSelectedMatch(null) here, so the match remains in the list
+      // Navigate to Conversations tab and open the conversation if possible
+      if (props.onNavigateToConversation && props.onNavigateToTab) {
+        props.onNavigateToConversation(conversationId);
+        props.onNavigateToTab("conversations");
+      } else {
+        toast.info("Message sent! Go to the Conversations tab to continue chatting.");
+      }
     } catch (error) {
       toast.error("Failed to send message");
     }
@@ -106,25 +157,32 @@ export function MatchesSection() {
     setShowProfileModal(true);
   };
 
+  // Like = match only
   const handleLike = async (profile: any) => {
     if (liked[profile.userId]) return;
     try {
       await createMatch({ targetUserId: profile.userId, interactionType: "like" });
       markLiked(profile.userId);
-      toast.success(`You liked ${profile.displayName}!`);
+      toast.success(`You liked ${profile.displayName}! If they like you back, it's a match!`);
     } catch (error: any) {
       toast.error(error?.message || "Failed to like profile.");
     }
   };
 
+  // Super Like = add as friend (limit 10 per 24h)
   const handleSuperLike = async (profile: any) => {
-    if (superLiked[profile.userId] || !canSuperLike) return;
+    if (superLiked[profile.userId]) return;
+    if (!canSuperLike) {
+      const resetIn = Math.max(0, Math.floor(((resetTime || 0) - Date.now()) / (60 * 1000)));
+      toast.error(`No Super Likes left. Try again in ${resetIn} minutes.`);
+      return;
+    }
     try {
-      await createMatch({ targetUserId: profile.userId, interactionType: "superlike" });
+      await sendFriendRequest({ toUserId: profile.userId });
       markSuperLiked(profile.userId);
-      toast.success(`You sent a Super Like to ${profile.displayName}! 🌟`);
+      toast.success(`You sent a Super Like and friend request to ${profile.displayName}! 🌟`);
     } catch (error: any) {
-      toast.error(error?.message || "Failed to super like profile.");
+      toast.error(error?.message || "Failed to send Super Like.");
     }
   };
 
@@ -197,7 +255,7 @@ export function MatchesSection() {
                     onClick={() => handleLike(match.otherProfile)}
                     disabled={isLiked}
                     className={`bg-white/80 hover:bg-pink-500/90 text-pink-500 hover:text-white rounded-full p-2 shadow-lg transition-all duration-200 border-2 border-white text-2xl ${isLiked ? 'bg-pink-500 text-white scale-110 animate-pulse' : ''}`}
-                    title={isLiked ? 'Liked' : 'Like'}
+                    title={isLiked ? 'Liked' : 'Like (Match)'}
                   >
                     <span role="img" aria-label="like">❤️</span>
                   </button>
@@ -205,7 +263,7 @@ export function MatchesSection() {
                     onClick={() => handleSuperLike(match.otherProfile)}
                     disabled={isSuperLiked || !canSuperLike}
                     className={`bg-white/80 hover:bg-yellow-400/90 text-yellow-500 hover:text-white rounded-full p-2 shadow-lg transition-all duration-200 border-2 border-white text-2xl ${isSuperLiked ? 'bg-yellow-400 text-white scale-110 animate-bounce' : ''} ${!canSuperLike ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    title={isSuperLiked ? 'Super Liked' : canSuperLike ? 'Super Like' : 'No Super Likes left'}
+                    title={isSuperLiked ? 'Super Liked' : canSuperLike ? 'Super Like (Add as Friend)' : 'No Super Likes left'}
                   >
                     <span role="img" aria-label="superlike">🌟</span>
                   </button>
@@ -222,13 +280,13 @@ export function MatchesSection() {
                 )}
                 {/* Profile Badges */}
                 <div className="absolute bottom-3 left-3 z-10 flex gap-2 items-center">
-                  {match.otherProfile.verified && (
+                  {((match.otherProfile as any)?.verified === true) && (
                     <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">Verified</span>
                   )}
-                  {match.otherProfile.createdAt && Date.now() - match.otherProfile.createdAt < 1000 * 60 * 60 * 24 * 7 && (
+                  {((match.otherProfile as any)?.createdAt || 0) > 0 && Date.now() - (match.otherProfile as any)?.createdAt < 1000 * 60 * 60 * 24 * 7 && (
                     <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">New</span>
                   )}
-                  {match.otherProfile.lastActive && Date.now() - match.otherProfile.lastActive < 1000 * 60 * 5 && (
+                  {((match.otherProfile as any)?.lastActive || 0) > 0 && Date.now() - (match.otherProfile as any)?.lastActive < 1000 * 60 * 5 && (
                     <span className="bg-green-400 text-white px-2 py-1 rounded-full text-xs font-bold shadow animate-pulse">Online</span>
                   )}
                 </div>
@@ -242,13 +300,13 @@ export function MatchesSection() {
                     </h3>
                     {/* Profile Badges */}
                     <div className="flex gap-2 mt-1">
-                      {match.otherProfile.verified && (
+                      {((match.otherProfile as any)?.verified === true) && (
                         <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">Verified</span>
                       )}
-                      {match.otherProfile.createdAt && Date.now() - match.otherProfile.createdAt < 1000 * 60 * 60 * 24 * 7 && (
+                      {((match.otherProfile as any)?.createdAt || 0) > 0 && Date.now() - (match.otherProfile as any)?.createdAt < 1000 * 60 * 60 * 24 * 7 && (
                         <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">New</span>
                       )}
-                      {match.otherProfile.lastActive && Date.now() - match.otherProfile.lastActive < 1000 * 60 * 5 && (
+                      {((match.otherProfile as any)?.lastActive || 0) > 0 && Date.now() - (match.otherProfile as any)?.lastActive < 1000 * 60 * 5 && (
                         <span className="bg-green-400 text-white px-2 py-1 rounded-full text-xs font-bold shadow animate-pulse">Online</span>
                       )}
                     </div>
@@ -318,7 +376,7 @@ export function MatchesSection() {
 
       {/* Super Like Counter */}
       <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full shadow-lg text-yellow-400 font-bold text-lg backdrop-blur-md border border-yellow-300">
-        <span role="img" aria-label="superlike">🌟</span> {maxPerDay - count} Super Likes left today
+        <span role="img" aria-label="superlike">🌟</span> {maxPerDay - count} Super Likes (Add as Friend) left today
       </div>
 
       {/* Message Prompt Modal */}
@@ -432,13 +490,13 @@ export function MatchesSection() {
                 )}
                 {/* Profile Badges in Modal */}
                 <div className="flex gap-2 mb-4">
-                  {selectedProfile.verified && (
+                  {((selectedProfile as any)?.verified === true) && (
                     <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">Verified</span>
                   )}
-                  {selectedProfile.createdAt && Date.now() - selectedProfile.createdAt < 1000 * 60 * 60 * 24 * 7 && (
+                  {((selectedProfile as any)?.createdAt || 0) > 0 && Date.now() - (selectedProfile as any)?.createdAt < 1000 * 60 * 60 * 24 * 7 && (
                     <span className="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow">New</span>
                   )}
-                  {selectedProfile.lastActive && Date.now() - selectedProfile.lastActive < 1000 * 60 * 5 && (
+                  {((selectedProfile as any)?.lastActive || 0) > 0 && Date.now() - (selectedProfile as any)?.lastActive < 1000 * 60 * 5 && (
                     <span className="bg-green-400 text-white px-2 py-1 rounded-full text-xs font-bold shadow animate-pulse">Online</span>
                   )}
                 </div>

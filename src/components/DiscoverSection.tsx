@@ -57,16 +57,55 @@ const useLikedProfiles = () => {
   return { liked, markLiked };
 };
 
-const useSuperLike = (maxPerDay = 3) => {
+const useSuperLike = (maxPerDay = 10) => {
   const [superLiked, setSuperLiked] = useState<{ [userId: string]: boolean }>({});
   const [count, setCount] = useState(0);
+  const [resetTime, setResetTime] = useState<number>(() => {
+    const stored = localStorage.getItem('superLikeResetTime');
+    return stored ? parseInt(stored) : 0;
+  });
+  useEffect(() => {
+    const now = Date.now();
+    if (resetTime && now > resetTime) {
+      setCount(0);
+      setSuperLiked({});
+      localStorage.setItem('superLikeCount', '0');
+      localStorage.setItem('superLikeResetTime', (now + 24 * 60 * 60 * 1000).toString());
+      setResetTime(now + 24 * 60 * 60 * 1000);
+    }
+  }, [resetTime]);
+  useEffect(() => {
+    const storedCount = localStorage.getItem('superLikeCount');
+    if (storedCount) setCount(parseInt(storedCount));
+  }, []);
   const canSuperLike = count < maxPerDay;
   const markSuperLiked = (userId: string) => {
     setSuperLiked(prev => ({ ...prev, [userId]: true }));
-    setCount(c => c + 1);
+    setCount(c => {
+      const newCount = c + 1;
+      localStorage.setItem('superLikeCount', newCount.toString());
+      if (!resetTime) {
+        const nextReset = Date.now() + 24 * 60 * 60 * 1000;
+        localStorage.setItem('superLikeResetTime', nextReset.toString());
+        setResetTime(nextReset);
+      }
+      return newCount;
+    });
   };
-  return { superLiked, canSuperLike, markSuperLiked, count, maxPerDay };
+  return { superLiked, canSuperLike, markSuperLiked, count, maxPerDay, resetTime };
 };
+
+// Mobile Bottom Navigation (only on mobile)
+function MobileBottomNav({ activeTab, setActiveTab }: { activeTab: string, setActiveTab: (tab: string) => void }) {
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-gradient-to-t from-black/80 via-black/60 to-transparent flex justify-around items-center h-16 sm:hidden border-t border-white/10">
+      <button onClick={() => setActiveTab('discover')} className={`flex flex-col items-center text-xs ${activeTab === 'discover' ? 'text-pink-400' : 'text-white/70'}`}><span className="text-2xl">🔍</span>Discover</button>
+      <button onClick={() => setActiveTab('matches')} className={`flex flex-col items-center text-xs ${activeTab === 'matches' ? 'text-pink-400' : 'text-white/70'}`}><span className="text-2xl">💫</span>Matches</button>
+      <button onClick={() => setActiveTab('friends')} className={`flex flex-col items-center text-xs ${activeTab === 'friends' ? 'text-pink-400' : 'text-white/70'}`}><span className="text-2xl">👥</span>Friends</button>
+      <button onClick={() => setActiveTab('profile')} className={`flex flex-col items-center text-xs ${activeTab === 'profile' ? 'text-pink-400' : 'text-white/70'}`}><span className="text-2xl">👤</span>Profile</button>
+    </nav>
+  );
+}
 
 export function DiscoverSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -81,11 +120,14 @@ export function DiscoverSection() {
   const sendFriendRequest = useMutation(api.friends.sendFriendRequest);
   const createMatch = useMutation(api.matches.createMatch);
   const { liked, markLiked } = useLikedProfiles();
-  const { superLiked, canSuperLike, markSuperLiked, count, maxPerDay } = useSuperLike();
+  const { superLiked, canSuperLike, markSuperLiked, count, maxPerDay, resetTime } = useSuperLike();
 
   // Simulate current user for mutual interests and completion
   const currentUserProfile = currentUser;
   const currentUserProfileCompletion = 80; // Default completion percentage
+
+  // For demo: allow switching tabs on mobile
+  const [mobileTab, setMobileTab] = useState('discover');
 
   // Sync visibleProfiles with profiles from backend
   useEffect(() => {
@@ -140,25 +182,32 @@ export function DiscoverSection() {
     touchStartX.current = null;
   };
 
+  // Like = match only
   const handleLike = async (profile: any) => {
     if (liked[profile.userId]) return;
     try {
       await createMatch({ targetUserId: profile.userId, interactionType: "like" });
       markLiked(profile.userId);
-      toast.success(`You liked ${profile.displayName}!`);
+      toast.success(`You liked ${profile.displayName}! If they like you back, it's a match!`);
     } catch (error: any) {
       toast.error(error?.message || "Failed to like profile.");
     }
   };
 
+  // Super Like = add as friend (limit 10 per 24h)
   const handleSuperLike = async (profile: any) => {
-    if (superLiked[profile.userId] || !canSuperLike) return;
+    if (superLiked[profile.userId]) return;
+    if (!canSuperLike) {
+      const resetIn = Math.max(0, Math.floor(((resetTime || 0) - Date.now()) / (60 * 1000)));
+      toast.error(`No Super Likes left. Try again in ${resetIn} minutes.`);
+      return;
+    }
     try {
-      await createMatch({ targetUserId: profile.userId, interactionType: "superlike" });
+      await sendFriendRequest({ toUserId: profile.userId });
       markSuperLiked(profile.userId);
-      toast.success(`You sent a Super Like to ${profile.displayName}! 🌟`);
+      toast.success(`You sent a Super Like and friend request to ${profile.displayName}! 🌟`);
     } catch (error: any) {
-      toast.error(error?.message || "Failed to super like profile.");
+      toast.error(error?.message || "Failed to send Super Like.");
     }
   };
 
@@ -214,23 +263,23 @@ export function DiscoverSection() {
           Profile {currentIndex + 1} of {visibleProfiles.length}
         </div>
         {/* Replace the main profile display with a grid of cards: */}
-        <div className="flex flex-wrap justify-center gap-4 w-full max-w-6xl mx-auto mt-8 px-2 sm:px-0">
+        <div className="flex flex-wrap justify-center gap-6 w-full max-w-6xl mx-auto mt-8 px-2 sm:px-0">
           {visibleProfiles.map((profile: any, idx: number) => (
             <div
               key={profile._id || idx}
-              className="relative bg-white/10 rounded-2xl shadow-lg border border-white/20 flex flex-col items-center p-0 hover:scale-105 transition-all hover-lift w-full max-w-xs sm:max-w-sm md:max-w-xs lg:max-w-xs min-w-[220px]"
-          >
-              {/* Profile Image - only this opens the modal */}
+              className="relative bg-white/10 rounded-[2.5rem] sm:rounded-2xl shadow-2xl border border-white/20 flex flex-col items-center hover:scale-105 transition-all hover-lift w-full min-w-[98vw] max-w-[99vw] sm:min-w-[320px] sm:max-w-[380px] md:min-w-[260px] md:max-w-xs lg:max-w-xs p-0 sm:p-0 mb-24 sm:mb-0"
+            >
+              {/* Edge-to-edge image on mobile */}
               {profile.profileImageUrl ? (
                 <img
                   src={profile.profileImageUrl}
                   alt={profile.displayName}
-                  className="w-full h-48 object-cover rounded-t-2xl cursor-pointer"
+                  className="w-full h-[320px] object-cover rounded-t-[2.5rem] sm:rounded-t-2xl cursor-pointer"
                   onClick={() => setSelectedProfile(profile)}
                 />
               ) : (
                 <div
-                  className="w-full h-48 flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 rounded-t-2xl cursor-pointer"
+                  className="w-full h-[320px] flex items-center justify-center bg-gradient-to-br from-purple-500 to-pink-500 rounded-t-[2.5rem] sm:rounded-t-2xl cursor-pointer"
                   onClick={() => setSelectedProfile(profile)}
                 >
                   <span className="text-5xl text-white/60">👤</span>
@@ -242,7 +291,7 @@ export function DiscoverSection() {
                   onClick={() => handleLike(profile)}
                   disabled={liked[profile.userId]}
                   className={`bg-white/80 hover:bg-pink-500/90 text-pink-500 hover:text-white rounded-full p-2 shadow-lg transition-all duration-200 border-2 border-white text-2xl ${liked[profile.userId] ? 'bg-pink-500 text-white scale-110 animate-pulse' : ''}`}
-                  title={liked[profile.userId] ? 'Liked' : 'Like'}
+                  title={liked[profile.userId] ? 'Liked' : 'Like (Match)'}
                 >
                   <span role="img" aria-label="like">❤️</span>
                 </button>
@@ -250,7 +299,7 @@ export function DiscoverSection() {
                   onClick={() => handleSuperLike(profile)}
                   disabled={superLiked[profile.userId] || !canSuperLike}
                   className={`bg-white/80 hover:bg-yellow-400/90 text-yellow-500 hover:text-white rounded-full p-2 shadow-lg transition-all duration-200 border-2 border-white text-2xl ${superLiked[profile.userId] ? 'bg-yellow-400 text-white scale-110 animate-bounce' : ''} ${!canSuperLike ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  title={superLiked[profile.userId] ? 'Super Liked' : canSuperLike ? 'Super Like' : 'No Super Likes left'}
+                  title={superLiked[profile.userId] ? 'Super Liked' : canSuperLike ? 'Super Like (Add as Friend)' : 'No Super Likes left'}
                 >
                   <span role="img" aria-label="superlike">🌟</span>
                 </button>
@@ -294,8 +343,10 @@ export function DiscoverSection() {
         </div>
       {/* Super Like Counter */}
       <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-white/20 px-4 py-2 rounded-full shadow-lg text-yellow-400 font-bold text-lg backdrop-blur-md border border-yellow-300">
-        <span role="img" aria-label="superlike">🌟</span> {maxPerDay - count} Super Likes left today
+        <span role="img" aria-label="superlike">🌟</span> {maxPerDay - count} Super Likes (Add as Friend) left today
       </div>
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav activeTab={mobileTab} setActiveTab={setMobileTab} />
     </div>
   );
 }
