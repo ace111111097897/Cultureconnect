@@ -6,6 +6,60 @@ import { MessagingPrompts } from "./MessagingPrompts";
 import KandiBubble from "./KandiBubble";
 import { toast } from "sonner";
 
+// Profile Modal for chat header
+function ProfileModalPopup({ profile, onClose, isFriend, isMatched, onAddFriend, onMatch }: {
+  profile: any;
+  onClose: () => void;
+  isFriend: boolean;
+  isMatched: boolean;
+  onAddFriend: () => void;
+  onMatch: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-3xl shadow-2xl p-8 max-w-lg w-full relative max-h-[90vh] overflow-y-auto border-2 border-white/20">
+        <button className="absolute top-4 right-4 text-white/70 hover:text-white text-2xl" onClick={onClose}>✕</button>
+        <div className="flex flex-col items-center">
+          {profile.profileImageUrl ? (
+            <img src={profile.profileImageUrl} alt={profile.displayName} className="w-32 h-32 rounded-full object-cover border-4 border-purple-400/40 shadow-xl mb-4" />
+          ) : (
+            <div className="w-32 h-32 rounded-full bg-white/20 flex items-center justify-center text-6xl text-white/60 border-4 border-purple-400/40 shadow-xl mb-4">👤</div>
+          )}
+          <div className="text-2xl font-bold text-white mb-2">{profile.displayName}, {profile.age}</div>
+          <div className="text-white/80 mb-4">{profile.bio || "No bio yet."}</div>
+          <div className="w-full space-y-2 mb-4">
+            {profile.culturalBackground && profile.culturalBackground.length > 0 && (
+              <div><span className="font-bold text-white">Culture:</span> <span className="text-white/80">{profile.culturalBackground.join(", ")}</span></div>
+            )}
+            {profile.languages && profile.languages.length > 0 && (
+              <div><span className="font-bold text-white">Languages:</span> <span className="text-white/80">{profile.languages.join(", ")}</span></div>
+            )}
+            {profile.values && profile.values.length > 0 && (
+              <div><span className="font-bold text-white">Values:</span> <span className="text-white/80">{profile.values.join(", ")}</span></div>
+            )}
+          </div>
+          <div className="flex gap-4 mt-4">
+            <button
+              onClick={onAddFriend}
+              disabled={isFriend}
+              className={`px-6 py-3 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white font-semibold hover:from-orange-600 hover:to-pink-600 transition-all text-lg hover-scale ${isFriend ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isFriend ? 'Already Friends' : 'Add Friend'}
+            </button>
+            <button
+              onClick={onMatch}
+              disabled={isMatched}
+              className={`px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-semibold hover:from-blue-600 hover:to-purple-600 transition-all text-lg hover-scale ${isMatched ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              {isMatched ? 'Matched' : 'Match'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function ConversationsSection({ initialConversationId }: { initialConversationId?: Id<"conversations"> }) {
   const [selectedConversation, setSelectedConversation] = useState<Id<"conversations"> | null>(initialConversationId || null);
   const [newMessage, setNewMessage] = useState("");
@@ -25,6 +79,10 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
   const markAsRead = useMutation(api.conversations.markAsRead);
   const createConversation = useMutation(api.conversations.createConversation);
   const createTestData = useMutation(api.profiles.createTestData);
+  const sendFriendRequest = useMutation(api.friends.sendFriendRequest);
+  const createMatch = useMutation(api.matches.createMatch);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [modalProfile, setModalProfile] = useState<any>(null);
 
   // Play notification sound for new messages
   const playNotificationSound = () => {
@@ -342,8 +400,8 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
             {(() => {
               const otherProfile = (selectedConversationData as any)?.otherProfile || selectedUserData;
               return otherProfile ? (
-                <div className="flex items-center space-x-3 md:space-x-3">
-                  <div className="w-10 h-10 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center">
+                <div className="flex items-center space-x-3 md:space-x-3 cursor-pointer group" onClick={() => { setModalProfile(otherProfile); setShowProfileModal(true); }}>
+                  <div className="w-10 h-10 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center group-hover:ring-2 group-hover:ring-pink-400 transition-all">
                     {otherProfile.profileImageUrl ? (
                       <img
                         src={otherProfile.profileImageUrl}
@@ -355,7 +413,7 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
                     )}
                   </div>
                   <div>
-                    <div className="font-semibold text-white">{otherProfile.displayName}</div>
+                    <div className="font-semibold text-white group-hover:underline">{otherProfile.displayName}</div>
                     <div className="text-white/70 text-sm">Online</div>
                   </div>
                 </div>
@@ -437,6 +495,31 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
         />
       )}
       </div>
+      {/* Profile Modal Popup */}
+      {showProfileModal && modalProfile && (
+        <ProfileModalPopup
+          profile={modalProfile}
+          onClose={() => setShowProfileModal(false)}
+          isFriend={!!(friends && friends.some((f: any) => f.userId === modalProfile.userId))}
+          isMatched={!!(matches && matches.some((m: any) => (m.user1Id === modalProfile.userId || m.user2Id === modalProfile.userId)))}
+          onAddFriend={async () => {
+            try {
+              await sendFriendRequest({ toUserId: modalProfile.userId });
+              toast.success('Friend request sent!');
+            } catch (e: any) {
+              toast.error(e?.message || 'Failed to send friend request.');
+            }
+          }}
+          onMatch={async () => {
+            try {
+              await createMatch({ targetUserId: modalProfile.userId, interactionType: 'like' });
+              toast.success('You liked this user!');
+            } catch (e: any) {
+              toast.error(e?.message || 'Failed to like.');
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
