@@ -17,13 +17,13 @@ function ProfileModalPopup({ profile, onClose, isFriend, isMatched, onAddFriend,
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-3xl shadow-2xl p-8 max-w-lg w-full relative max-h-[90vh] overflow-y-auto border-2 border-white/20">
+      <div className="bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-3xl shadow-2xl p-6 max-w-md w-full relative max-h-[90vh] overflow-y-auto border-2 border-white/20">
         <button className="absolute top-4 right-4 text-white/70 hover:text-white text-2xl" onClick={onClose}>✕</button>
         <div className="flex flex-col items-center">
           {profile.profileImageUrl ? (
-            <img src={profile.profileImageUrl} alt={profile.displayName} className="w-32 h-32 rounded-full object-cover border-4 border-purple-400/40 shadow-xl mb-4" />
+            <img src={profile.profileImageUrl} alt={profile.displayName} className="w-24 h-24 rounded-full object-cover border-4 border-purple-400/40 shadow-xl mb-4" />
           ) : (
-            <div className="w-32 h-32 rounded-full bg-white/20 flex items-center justify-center text-6xl text-white/60 border-4 border-purple-400/40 shadow-xl mb-4">👤</div>
+            <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center text-5xl text-white/60 border-4 border-purple-400/40 shadow-xl mb-4">👤</div>
           )}
           <div className="text-2xl font-bold text-white mb-2">{profile.displayName}, {profile.age}</div>
           <div className="text-white/80 mb-4">{profile.bio || "No bio yet."}</div>

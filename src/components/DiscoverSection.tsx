@@ -267,7 +267,7 @@ export function DiscoverSection() {
           {visibleProfiles.map((profile: any, idx: number) => (
             <div
               key={profile._id || idx}
-              className="relative bg-white/10 rounded-[2.5rem] sm:rounded-2xl shadow-2xl border border-white/20 flex flex-col items-center hover:scale-105 transition-all hover-lift w-full min-w-[98vw] max-w-[99vw] sm:min-w-[320px] sm:max-w-[380px] md:min-w-[260px] md:max-w-xs lg:max-w-xs p-0 sm:p-0 mb-24 sm:mb-0"
+              className="relative bg-white/10 rounded-3xl shadow-xl border border-white/20 flex flex-col items-center hover:scale-105 transition-all hover-lift mx-auto w-full max-w-xs p-0 mb-24 sm:mb-0"
             >
               {/* Edge-to-edge image on mobile */}
               {profile.profileImageUrl ? (
