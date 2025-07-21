@@ -367,22 +367,32 @@ export function ConversationsSection({ initialConversationId }: { initialConvers
 
           {/* Messages - Scrollable area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-0">
-            {messages?.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${message.senderId === userProfile?.userId ? 'justify-end' : 'justify-start'}`}
-              >
+            {messages?.map((message, index) => {
+              const isMe = message.senderId === userProfile?.userId;
+              const date = message.timestamp ? new Date(message.timestamp) : null;
+              const formatted = date ? date.toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+              return (
                 <div
-                  className={`max-w-[70%] p-3 rounded-2xl ${
-                    message.senderId === userProfile?.userId
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                      : 'bg-white/20 text-white'
-                  }`}
+                  key={index}
+                  className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
                 >
-                  {message.content}
+                  <div className={`max-w-[70%]`}>
+                    <div
+                      className={`p-3 rounded-2xl ${
+                        isMe
+                          ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                          : 'bg-white/20 text-white'
+                      }`}
+                    >
+                      {message.content}
+                    </div>
+                    {formatted && (
+                      <div className={`text-xs text-white/60 mt-1 ${isMe ? 'text-right' : 'text-left'}`}>{formatted}</div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {selectedUser && messages?.length === 0 && (
               <div className="text-center text-white/50 text-sm">
                 Start the conversation by sending a message!
